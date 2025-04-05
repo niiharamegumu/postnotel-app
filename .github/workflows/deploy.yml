@@ -8,13 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Add this step to install wrangler
-      - name: Install Wrangler
-        run: npm install -g @cloudflare/wrangler
+      - name: Install
+        run: npm install
+        working-directory: ./
 
-      - name: Build & Deploy Worker
+      - name: Build
+        run: npm run build
+        working-directory: ./
+
+      - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
