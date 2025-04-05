@@ -4,13 +4,14 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "npm run build && npx wrangler deploy",
     "dev": "react-router dev",
     "preview": "vite preview",
-    "start": "wrangler dev",
-    "typecheck": "wrangler types && react-router typegen && tsc -b"
+    "start": "npx wrangler dev",
+    "typecheck": "npx wrangler types && react-router typegen && tsc -b"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "isbot": "^5.1.17",
@@ -33,6 +34,6 @@
     "typescript": "^5.7.2",
     "vite": "^6.2.1",
     "vite-tsconfig-paths": "^5.1.4",
-    "wrangler": "^3.114.1"
+    "wrangler": "^4.7.2"
   }
 }
