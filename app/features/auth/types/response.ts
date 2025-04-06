@@ -1,3 +1,3 @@
-type LoginResponse = {
+export type LoginResponse = {
 	url: string;
 };
