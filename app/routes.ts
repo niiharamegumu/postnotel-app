@@ -4,6 +4,10 @@ export default [
 	route("/", "routes/top.tsx"),
 	route("/home", "routes/home.tsx"),
 
-	// ログイン・ログアウト
-	...prefix("auth", [route("/login", "routes/auth/login.tsx")]),
+	// ログイン
+	...prefix("auth", [
+		route("/login", "routes/auth/login.tsx"),
+		// auth callback
+		route("/callback", "routes/auth/callback.tsx"),
+	]),
 ] satisfies RouteConfig;
