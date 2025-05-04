@@ -4,4 +4,7 @@ export const endpoints = {
 		logout: "/v1/auth/logout",
 		callback: "/v1/auth/google/callback",
 	},
+	users: {
+		me: "/v1/users/me",
+	},
 };
