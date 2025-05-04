@@ -1,6 +1,7 @@
 export const endpoints = {
 	auth: {
-		login: "/auth/google/login",
-		logout: "/auth/logout",
+		login: "/v1/auth/google/login",
+		logout: "/v1/auth/logout",
+		callback: "/v1/auth/google/callback",
 	},
 };
