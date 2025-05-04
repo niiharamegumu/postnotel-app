@@ -4,15 +4,23 @@ import { redirect } from "react-router";
 import type { Route } from "./+types/login";
 import { endpoints } from "~/constants/endpoints";
 import type { LoginResponse } from "~/features/auth/types/response";
+import { StatusCodes } from "http-status-codes";
 
-export async function action({ context }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
 	try {
-		const response = await fetcher(context, endpoints.auth.login);
-		const data: LoginResponse = await response.json();
+		const response = await fetcher(context, endpoints.auth.login, {
+			headers: {
+				Cookie: request.headers.get("cookie") || "",
+			},
+		});
 
+		if (response.status === StatusCodes.CONFLICT) {
+			console.log("User is already logged in.");
+			return redirect("/");
+		}
+
+		const data: LoginResponse = await response.json();
 		if (!data.url) throw new Error("Login failed. No URL found in response.");
-		console.log("Header:", response.headers);
-		console.log("Status:", response.status);
 		return redirect(data.url, { headers: response.headers });
 	} catch (error) {
 		console.error("Login error:", error);

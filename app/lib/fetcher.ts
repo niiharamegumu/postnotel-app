@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import type { AppLoadContext } from "react-router";
 
 export type FetchOptions = {
@@ -22,7 +23,7 @@ export async function fetcher(
 		body: options.body,
 	});
 
-	if (!response.ok) {
+	if (response.status >= StatusCodes.INTERNAL_SERVER_ERROR) {
 		throw new Error(`HTTP error! Status: ${response.status}`);
 	}
 
