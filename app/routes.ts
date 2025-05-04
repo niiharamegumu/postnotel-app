@@ -2,7 +2,6 @@ import { type RouteConfig, prefix, route } from "@react-router/dev/routes";
 
 export default [
 	route("/", "routes/top.tsx"),
-	route("/home", "routes/home.tsx"),
 
 	// ログイン
 	...prefix("auth", [
