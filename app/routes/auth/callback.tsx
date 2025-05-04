@@ -26,7 +26,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		);
 
 		if (response.ok) {
-			console.log("認証成功:", response);
 			return redirect("/");
 		}
 
