@@ -26,7 +26,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		);
 
 		if (response.ok) {
-			return redirect("/");
+			return redirect("/", { headers: response.headers });
 		}
 
 		return redirect("/auth/login");
