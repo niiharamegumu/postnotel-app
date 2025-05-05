@@ -2,3 +2,6 @@ name = "postnotel-app"
 compatibility_date = "2025-02-24"
 main = "./workers/app.ts"
 keep_vars = true
+
+[observability.logs]
+enabled = true
