@@ -7,7 +7,6 @@ export function meta() {
 
 export default function Top() {
 	const userInfo = useOutletContext<UserInfo>();
-	console.log(userInfo);
 	return (
 		<section>
 			<h1>PostNotel</h1>
