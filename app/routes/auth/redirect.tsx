@@ -5,6 +5,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const target = url.searchParams.get("target");
 
+	// TODO:消す
+	console.log(target);
+
 	if (!target) return redirect("/auth/login");
 	return redirect(target);
 }

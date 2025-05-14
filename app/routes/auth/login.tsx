@@ -14,6 +14,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		});
 
+		// TODO:消す
+		console.log(response.headers.get("set-cookie"));
+
 		if (response.status === StatusCodes.CONFLICT) {
 			console.log("User is already logged in.");
 			return redirect("/");
@@ -21,9 +24,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const data: LoginResponse = await response.json();
 		if (!data.url) throw new Error("Login failed. No URL found in response.");
-
-		// TODO:消す
-		console.log(response.headers.get("set-cookie"));
 
 		return redirect(`/auth/redirect?target=${encodeURIComponent(data.url)}`, {
 			headers: response.headers,
