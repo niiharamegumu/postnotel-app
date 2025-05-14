@@ -14,6 +14,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		return redirect("/auth/login");
 	}
 
+	// TODO: 消す
+	console.log(request.headers.get("cookie"));
 	try {
 		const response = await fetcher(
 			context,

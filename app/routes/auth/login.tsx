@@ -22,6 +22,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 		const data: LoginResponse = await response.json();
 		if (!data.url) throw new Error("Login failed. No URL found in response.");
 
+		// TODO:消す
+		console.log(response);
+
 		return redirect(`/auth/redirect?target=${encodeURIComponent(data.url)}`, {
 			headers: response.headers,
 		});
