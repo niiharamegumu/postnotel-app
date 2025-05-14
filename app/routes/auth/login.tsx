@@ -23,7 +23,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		if (!data.url) throw new Error("Login failed. No URL found in response.");
 
 		// TODO:消す
-		console.log(response);
+		console.log(response.headers.get("set-cookie"));
 
 		return redirect(`/auth/redirect?target=${encodeURIComponent(data.url)}`, {
 			headers: response.headers,
