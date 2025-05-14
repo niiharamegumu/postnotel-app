@@ -6,6 +6,8 @@ export default [
 	...prefix("auth", [
 		// login
 		route("/login", "routes/auth/login.tsx"),
+		// redirect
+		route("/redirect", "routes/auth/redirect.tsx"),
 		// logout
 		route("/logout", "routes/auth/logout.tsx"),
 		// auth callback
