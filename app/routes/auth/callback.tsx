@@ -10,7 +10,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 	// codeとstateパラメータが存在するか確認
 	if (!code || !state) {
-		console.error("認証エラー: codeまたはstateが不足しています");
+		console.log("認証エラー: codeまたはstateが不足しています");
 		return redirect("/auth/login");
 	}
 
@@ -33,7 +33,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 		return redirect("/auth/login");
 	} catch (error) {
-		console.error("認証コールバックエラー:", error);
+		console.log("認証コールバックエラー:", error);
 		return redirect("/auth/login");
 	}
 }

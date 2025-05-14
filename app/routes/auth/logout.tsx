@@ -24,7 +24,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 		// ログアウト成功後はトップページにリダイレクト
 		return redirect("/", { headers: response.headers });
 	} catch (error) {
-		console.error("Logout error:", error);
+		console.log("Logout error:", error);
 		throw error;
 	}
 }
