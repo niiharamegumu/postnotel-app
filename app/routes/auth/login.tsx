@@ -29,7 +29,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 			headers: response.headers,
 		});
 	} catch (error) {
-		console.error("Login error:", error);
+		console.log("Login error:", error);
 		throw error;
 	}
 }
