@@ -21,7 +21,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 		const data: LoginResponse = await response.json();
 		if (!data.url) throw new Error("Login failed. No URL found in response.");
-		return redirect(data.url, { headers: response.headers });
+
+		return redirect(`/auth/redirect?target=${encodeURIComponent(data.url)}`, {
+			headers: response.headers,
+		});
 	} catch (error) {
 		console.error("Login error:", error);
 		throw error;
@@ -29,7 +32,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 }
 
 export function meta() {
-	return [{ title: "PostNotel_Login" }, { name: "description", content: "PostNotel Login" }];
+	return [{ title: "PostNotel Login" }, { name: "description", content: "PostNotel Login" }];
 }
 
 export default function Login() {
