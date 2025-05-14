@@ -14,15 +14,20 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		return redirect("/auth/login");
 	}
 
-	// TODO: 消す
-	console.log(request.headers.get("cookie"));
 	try {
+		const cookie = request.headers.get("cookie");
+		// TODO: 消す
+		console.log(cookie);
+		if (!cookie) {
+			console.log("認証エラー: Cookieが存在しません");
+			return redirect("/auth/login");
+		}
 		const response = await fetcher(
 			context,
 			`${endpoints.auth.callback}?code=${code}&state=${state}`,
 			{
 				headers: {
-					Cookie: request.headers.get("cookie") || "",
+					Cookie: cookie,
 				},
 			},
 		);
