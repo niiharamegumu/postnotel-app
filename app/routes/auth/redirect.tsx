@@ -7,6 +7,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	// TODO:消す
 	console.log(target);
+	const cookie = request.headers.get("cookie");
+	console.log(cookie);
 
 	if (!target) return redirect("/auth/login");
 	return redirect(target);
