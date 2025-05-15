@@ -14,9 +14,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 			},
 		});
 
-		// TODO:消す
-		console.log(response.headers.get("set-cookie"));
-
 		if (response.status === StatusCodes.CONFLICT) {
 			console.log("User is already logged in.");
 			return redirect("/");

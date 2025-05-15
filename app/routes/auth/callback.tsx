@@ -1,13 +1,14 @@
-import { redirect } from "react-router";
+import { redirect, useFetcher } from "react-router";
+import { useEffect } from "react";
 import { fetcher } from "~/lib/fetcher";
 import { endpoints } from "~/constants/endpoints";
 import type { Route } from "./+types/callback";
 
-export async function loader({ request, context }: Route.LoaderArgs) {
-	const url = new URL(request.url);
-	const code = url.searchParams.get("code");
-	const state = url.searchParams.get("state");
-
+export async function action({ request, context }: Route.ActionArgs) {
+	// postなのでbodyからcode, stateを取得
+	const formData = await request.formData();
+	const code = formData.get("code");
+	const state = formData.get("state");
 	// codeとstateパラメータが存在するか確認
 	if (!code || !state) {
 		console.log("認証エラー: codeまたはstateが不足しています");
@@ -15,19 +16,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	}
 
 	try {
-		const cookie = request.headers.get("cookie");
-		// TODO: 消す
-		console.log(cookie);
-		if (!cookie) {
-			console.log("認証エラー: Cookieが存在しません");
-			return redirect("/auth/login");
-		}
 		const response = await fetcher(
 			context,
 			`${endpoints.auth.callback}?code=${code}&state=${state}`,
 			{
 				headers: {
-					Cookie: cookie,
+					Cookie: request.headers.get("cookie") || "",
 				},
 			},
 		);
@@ -48,9 +42,23 @@ export function meta() {
 }
 
 export default function Callback() {
+	const submit = useFetcher();
+
+	useEffect(() => {
+		// URLからcode, stateを取得
+		const url = new URL(window.location.href);
+		const code = url.searchParams.get("code");
+		const state = url.searchParams.get("state");
+
+		if (code && state && submit.state === "idle" && !submit.data) {
+			// actionにパラメータを渡す
+			submit.submit({ code, state }, { method: "post", action: "/auth/callback" });
+		}
+	}, [submit]);
+
 	return (
 		<div className="h-screen flex flex-col justify-center items-center">
-			<div className="text-xl mb-4">認証処理中...</div>
+			<div className="text-xl mb-4">認証処理中</div>
 		</div>
 	);
 }
