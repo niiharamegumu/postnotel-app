@@ -27,7 +27,11 @@ export async function action({ request, context }: Route.ActionArgs) {
 		);
 
 		if (response.ok) {
-			return redirect("/", { headers: response.headers });
+			return redirect("/", {
+				headers: {
+					Cookie: response.headers.get("set-cookie") || "",
+				},
+			});
 		}
 
 		return redirect("/auth/login");
