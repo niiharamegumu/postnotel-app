@@ -28,7 +28,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 		throw error;
 	}
 }
-
 export function meta() {
 	return [{ title: "PostNotel_Logout" }, { name: "description", content: "PostNotel Logout" }];
 }

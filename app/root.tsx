@@ -45,7 +45,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	);
 }
 
-export async function loader({ request, context }: Route.LoaderArgs): Promise<UserInfo> {
+export async function loader({
+	request,
+	context,
+}: Route.LoaderArgs): Promise<{ userInfo: UserInfo | null }> {
 	try {
 		const response = await fetcher(context, endpoints.users.me, {
 			headers: {
@@ -53,19 +56,19 @@ export async function loader({ request, context }: Route.LoaderArgs): Promise<Us
 			},
 		});
 
-		if (!response.ok) return {} as UserInfo;
+		if (!response.ok) return { userInfo: null };
 
-		const userInfo = await response.json();
-		if (!userInfo) return {} as UserInfo;
+		const data = await response.json();
+		if (!data) return { userInfo: null };
 
-		return userInfo as UserInfo;
+		return { userInfo: data as UserInfo };
 	} catch (error) {
-		return {} as UserInfo;
+		return { userInfo: null };
 	}
 }
 
 export default function App() {
-	const userInfo = useLoaderData<UserInfo>();
+	const { userInfo } = useLoaderData<{ userInfo: UserInfo | null }>();
 	return <Outlet context={userInfo} />;
 }
 
