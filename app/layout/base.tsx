@@ -3,7 +3,7 @@ import FloatMenu from "~/components/common/floatMenu";
 import type { UserInfo } from "~/types/user";
 
 export default function Base() {
-	const userInfo = useOutletContext<UserInfo>();
+	const userInfo = useOutletContext<UserInfo | null>();
 
 	return (
 		<div className="flex flex-col min-h-screen">
