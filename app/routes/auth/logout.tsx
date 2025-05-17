@@ -5,6 +5,11 @@ import { endpoints } from "~/constants/endpoints";
 import { StatusCodes } from "http-status-codes";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+	const userInfo = context.userInfo;
+	if (!userInfo) {
+		console.log("User is not logged in.");
+		return redirect("/");
+	}
 	try {
 		const response = await fetcher(context, endpoints.auth.logout, {
 			headers: {
@@ -28,7 +33,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 		throw error;
 	}
 }
-
 export function meta() {
 	return [{ title: "PostNotel_Logout" }, { name: "description", content: "PostNotel Logout" }];
 }
