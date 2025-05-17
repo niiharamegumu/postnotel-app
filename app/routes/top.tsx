@@ -3,5 +3,5 @@ export function meta() {
 }
 
 export default function Top() {
-	return <section>ここにコンテンツが入ります</section>;
+	return <section>PostNotel</section>;
 }
