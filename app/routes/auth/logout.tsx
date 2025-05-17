@@ -5,11 +5,6 @@ import { endpoints } from "~/constants/endpoints";
 import { StatusCodes } from "http-status-codes";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-	const userInfo = context.userInfo;
-	if (!userInfo) {
-		console.log("User is not logged in.");
-		return redirect("/");
-	}
 	try {
 		const response = await fetcher(context, endpoints.auth.logout, {
 			headers: {
