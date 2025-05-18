@@ -11,7 +11,7 @@ import type { UserInfo } from "~/types/user";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
-import { Minus, Plus } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
@@ -26,13 +26,13 @@ export default function FloatMenu({ userInfo }: Props) {
 				<Button variant="outline">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
-							key={open ? "minus" : "plus"}
+							key={open ? "close" : "menu"}
 							initial={{ opacity: 0, scale: 0.7 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.7 }}
 							transition={{ duration: 0.18, ease: "easeInOut" }}
 						>
-							{open ? <Minus /> : <Plus />}
+							{open ? <X /> : <Menu />}
 						</motion.span>
 					</AnimatePresence>
 				</Button>
