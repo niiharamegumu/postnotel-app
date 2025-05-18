@@ -5,7 +5,7 @@ import { ja } from "date-fns/locale";
 import { format, parseISO, isValid } from "date-fns";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
-import { fetchNotesByDate } from "~/features/notes/api/get";
+import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -16,9 +16,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		date = isValid(parsed) ? parsed : new Date();
 	}
 	const notes = await fetchNotesByDate(request, context, date);
-	// TODO: 投稿あり日: 2025/5/15
-	const hasNoteDate = ["2025-05-15", "2025-05-16", "2025-05-17"];
-	return { notes, date: date.toISOString(), hasNoteDate };
+	const noteDays = await fetchDays(request, context);
+	return { notes, date: date.toISOString(), noteDays };
 }
 
 export function meta() {
@@ -27,10 +26,10 @@ export function meta() {
 
 export default function Index() {
 	const navigate = useNavigate();
-	const { notes, date, hasNoteDate } = useLoaderData<typeof loader>() as {
+	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
 		notes: NotesByDateResponse | null;
 		date: string;
-		hasNoteDate: string[];
+		noteDays: string[];
 	};
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
 
@@ -54,7 +53,7 @@ export default function Index() {
 						formatCaption: (month: Date) => format(month, "yyyy年M月", { locale: ja }),
 					}}
 					modifiers={{
-						hasNote: (date) => hasNoteDate.some((d) => d === format(date, "yyyy-MM-dd")),
+						hasNote: (date) => noteDays.some((d) => d === format(date, "yyyy-MM-dd")),
 					}}
 					modifiersClassNames={{
 						hasNote: "bg-green-300 text-green-600",
