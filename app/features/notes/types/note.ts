@@ -16,3 +16,7 @@ export type NotesByDateResponse = {
 	notes: Note[];
 	notesCount: number;
 };
+
+export type NoteDaysResponse = {
+	noteDays: string[];
+};
