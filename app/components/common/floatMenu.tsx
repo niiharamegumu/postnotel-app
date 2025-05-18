@@ -23,7 +23,7 @@ export default function FloatMenu({ userInfo }: Props) {
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger className="outline-none">
-				<Button variant="outline">
+				<Button variant="secondary">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
 							key={open ? "close" : "menu"}
@@ -52,9 +52,16 @@ export default function FloatMenu({ userInfo }: Props) {
 						<DropdownMenuSeparator />
 					</div>
 				)}
-				<DropdownMenuItem>Top</DropdownMenuItem>
-				{/* TODO: Notesが完成したら遷移させる */}
-				<DropdownMenuItem>Notes</DropdownMenuItem>
+				<DropdownMenuItem>
+					<Link to="/" className="flex w-full">
+						Top
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<Link to="/notes" className="flex w-full">
+						Notes
+					</Link>
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
