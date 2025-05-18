@@ -11,7 +11,7 @@ import type { UserInfo } from "~/types/user";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
-import { Minus, Plus } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
@@ -23,16 +23,16 @@ export default function FloatMenu({ userInfo }: Props) {
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger className="outline-none">
-				<Button variant="outline">
+				<Button variant="secondary">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
-							key={open ? "minus" : "plus"}
+							key={open ? "close" : "menu"}
 							initial={{ opacity: 0, scale: 0.7 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.7 }}
 							transition={{ duration: 0.18, ease: "easeInOut" }}
 						>
-							{open ? <Minus /> : <Plus />}
+							{open ? <X /> : <Menu />}
 						</motion.span>
 					</AnimatePresence>
 				</Button>
@@ -52,9 +52,16 @@ export default function FloatMenu({ userInfo }: Props) {
 						<DropdownMenuSeparator />
 					</div>
 				)}
-				<DropdownMenuItem>Top</DropdownMenuItem>
-				{/* TODO: Notesが完成したら遷移させる */}
-				<DropdownMenuItem>Notes</DropdownMenuItem>
+				<DropdownMenuItem>
+					<Link to="/" className="flex w-full">
+						Top
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<Link to="/notes" className="flex w-full">
+						Notes
+					</Link>
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
