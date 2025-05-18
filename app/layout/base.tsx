@@ -7,10 +7,12 @@ export default function Base() {
 
 	return (
 		<div className="flex flex-col min-h-screen">
-			<Outlet context={userInfo} />
-			<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center">
-				<FloatMenu userInfo={userInfo} />
-			</div>
+			<main className="max-w-full pt-6 pb-25 px-6">
+				<Outlet context={userInfo} />
+				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center">
+					<FloatMenu userInfo={userInfo} />
+				</div>
+			</main>
 		</div>
 	);
 }
