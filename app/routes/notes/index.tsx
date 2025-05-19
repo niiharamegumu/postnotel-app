@@ -6,6 +6,7 @@ import { format, parseISO, isValid } from "date-fns";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
+import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -97,6 +98,9 @@ export default function Index() {
 								)}
 								<span className="text-xs text-muted-foreground ml-2">
 									{format(new Date(note.createdAt), "HH:mm")}
+									{note.accessLevel === AccessLevel.Private && (
+										<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
+									)}
 								</span>
 							</li>
 						))}
