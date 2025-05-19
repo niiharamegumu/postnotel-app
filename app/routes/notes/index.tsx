@@ -58,10 +58,16 @@ export default function Index() {
 					modifiersClassNames={{
 						hasNote: "bg-green-300 text-green-600",
 					}}
+					className="p-0"
+					classNames={{
+						head_row: "flex w-full justify-between",
+						row: "flex w-full justify-between",
+						day_today: "bg-none text-destructive",
+					}}
 				/>
 			</div>
 			<section className="w-full">
-				<h2 className="text-lg mt-4 mb-6 text-primary">
+				<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 					{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 				</h2>
 				{notes && notes.notes.length > 0 ? (
