@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLoaderData, useNavigate } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO, isValid } from "date-fns";
+import { format, parseISO, isValid, startOfToday } from "date-fns";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
@@ -11,10 +11,12 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const dateParam = url.searchParams.get("date");
-	let date = new Date();
+	let date: Date;
 	if (dateParam) {
 		const parsed = parseISO(dateParam);
 		date = isValid(parsed) ? parsed : new Date();
+	} else {
+		date = startOfToday();
 	}
 	const notes = await fetchNotesByDate(request, context, date);
 	const noteDays = await fetchDays(request, context);
