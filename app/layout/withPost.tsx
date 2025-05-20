@@ -5,6 +5,7 @@ import type { UserInfo } from "~/types/user";
 
 export default function WithPost() {
 	const userInfo = useOutletContext<UserInfo | null>();
+	const isClient = typeof window !== "undefined";
 
 	return (
 		<div className="flex flex-col min-h-screen">
@@ -12,8 +13,7 @@ export default function WithPost() {
 				<Outlet context={userInfo} />
 				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center gap-2">
 					<FloatMenu userInfo={userInfo} />
-					{/* TODO: client限定なので対策が必要。リロードするとエラーになる */}
-					{userInfo && <BlockNoteDrawer />}
+					{isClient && userInfo && <BlockNoteDrawer />}
 				</div>
 			</main>
 		</div>

@@ -13,6 +13,7 @@ import "./app.css";
 import { fetcher } from "./lib/fetcher";
 import { endpoints } from "./constants/endpoints";
 import type { UserInfo } from "./types/user";
+import { Toaster } from "./components/ui/sonner";
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -69,7 +70,12 @@ export async function loader({
 
 export default function App() {
 	const { userInfo } = useLoaderData<{ userInfo: UserInfo | null }>();
-	return <Outlet context={userInfo} />;
+	return (
+		<>
+			<Toaster position="top-right" />
+			<Outlet context={userInfo} />
+		</>
+	);
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
