@@ -12,5 +12,6 @@ export const endpoints = {
 	notes: {
 		notesByDate: (date: Date) => `/v1/notes?date=${format(date, "yyyy-MM-dd")}`,
 		days: "/v1/notes/days",
+		create: "/v1/notes",
 	},
 };
