@@ -13,10 +13,17 @@ import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
+import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 
 export default function BlockNoteDrawer() {
 	const [open, setOpen] = useState(false);
-	const editor = useCreateBlockNote();
+	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
+	const schema = BlockNoteSchema.create({
+		blockSpecs: {
+			...customBlockSpecs,
+		},
+	});
+	const editor = useCreateBlockNote({ schema });
 
 	return (
 		<Drawer open={open} onOpenChange={setOpen}>
