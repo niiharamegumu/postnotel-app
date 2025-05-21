@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
-import { ja } from "date-fns/locale";
+import { is, ja } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
@@ -23,6 +23,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 export function meta() {
 	return [{ title: "PostNotel Notes" }, { name: "description", content: "PostNotel Notes" }];
 }
+
+const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function Index() {
 	const navigate = useNavigate();
@@ -73,35 +75,36 @@ export default function Index() {
 				{notes && notes.notes.length > 0 ? (
 					<ul className="space-y-4">
 						{notes.notes.map((note) => (
-							<li key={note.noteId} className="flex flex-col items-start">
-								{note.images?.length > 0 && (
-									<div className="mb-1">
-										{note.images.map((img, i) => (
-											<div
-												key={`${note.noteId}-img-${i}`}
-												className="rounded-xl overflow-hidden bg-secondary p-2"
-											>
-												<img
-													src={img}
-													alt={`ノート添付 #${i + 1}`}
-													className="w-48 h-auto object-cover rounded-xl"
-												/>
-											</div>
-										))}
-									</div>
-								)}
-								{note.content && (
-									<div className="bg-secondary text-primary rounded-xl px-4 py-2 mb-1 whitespace-pre-line">
-										{note.content}
-									</div>
-								)}
-								<span className="text-xs text-muted-foreground ml-2">
-									{format(new Date(note.createdAt), "HH:mm")}
-									{note.accessLevel === AccessLevel.Private && (
-										<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
+							<Suspense
+								key={note.noteId}
+								fallback={<li className="text-muted-foreground text-sm">Loading...</li>}
+							>
+								<li className="flex flex-col items-start">
+									{note.images?.length > 0 && (
+										<div className="mb-1">
+											{note.images.map((img, i) => (
+												<div
+													key={`${note.noteId}-img-${i}`}
+													className="rounded-xl overflow-hidden bg-secondary p-2"
+												>
+													<img
+														src={img}
+														alt={`ノート添付 #${i + 1}`}
+														className="w-48 h-auto object-cover rounded-xl"
+													/>
+												</div>
+											))}
+										</div>
 									)}
-								</span>
-							</li>
+									<NoteContent note={note} />
+									<span className="text-xs text-muted-foreground ml-2">
+										{format(new Date(note.createdAt), "HH:mm")}
+										{note.accessLevel === AccessLevel.Private && (
+											<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
+										)}
+									</span>
+								</li>
+							</Suspense>
 						))}
 					</ul>
 				) : (
