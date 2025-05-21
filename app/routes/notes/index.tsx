@@ -76,47 +76,53 @@ export default function Index() {
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
-					{!isLoading && notes && notes.notes.length > 0 ? (
-						<ul className="space-y-4">
-							{notes.notes.map((note) => (
-								<Suspense
-									key={note.noteId}
-									fallback={
-										<li>
-											<Skeleton className="h-10 w-full" />
-										</li>
-									}
-								>
-									<li className="flex flex-col items-start">
-										{note.images?.length > 0 && (
-											<div className="mb-1">
-												{note.images.map((img, i) => (
-													<div
-														key={`${note.noteId}-img-${i}`}
-														className="rounded-xl overflow-hidden bg-secondary p-2"
-													>
-														<img
-															src={img}
-															alt={`ノート添付 #${i + 1}`}
-															className="w-48 h-auto object-cover rounded-xl"
-														/>
-													</div>
-												))}
-											</div>
-										)}
-										<NoteContent note={note} />
-										<span className="text-xs text-muted-foreground ml-2">
-											{format(new Date(note.createdAt), "HH:mm")}
-											{note.accessLevel === AccessLevel.Private && (
-												<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
-											)}
-										</span>
-									</li>
-								</Suspense>
-							))}
-						</ul>
+					{isLoading ? (
+						<Skeleton className="h-screen w-full" />
 					) : (
-						<p className="text-primary">ノートがありません。</p>
+						<>
+							{notes && notes.notes.length > 0 ? (
+								<ul className="space-y-4">
+									{notes.notes.map((note) => (
+										<Suspense
+											key={note.noteId}
+											fallback={
+												<li>
+													<Skeleton className="h-10 w-full" />
+												</li>
+											}
+										>
+											<li className="flex flex-col items-start">
+												{note.images?.length > 0 && (
+													<div className="mb-1">
+														{note.images.map((img, i) => (
+															<div
+																key={`${note.noteId}-img-${i}`}
+																className="rounded-xl overflow-hidden bg-secondary p-2"
+															>
+																<img
+																	src={img}
+																	alt={`ノート添付 #${i + 1}`}
+																	className="w-48 h-auto object-cover rounded-xl"
+																/>
+															</div>
+														))}
+													</div>
+												)}
+												<NoteContent note={note} />
+												<span className="text-xs text-muted-foreground ml-2">
+													{format(new Date(note.createdAt), "HH:mm")}
+													{note.accessLevel === AccessLevel.Private && (
+														<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
+													)}
+												</span>
+											</li>
+										</Suspense>
+									))}
+								</ul>
+							) : (
+								<p className="text-primary">ノートがありません。</p>
+							)}
+						</>
 					)}
 				</section>
 			</div>
