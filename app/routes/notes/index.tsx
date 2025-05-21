@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useLoaderData, useNavigate } from "react-router";
+import { useLoaderData, useNavigate, useNavigation } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { is, ja } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
@@ -29,6 +29,8 @@ const NoteContent = lazy(() => import("~/features/notes/components/.client/conte
 
 export default function Index() {
 	const navigate = useNavigate();
+	const navigation = useNavigation();
+	const isLoading = navigation.state === "loading";
 	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
 		notes: NotesByDateResponse | null;
 		date: string;
@@ -74,7 +76,7 @@ export default function Index() {
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
-					{notes && notes.notes.length > 0 ? (
+					{!isLoading && notes && notes.notes.length > 0 ? (
 						<ul className="space-y-4">
 							{notes.notes.map((note) => (
 								<Suspense
