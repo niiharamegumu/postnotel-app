@@ -2,25 +2,22 @@ import { useState } from "react";
 import { useLoaderData, useNavigate } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO, isValid, startOfToday } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { formatInTimeZone } from "date-fns-tz";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const dateParam = url.searchParams.get("date");
-	let date: Date;
-	if (dateParam) {
-		const parsed = parseISO(dateParam);
-		date = isValid(parsed) ? parsed : new Date();
-	} else {
-		date = startOfToday();
-	}
-	const notes = await fetchNotesByDate(request, context, date);
+	const date = dateParam
+		? formatInTimeZone(new Date(dateParam), "Asia/Tokyo", "yyyy-MM-dd")
+		: formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+	const notes = await fetchNotesByDate(request, context, parseISO(date));
 	const noteDays = await fetchDays(request, context);
-	return { notes, date: date.toISOString(), noteDays };
+	return { notes, date, noteDays };
 }
 
 export function meta() {
