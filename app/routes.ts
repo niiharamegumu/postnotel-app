@@ -8,6 +8,8 @@ export default [
 	...prefix("notes", [
 		// create
 		route("/create", "routes/notes/create.tsx"),
+		// update
+		route("/update/:id", "routes/notes/update.tsx"),
 	]),
 
 	...prefix("auth", [
