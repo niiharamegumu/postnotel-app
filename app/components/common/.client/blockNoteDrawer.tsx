@@ -19,11 +19,12 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
+import { ActionType } from "~/features/notes/constants/actionType";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
-	noteDrawerType: "create" | "edit";
-	setNoteDrawerType: React.Dispatch<React.SetStateAction<"create" | "edit">>;
+	noteDrawerType: ActionType;
+	setNoteDrawerType: React.Dispatch<React.SetStateAction<ActionType>>;
 	loading: boolean;
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	open: boolean;
@@ -53,7 +54,7 @@ export default function BlockNoteDrawer({
 	const editor = useCreateBlockNote({ schema });
 	useEffect(() => {
 		const initializeEditor = async () => {
-			if (note?.content && noteDrawerType === "edit" && editor) {
+			if (note?.content && noteDrawerType === ActionType.Edit && editor) {
 				try {
 					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
 					editor.replaceBlocks(editor.document, blocks);
@@ -72,7 +73,7 @@ export default function BlockNoteDrawer({
 
 	const resetDrawer = () => {
 		setOpen(false);
-		setNoteDrawerType("create");
+		setNoteDrawerType(ActionType.Create);
 		setIsPrivate(true);
 		editor.replaceBlocks(editor.document, []);
 	};

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
+import { ActionType } from "~/features/notes/constants/actionType";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import type { UserInfo } from "~/types/user";
 
@@ -18,7 +19,7 @@ export default function WithPost() {
 
 	const [loading, setLoading] = useState(false); // 処理中かどうか
 	const [isNoteDrawerOpen, setNoteDrawerOpen] = useState(false); // noteのドロワーの開閉状態
-	const [noteDrawerType, setNoteDrawerType] = useState<"create" | "edit">("create"); // noteのドロワーのタイプ
+	const [noteDrawerType, setNoteDrawerType] = useState<ActionType>(ActionType.Create); // noteのドロワーのタイプ
 	const [targetNote, setTargetNote] = useState<Note | null>(null);
 
 	const createNote = async (params: NoteApiRequest): Promise<void> => {
@@ -73,10 +74,10 @@ export default function WithPost() {
 
 	let noteDrawerHandler = createNote;
 	switch (noteDrawerType) {
-		case "create":
+		case ActionType.Create:
 			noteDrawerHandler = createNote;
 			break;
-		case "edit":
+		case ActionType.Edit:
 			noteDrawerHandler = editNote;
 			break;
 	}
@@ -85,7 +86,7 @@ export default function WithPost() {
 		(note: Note) => {
 			if (!userInfo) return;
 			setTargetNote(note);
-			setNoteDrawerType("edit");
+			setNoteDrawerType(ActionType.Edit);
 			setNoteDrawerOpen(true);
 		},
 		[userInfo],
