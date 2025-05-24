@@ -9,7 +9,7 @@ export default [
 		// create
 		route("/create", "routes/notes/create.tsx"),
 		// update
-		route("/update/:id", "routes/notes/update.tsx"),
+		route("/:id/update", "routes/notes/update.tsx"),
 	]),
 
 	...prefix("auth", [
