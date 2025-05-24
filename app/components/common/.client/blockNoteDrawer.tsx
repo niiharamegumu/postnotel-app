@@ -14,18 +14,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { useNavigate, useSearchParams } from "react-router";
-import { format } from "date-fns";
 import { Toggle } from "~/components/ui/toggle";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { toast } from "sonner";
 
-export default function BlockNoteDrawer() {
+type BlockNoteDrawerProps = {
+	onSubmit: (params: {
+		content: string;
+		accessLevel: AccessLevel;
+	}) => Promise<void>;
+	buttonLabel?: string;
+};
+
+export default function BlockNoteDrawer({
+	onSubmit,
+	buttonLabel = "Submit",
+}: BlockNoteDrawerProps) {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(true);
-	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
 
 	// BlockNoteの初期化
 	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
@@ -36,37 +43,26 @@ export default function BlockNoteDrawer() {
 	});
 	const editor = useCreateBlockNote({ schema });
 
-	// 登録対象の日付を取得
-	const date = searchParams.get("date");
-	const targetDate = date ? new Date(date) : new Date();
-
-	// BlockNoteをMarkdownに変換して送信する
+	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
 		setLoading(true);
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
-			const body = JSON.stringify({
+			const accessLevel = isPrivate ? AccessLevel.Private : AccessLevel.Public;
+			await onSubmit({
 				content: markdown,
-				accessLevel: isPrivate ? AccessLevel.Private : AccessLevel.Public,
-				noteDay: format(targetDate, "yyyy-MM-dd"),
+				accessLevel,
 			});
-			const res = await fetch("/notes/create", {
-				method: "POST",
-				body,
-			});
-			if (!res.ok) {
-				toast.error("ノートの作成に失敗しました");
-				return;
-			}
-			setOpen(false);
-			editor.replaceBlocks(editor.document, []);
-			navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-			toast.success("ノートを作成しました");
 		} catch (e) {
-			console.error(e);
-			toast.error("ノートの作成に失敗しました");
+			if (e instanceof ApiResponseError) {
+				toast.error(e.message);
+			} else {
+				console.error(e);
+			}
 		} finally {
+			setOpen(false);
 			setLoading(false);
+			editor.replaceBlocks(editor.document, []);
 		}
 	};
 
@@ -97,7 +93,7 @@ export default function BlockNoteDrawer() {
 					</Toggle>
 					<div className="flex items-center gap-2">
 						<Button variant="default" onClick={handleSubmit} disabled={loading}>
-							{loading ? "Submitting..." : "Submit"}
+							{loading ? `${buttonLabel}...` : buttonLabel}
 						</Button>
 						<DrawerClose>
 							<Button variant="outline">Cancel</Button>
