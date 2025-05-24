@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { AppLoadContext } from "react-router";
 
 export type FetchOptions = {
-	method?: "GET" | "POST" | "PUT" | "DELETE";
+	method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 	headers?: HeadersInit;
 	body?: BodyInit;
 	credentials?: RequestCredentials;

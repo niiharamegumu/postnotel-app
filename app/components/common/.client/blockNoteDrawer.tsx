@@ -11,21 +11,37 @@ import {
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { useNavigate, useSearchParams } from "react-router";
-import { format } from "date-fns";
 import { Toggle } from "~/components/ui/toggle";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { toast } from "sonner";
+import type { Note, NoteApiRequest } from "~/features/notes/types/note";
+import { ApiResponseError } from "~/api/error/apiResponseError";
 
-export default function BlockNoteDrawer() {
-	const [loading, setLoading] = useState(false);
-	const [open, setOpen] = useState(false);
+type BlockNoteDrawerProps = {
+	onSubmit: (params: NoteApiRequest) => Promise<void>;
+	noteDrawerType: "create" | "edit";
+	setNoteDrawerType: React.Dispatch<React.SetStateAction<"create" | "edit">>;
+	loading: boolean;
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	open: boolean;
+	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	note: Note | null;
+};
+
+export default function BlockNoteDrawer({
+	onSubmit,
+	noteDrawerType,
+	setNoteDrawerType,
+	loading,
+	setLoading,
+	open,
+	setOpen,
+	note,
+}: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
-	const [searchParams] = useSearchParams();
-	const navigate = useNavigate();
 
 	// BlockNoteの初期化
 	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
@@ -35,38 +51,45 @@ export default function BlockNoteDrawer() {
 		},
 	});
 	const editor = useCreateBlockNote({ schema });
+	useEffect(() => {
+		const initializeEditor = async () => {
+			if (note?.content && noteDrawerType === "edit" && editor) {
+				try {
+					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
+					editor.replaceBlocks(editor.document, blocks);
+				} catch (error) {
+					console.error("Failed to convert markdown to blocks:", error);
+				}
+			}
+		};
 
-	// 登録対象の日付を取得
-	const date = searchParams.get("date");
-	const targetDate = date ? new Date(date) : new Date();
+		if (open) {
+			initializeEditor();
+		}
+	}, [note, editor, noteDrawerType, open]);
 
-	// BlockNoteをMarkdownに変換して送信する
+	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
 		setLoading(true);
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
-			const body = JSON.stringify({
+			const accessLevel = isPrivate ? AccessLevel.Private : AccessLevel.Public;
+			await onSubmit({
 				content: markdown,
-				accessLevel: isPrivate ? AccessLevel.Private : AccessLevel.Public,
-				noteDay: format(targetDate, "yyyy-MM-dd"),
+				accessLevel,
 			});
-			const res = await fetch("/notes/create", {
-				method: "POST",
-				body,
-			});
-			if (!res.ok) {
-				toast.error("ノートの作成に失敗しました");
-				return;
-			}
-			setOpen(false);
-			editor.replaceBlocks(editor.document, []);
-			navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-			toast.success("ノートを作成しました");
 		} catch (e) {
-			console.error(e);
-			toast.error("ノートの作成に失敗しました");
+			if (e instanceof ApiResponseError) {
+				toast.error(e.message);
+			} else {
+				console.error(e);
+			}
 		} finally {
+			setOpen(false);
 			setLoading(false);
+			setNoteDrawerType("create");
+			setIsPrivate(true);
+			editor.replaceBlocks(editor.document, []);
 		}
 	};
 
@@ -97,7 +120,7 @@ export default function BlockNoteDrawer() {
 					</Toggle>
 					<div className="flex items-center gap-2">
 						<Button variant="default" onClick={handleSubmit} disabled={loading}>
-							{loading ? "Submitting..." : "Submit"}
+							{loading ? `${noteDrawerType}...` : noteDrawerType}
 						</Button>
 						<DrawerClose>
 							<Button variant="outline">Cancel</Button>

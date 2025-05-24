@@ -1,4 +1,4 @@
-import { useParams, type ActionFunctionArgs } from "react-router";
+import type { ActionFunctionArgs } from "react-router";
 import type { AccessLevel } from "~/constants/accessLevel";
 import { endpoints } from "~/constants/endpoints";
 import { fetcher } from "~/lib/fetcher";
@@ -10,9 +10,9 @@ type Body = {
 	images?: string[];
 };
 
-export async function action({ request, context }: ActionFunctionArgs): Promise<Response> {
+export async function action({ request, context, params }: ActionFunctionArgs): Promise<Response> {
 	try {
-		const { id } = useParams();
+		const id = params.id;
 		if (!id) return new Response("Invalid request", { status: 400 });
 
 		const body: Body = await request.json();
@@ -23,7 +23,7 @@ export async function action({ request, context }: ActionFunctionArgs): Promise<
 			headers: {
 				Cookie: request.headers.get("cookie") || "",
 			},
-			method: "POST",
+			method: "PATCH",
 			body: JSON.stringify(body),
 		});
 		return res;

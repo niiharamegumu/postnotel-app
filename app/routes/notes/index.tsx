@@ -1,9 +1,9 @@
 import { lazy, Suspense, useState } from "react";
-import { useLoaderData, useNavigate, useNavigation } from "react-router";
+import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { is, ja } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
-import type { NotesByDateResponse } from "~/features/notes/types/note";
+import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
@@ -28,14 +28,20 @@ export function meta() {
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function Index() {
+	const { onClickEditNote } = useOutletContext<{
+		onClickEditNote: (note: Note) => void;
+	}>();
+
 	const navigate = useNavigate();
 	const navigation = useNavigation();
 	const isLoading = navigation.state === "loading";
+
 	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
 		notes: NotesByDateResponse | null;
 		date: string;
 		noteDays: string[];
 	};
+
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
 
 	const handleSelect = (selected: Date | undefined) => {
@@ -76,9 +82,7 @@ export default function Index() {
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
-					{isLoading ? (
-						<Skeleton className="h-screen w-full" />
-					) : (
+					{isLoading ? null : (
 						<>
 							{notes && notes.notes.length > 0 ? (
 								<ul className="space-y-4">
@@ -108,7 +112,9 @@ export default function Index() {
 														))}
 													</div>
 												)}
-												<NoteContent note={note} />
+												<div className="cursor-pointer" onClick={() => onClickEditNote(note)}>
+													<NoteContent note={note} />
+												</div>
 												<span className="text-xs text-muted-foreground ml-2">
 													{format(new Date(note.createdAt), "HH:mm")}
 													{note.accessLevel === AccessLevel.Private && (
