@@ -11,28 +11,36 @@ import {
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { Toggle } from "~/components/ui/toggle";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { toast } from "sonner";
+import type { Note, NoteApiRequest } from "~/features/notes/types/note";
+import { ApiResponseError } from "~/api/error/apiResponseError";
 
 type BlockNoteDrawerProps = {
-	onSubmit: (params: {
-		content: string;
-		accessLevel: AccessLevel;
-	}) => Promise<void>;
-	type: "create" | "edit";
-	buttonLabel: string;
+	onSubmit: (params: NoteApiRequest) => Promise<void>;
+	noteDrawerType: "create" | "edit";
+	setNoteDrawerType: React.Dispatch<React.SetStateAction<"create" | "edit">>;
+	loading: boolean;
+	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+	open: boolean;
+	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	note: Note | null;
 };
 
 export default function BlockNoteDrawer({
 	onSubmit,
-	buttonLabel = "Submit",
+	noteDrawerType,
+	setNoteDrawerType,
+	loading,
+	setLoading,
+	open,
+	setOpen,
+	note,
 }: BlockNoteDrawerProps) {
-	const [loading, setLoading] = useState(false);
-	const [open, setOpen] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(true);
 
 	// BlockNoteの初期化
@@ -43,6 +51,22 @@ export default function BlockNoteDrawer({
 		},
 	});
 	const editor = useCreateBlockNote({ schema });
+	useEffect(() => {
+		const initializeEditor = async () => {
+			if (note?.content && noteDrawerType === "edit" && editor) {
+				try {
+					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
+					editor.replaceBlocks(editor.document, blocks);
+				} catch (error) {
+					console.error("Failed to convert markdown to blocks:", error);
+				}
+			}
+		};
+
+		if (open) {
+			initializeEditor();
+		}
+	}, [note, editor, noteDrawerType, open]);
 
 	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
@@ -63,6 +87,8 @@ export default function BlockNoteDrawer({
 		} finally {
 			setOpen(false);
 			setLoading(false);
+			setNoteDrawerType("create");
+			setIsPrivate(true);
 			editor.replaceBlocks(editor.document, []);
 		}
 	};
@@ -94,7 +120,7 @@ export default function BlockNoteDrawer({
 					</Toggle>
 					<div className="flex items-center gap-2">
 						<Button variant="default" onClick={handleSubmit} disabled={loading}>
-							{loading ? `${buttonLabel}...` : buttonLabel}
+							{loading ? `${noteDrawerType}...` : noteDrawerType}
 						</Button>
 						<DrawerClose>
 							<Button variant="outline">Cancel</Button>
