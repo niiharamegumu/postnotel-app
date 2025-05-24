@@ -125,7 +125,9 @@ export default function BlockNoteDrawer({
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent className="w-full h-[80vh] max-h-[80vh] px-4">
-				<BlockNoteView editor={editor} className="py-4" />
+				<div className="h-full overflow-y-auto">
+					<BlockNoteView editor={editor} className="py-4" />
+				</div>
 				<DrawerFooter className="flex items-center flex-row justify-between">
 					<Toggle variant="outline" onClick={() => setIsPrivate(!isPrivate)}>
 						{isPrivate
