@@ -76,9 +76,7 @@ export default function Index() {
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
-					{isLoading ? (
-						<Skeleton className="h-screen w-full" />
-					) : (
+					{isLoading ? null : (
 						<>
 							{notes && notes.notes.length > 0 ? (
 								<ul className="space-y-4">
