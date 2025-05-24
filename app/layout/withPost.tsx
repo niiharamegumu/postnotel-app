@@ -20,6 +20,8 @@ export default function WithPost() {
 		accessLevel: AccessLevel;
 	}): Promise<void> => {
 		const { content, accessLevel } = params;
+		if (!content) return;
+
 		const date = searchParams.get("date");
 		const targetDate = date ? new Date(date) : new Date();
 		const body = JSON.stringify({
@@ -54,7 +56,9 @@ export default function WithPost() {
 							</Button>
 						}
 					>
-						{userInfo && <BlockNoteDrawer onSubmit={createNote} buttonLabel="Create Note" />}
+						{userInfo && (
+							<BlockNoteDrawer onSubmit={createNote} type="create" buttonLabel="Create Note" />
+						)}
 					</Suspense>
 				</div>
 			</main>

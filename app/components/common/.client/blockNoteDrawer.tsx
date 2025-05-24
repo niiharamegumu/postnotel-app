@@ -23,7 +23,8 @@ type BlockNoteDrawerProps = {
 		content: string;
 		accessLevel: AccessLevel;
 	}) => Promise<void>;
-	buttonLabel?: string;
+	type: "create" | "edit";
+	buttonLabel: string;
 };
 
 export default function BlockNoteDrawer({
