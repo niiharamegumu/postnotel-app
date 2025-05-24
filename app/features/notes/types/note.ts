@@ -1,7 +1,9 @@
+import type { AccessLevel } from "~/constants/accessLevel";
+
 export type Note = {
 	noteId: string;
 	content: string;
-	accessLevel: "private" | "public";
+	accessLevel: AccessLevel;
 	tags: {
 		tags: string[];
 		count: number;
@@ -19,4 +21,9 @@ export type NotesByDateResponse = {
 
 export type NoteDaysResponse = {
 	noteDays: string[];
+};
+
+export type NoteApiRequest = {
+	content: string;
+	accessLevel: AccessLevel;
 };
