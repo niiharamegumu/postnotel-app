@@ -7,7 +7,9 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"ignore": ["!./app/*"]
+		"ignore": [
+			"!./app/*"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -20,7 +22,10 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			}
 		}
 	},
 	"javascript": {
