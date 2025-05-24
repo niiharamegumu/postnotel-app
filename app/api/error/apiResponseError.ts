@@ -2,7 +2,7 @@
  * Custom error class for API responses
  * @extends Error
  */
-class ApiResponseError extends Error {
+export class ApiResponseError extends Error {
 	/**
 	 * HTTP status code of the error
 	 */
