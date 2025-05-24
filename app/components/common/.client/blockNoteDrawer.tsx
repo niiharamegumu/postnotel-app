@@ -19,11 +19,12 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
+import { ActionType } from "~/features/notes/constants/actionType";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
-	noteDrawerType: "create" | "edit";
-	setNoteDrawerType: React.Dispatch<React.SetStateAction<"create" | "edit">>;
+	noteDrawerType: ActionType;
+	setNoteDrawerType: React.Dispatch<React.SetStateAction<ActionType>>;
 	loading: boolean;
 	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	open: boolean;
@@ -53,10 +54,12 @@ export default function BlockNoteDrawer({
 	const editor = useCreateBlockNote({ schema });
 	useEffect(() => {
 		const initializeEditor = async () => {
-			if (note?.content && noteDrawerType === "edit" && editor) {
+			if (note?.content && noteDrawerType === ActionType.Edit && editor) {
 				try {
 					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
 					editor.replaceBlocks(editor.document, blocks);
+					setIsPrivate(note.accessLevel === AccessLevel.Private);
+					editor.focus();
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
@@ -67,6 +70,13 @@ export default function BlockNoteDrawer({
 			initializeEditor();
 		}
 	}, [note, editor, noteDrawerType, open]);
+
+	const resetDrawer = () => {
+		setOpen(false);
+		setNoteDrawerType(ActionType.Create);
+		setIsPrivate(true);
+		editor.replaceBlocks(editor.document, []);
+	};
 
 	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
@@ -85,16 +95,21 @@ export default function BlockNoteDrawer({
 				console.error(e);
 			}
 		} finally {
-			setOpen(false);
 			setLoading(false);
-			setNoteDrawerType("create");
-			setIsPrivate(true);
-			editor.replaceBlocks(editor.document, []);
+			resetDrawer();
 		}
 	};
 
 	return (
-		<Drawer open={open} onOpenChange={setOpen}>
+		<Drawer
+			open={open}
+			onOpenChange={(isOpen) => {
+				if (!isOpen) {
+					resetDrawer();
+				}
+				setOpen(isOpen);
+			}}
+		>
 			<DrawerTrigger>
 				<Button variant="secondary">
 					<AnimatePresence mode="wait" initial={false}>
