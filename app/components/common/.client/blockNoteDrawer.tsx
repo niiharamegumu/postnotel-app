@@ -59,7 +59,6 @@ export default function BlockNoteDrawer({
 					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
 					editor.replaceBlocks(editor.document, blocks);
 					setIsPrivate(note.accessLevel === AccessLevel.Private);
-					editor.focus();
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
