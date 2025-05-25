@@ -12,10 +12,9 @@ import {
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { Toggle } from "~/components/ui/toggle";
-import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { AccessLevel } from "~/constants/accessLevel";
 import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
@@ -129,11 +128,16 @@ export default function BlockNoteDrawer({
 					<BlockNoteView editor={editor} className="py-4" />
 				</div>
 				<DrawerFooter className="flex items-center flex-row justify-between">
-					<Toggle variant="outline" onClick={() => setIsPrivate(!isPrivate)}>
-						{isPrivate
-							? accessLevelLabels[AccessLevel.Private]
-							: accessLevelLabels[AccessLevel.Public]}
-					</Toggle>
+					<div className="flex items-center gap-2">
+						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
+							{isPrivate ? <EyeOff /> : <Eye />}
+						</Button>
+						{noteDrawerType === ActionType.Edit && (
+							<Button variant="outline" type="button">
+								<Trash2 />
+							</Button>
+						)}
+					</div>
 					<div className="flex items-center gap-2">
 						<Button variant="default" onClick={handleSubmit} disabled={loading}>
 							{loading ? `${noteDrawerType}...` : noteDrawerType}
