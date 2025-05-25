@@ -14,5 +14,6 @@ export const endpoints = {
 		days: "/v1/notes/days",
 		create: "/v1/notes",
 		update: (id: string) => `/v1/notes/${id}`,
+		delete: (id: string) => `/v1/notes/${id}`,
 	},
 };

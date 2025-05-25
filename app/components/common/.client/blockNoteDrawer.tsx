@@ -12,14 +12,15 @@ import {
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
-import { Toggle } from "~/components/ui/toggle";
-import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { AccessLevel } from "~/constants/accessLevel";
 import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
+import { useNavigate } from "react-router";
+import { format } from "date-fns";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -30,6 +31,7 @@ type BlockNoteDrawerProps = {
 	open: boolean;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	note: Note | null;
+	targetDate: Date;
 };
 
 export default function BlockNoteDrawer({
@@ -40,9 +42,11 @@ export default function BlockNoteDrawer({
 	setLoading,
 	open,
 	setOpen,
+	targetDate,
 	note,
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
+	const navigate = useNavigate();
 
 	// BlockNoteの初期化
 	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
@@ -99,6 +103,33 @@ export default function BlockNoteDrawer({
 		}
 	};
 
+	const deleteNote = async () => {
+		if (!note) return;
+
+		const isConfirmed = window.confirm("このノートを削除しますか？");
+		if (!isConfirmed || noteDrawerType !== ActionType.Edit) return;
+
+		setLoading(true);
+		try {
+			const res = await fetch(`/notes/${note.noteId}/delete`, {
+				method: "POST",
+			});
+			if (!res.ok) throw new ApiResponseError(res.status, "ノートの削除に失敗しました");
+
+			navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
+			toast.success("ノートを削除しました");
+		} catch (error) {
+			if (error instanceof ApiResponseError) {
+				toast.error(error.message);
+			} else {
+				console.error("Failed to delete note:", error);
+			}
+		} finally {
+			setLoading(false);
+			resetDrawer();
+		}
+	};
+
 	return (
 		<Drawer
 			open={open}
@@ -129,11 +160,16 @@ export default function BlockNoteDrawer({
 					<BlockNoteView editor={editor} className="py-4" />
 				</div>
 				<DrawerFooter className="flex items-center flex-row justify-between">
-					<Toggle variant="outline" onClick={() => setIsPrivate(!isPrivate)}>
-						{isPrivate
-							? accessLevelLabels[AccessLevel.Private]
-							: accessLevelLabels[AccessLevel.Public]}
-					</Toggle>
+					<div className="flex items-center gap-2">
+						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
+							{isPrivate ? <EyeOff /> : <Eye />}
+						</Button>
+						{noteDrawerType === ActionType.Edit && (
+							<Button variant="outline" type="button" onClick={deleteNote} disabled={loading}>
+								<Trash2 />
+							</Button>
+						)}
+					</div>
 					<div className="flex items-center gap-2">
 						<Button variant="default" onClick={handleSubmit} disabled={loading}>
 							{loading ? `${noteDrawerType}...` : noteDrawerType}
