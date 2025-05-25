@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
+import { useNavigate } from "react-router";
+import { format } from "date-fns";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -29,6 +31,7 @@ type BlockNoteDrawerProps = {
 	open: boolean;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	note: Note | null;
+	targetDate: Date;
 };
 
 export default function BlockNoteDrawer({
@@ -39,9 +42,11 @@ export default function BlockNoteDrawer({
 	setLoading,
 	open,
 	setOpen,
+	targetDate,
 	note,
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
+	const navigate = useNavigate();
 
 	// BlockNoteの初期化
 	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
@@ -98,6 +103,33 @@ export default function BlockNoteDrawer({
 		}
 	};
 
+	const deleteNote = async () => {
+		if (!note) return;
+
+		const isConfirmed = window.confirm("このノートを削除しますか？");
+		if (!isConfirmed || noteDrawerType !== ActionType.Edit) return;
+
+		setLoading(true);
+		try {
+			const res = await fetch(`/notes/${note.noteId}/delete`, {
+				method: "POST",
+			});
+			if (!res.ok) throw new ApiResponseError(res.status, "ノートの削除に失敗しました");
+
+			navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
+			toast.success("ノートを削除しました");
+		} catch (error) {
+			if (error instanceof ApiResponseError) {
+				toast.error(error.message);
+			} else {
+				console.error("Failed to delete note:", error);
+			}
+		} finally {
+			setLoading(false);
+			resetDrawer();
+		}
+	};
+
 	return (
 		<Drawer
 			open={open}
@@ -133,7 +165,7 @@ export default function BlockNoteDrawer({
 							{isPrivate ? <EyeOff /> : <Eye />}
 						</Button>
 						{noteDrawerType === ActionType.Edit && (
-							<Button variant="outline" type="button">
+							<Button variant="outline" type="button" onClick={deleteNote} disabled={loading}>
 								<Trash2 />
 							</Button>
 						)}

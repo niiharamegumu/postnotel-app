@@ -22,12 +22,13 @@ export default function WithPost() {
 	const [noteDrawerType, setNoteDrawerType] = useState<ActionType>(ActionType.Create); // noteのドロワーのタイプ
 	const [targetNote, setTargetNote] = useState<Note | null>(null);
 
+	const date = searchParams.get("date");
+	const targetDate = date ? new Date(date) : new Date();
+
 	const createNote = async (params: NoteApiRequest): Promise<void> => {
 		const { content, accessLevel } = params;
 		if (!content) return;
 
-		const date = searchParams.get("date");
-		const targetDate = date ? new Date(date) : new Date();
 		const body = JSON.stringify({
 			content,
 			accessLevel,
@@ -52,8 +53,6 @@ export default function WithPost() {
 		if (!content) return;
 		if (!targetNote) return;
 
-		const date = searchParams.get("date");
-		const targetDate = date ? new Date(date) : new Date();
 		const body = JSON.stringify({
 			content,
 			accessLevel,
@@ -123,6 +122,7 @@ export default function WithPost() {
 								open={isNoteDrawerOpen}
 								setOpen={setNoteDrawerOpen}
 								note={targetNote}
+								targetDate={targetDate}
 							/>
 						)}
 					</Suspense>
