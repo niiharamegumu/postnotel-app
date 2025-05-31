@@ -16,4 +16,7 @@ export const endpoints = {
 		update: (id: string) => `/v1/notes/${id}`,
 		delete: (id: string) => `/v1/notes/${id}`,
 	},
+	image: {
+		getUploadUrl: "/v1/image/upload-url",
+	},
 };

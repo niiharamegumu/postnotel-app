@@ -13,6 +13,10 @@ export default [
 		// delete
 		route("/:id/delete", "routes/notes/delete.tsx"),
 	]),
+	...prefix("image", [
+		// get upload URL
+		route("/get-upload-url", "routes/image/getUploadUrl.tsx"),
+	]),
 
 	...prefix("auth", [
 		// login

@@ -98,18 +98,20 @@ export default function Index() {
 											<li className="flex flex-col items-start">
 												{note.images?.length > 0 && (
 													<div className="mb-1">
-														{note.images.map((img, i) => (
-															<div
-																key={`${note.noteId}-img-${i}`}
-																className="rounded-xl overflow-hidden bg-secondary p-2"
-															>
-																<img
-																	src={img}
-																	alt={`ノート添付 #${i + 1}`}
-																	className="w-48 h-auto object-cover rounded-xl"
-																/>
-															</div>
-														))}
+														<div className="flex gap-1 flex-col">
+															{note.images.map((img, i) => (
+																<div
+																	key={`${note.noteId}-img-${i}`}
+																	className="rounded-xl overflow-hidden bg-secondary p-2"
+																>
+																	<img
+																		src={img}
+																		alt={`ノート添付 #${i + 1}`}
+																		className="w-48 h-auto object-cover rounded-xl"
+																	/>
+																</div>
+															))}
+														</div>
 													</div>
 												)}
 												<div className="cursor-pointer" onClick={() => onClickEditNote(note)}>
