@@ -86,6 +86,10 @@ export default function BlockNoteDrawer({
 		setLoading(true);
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
+			if (!markdown) {
+				toast.error("ノートの内容が空です。");
+				return;
+			}
 			const accessLevel = isPrivate ? AccessLevel.Private : AccessLevel.Public;
 			await onSubmit({
 				content: markdown,
