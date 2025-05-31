@@ -26,4 +26,5 @@ export type NoteDaysResponse = {
 export type NoteApiRequest = {
 	content: string;
 	accessLevel: AccessLevel;
+	images: string[];
 };
