@@ -56,6 +56,7 @@ export default function BlockNoteDrawer({
 	const [isPrivate, setIsPrivate] = useState(true);
 	const navigate = useNavigate();
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	// TODO: editのとき初期値が入らない問題を修正する
 	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
 	// BlockNoteの初期化
