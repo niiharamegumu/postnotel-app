@@ -49,7 +49,7 @@ export default function BlockNoteDrawer({
 	const navigate = useNavigate();
 
 	// BlockNoteの初期化
-	const { video, audio, file, ...customBlockSpecs } = defaultBlockSpecs;
+	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
 	const schema = BlockNoteSchema.create({
 		blockSpecs: {
 			...customBlockSpecs,
