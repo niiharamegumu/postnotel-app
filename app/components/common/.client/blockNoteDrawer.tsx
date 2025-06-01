@@ -28,6 +28,7 @@ type UploadUrlResponse = {
 	fileName: string;
 	method: string;
 	expires: number;
+	storageBaseUrl: string;
 };
 
 type BlockNoteDrawerProps = {
@@ -186,7 +187,7 @@ export default function BlockNoteDrawer({
 				throw new Error("Failed to upload image");
 			}
 
-			const imageUrl = `https://r2.postnotel-dev.megumu.me/temporary/${uploadData.fileName}`;
+			const imageUrl = `${uploadData.storageBaseUrl}/temporary/${uploadData.fileName}`;
 
 			// 画像URLを配列に追加
 			setUploadedImages((prev) => [...prev, imageUrl]);
