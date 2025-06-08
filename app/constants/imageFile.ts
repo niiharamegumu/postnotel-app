@@ -9,3 +9,9 @@ export enum AllowImageFileExtension {
 }
 export const allowedImageContentTypes: string[] = Object.values(AllowImageContentType);
 export const allowedImageFileExtensions: string[] = Object.values(AllowImageFileExtension);
+
+export const imageCompressionOptions = {
+	maxSizeMB: 0.2,
+	maxWidthOrHeight: 5000,
+	useWebWorker: true,
+};

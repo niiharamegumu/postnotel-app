@@ -21,6 +21,8 @@ import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
 import { useNavigate } from "react-router";
 import { format } from "date-fns";
+import imageCompression from "browser-image-compression";
+import { imageCompressionOptions } from "~/constants/imageFile";
 
 // TODO:型は移動させる
 type UploadUrlResponse = {
@@ -216,8 +218,7 @@ export default function BlockNoteDrawer({
 	};
 
 	// ファイル選択時の処理
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		// TODO: 画像の圧縮と拡張子変換を導入する
+	const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
 		if (!files || files.length === 0) return;
 
@@ -227,10 +228,17 @@ export default function BlockNoteDrawer({
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			if (!file.type.startsWith("image/")) {
-				toast.error(`${file.name}は画像ファイルではありません`);
+				toast.error("画像ファイルではありません");
 				continue;
 			}
-			validFiles.push(file);
+			// heicやheif形式の画像はブラウザで直接扱えないため、スキップ
+			if (file.type === "image/heic" || file.type === "image/heif") {
+				toast.error("HEIC/HEIF形式の画像には対応していません");
+				continue;
+			}
+			const compressedFile = await imageCompression(file, imageCompressionOptions);
+
+			validFiles.push(compressedFile);
 		}
 
 		// 有効なファイルがあればアップロード処理
