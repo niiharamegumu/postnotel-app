@@ -57,7 +57,6 @@ export default function BlockNoteDrawer({
 	const [isPrivate, setIsPrivate] = useState(true);
 	const navigate = useNavigate();
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	// TODO: editのとき初期値が入らない問題を修正する
 	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
 	// BlockNoteの初期化
@@ -75,6 +74,8 @@ export default function BlockNoteDrawer({
 					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
 					editor.replaceBlocks(editor.document, blocks);
 					setIsPrivate(note.accessLevel === AccessLevel.Private);
+
+					setUploadedImages(note.images);
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
