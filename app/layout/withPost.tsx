@@ -109,7 +109,7 @@ export default function WithPost() {
 					<FloatMenu userInfo={userInfo} />
 					<Suspense
 						fallback={
-							<Button variant="secondary">
+							<Button>
 								<Plus />
 							</Button>
 						}

@@ -260,7 +260,7 @@ export default function BlockNoteDrawer({
 			}}
 		>
 			<DrawerTrigger>
-				<Button variant="secondary">
+				<Button>
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
 							key={open ? "close" : "plus"}

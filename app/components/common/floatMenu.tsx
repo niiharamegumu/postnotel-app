@@ -23,7 +23,7 @@ export default function FloatMenu({ userInfo }: Props) {
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
 			<DropdownMenuTrigger className="outline-none">
-				<Button variant="secondary">
+				<Button>
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
 							key={open ? "close" : "menu"}
