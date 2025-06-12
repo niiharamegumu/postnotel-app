@@ -23,15 +23,7 @@ import { useNavigate } from "react-router";
 import { format } from "date-fns";
 import imageCompression from "browser-image-compression";
 import { imageCompressionOptions } from "~/constants/imageFile";
-
-// TODO:型は移動させる
-type UploadUrlResponse = {
-	url: string;
-	fileName: string;
-	method: string;
-	expires: number;
-	storageBaseUrl: string;
-};
+import type { UploadUrlResponse } from "~/features/image/types/image";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
