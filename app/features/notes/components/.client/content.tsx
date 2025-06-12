@@ -12,7 +12,11 @@ export default async function NoteContent({ note }: Props) {
 	const HTMLFromBlocks = await editor.blocksToFullHTML(blocks);
 
 	return (
-		<div className="bg-secondary text-primary rounded-xl px-4 py-2 mb-1 whitespace-pre-line">
+		<div
+			className={`rounded-xl px-4 py-2 mb-1 whitespace-pre-line ${
+				note.accessLevel === "private" ? "text-secondary bg-primary" : "bg-secondary text-primary"
+			}`}
+		>
 			{parse(HTMLFromBlocks)}
 		</div>
 	);

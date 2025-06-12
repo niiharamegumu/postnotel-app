@@ -102,7 +102,11 @@ export default function Index() {
 															{note.images.map((img, i) => (
 																<div
 																	key={`${note.noteId}-img-${i}`}
-																	className="rounded-xl overflow-hidden bg-secondary p-2 cursor-pointer"
+																	className={`rounded-xl overflow-hidden p-2 cursor-pointer ${
+																		note.accessLevel === AccessLevel.Private
+																			? "bg-primary"
+																			: "bg-secondary"
+																	}`}
 																	onClick={() => onClickEditNote(note)}
 																>
 																	<img
