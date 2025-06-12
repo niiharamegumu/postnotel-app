@@ -104,8 +104,8 @@ export default function Index() {
 																	key={`${note.noteId}-img-${i}`}
 																	className={`rounded-xl overflow-hidden p-2 cursor-pointer ${
 																		note.accessLevel === AccessLevel.Private
-																			? "bg-primary"
-																			: "bg-secondary"
+																			? "bg-secondary"
+																			: "bg-primary"
 																	}`}
 																	onClick={() => onClickEditNote(note)}
 																>
