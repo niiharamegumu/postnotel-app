@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
-import { is, ja } from "date-fns/locale";
+import { ja } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
