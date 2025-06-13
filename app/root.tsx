@@ -8,6 +8,8 @@ import {
 	useLoaderData,
 } from "react-router";
 
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/mantine/style.css";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { fetcher } from "./lib/fetcher";
