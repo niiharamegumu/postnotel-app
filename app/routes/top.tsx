@@ -47,6 +47,45 @@ export default function Top() {
 						<h3 className="text-lg font-semibold mb-2">Interests</h3>
 						<p>Coffee, solo camping, cooking</p>
 					</div>
+
+					<div>
+						<h3 className="text-lg font-semibold mb-2">Social</h3>
+						<ul>
+							<li>
+								Twitter :
+								<a
+									href="https://twitter.com/megumu_niihara"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="ml-1"
+								>
+									https://x.com/megumu_me
+								</a>
+							</li>
+							<li>
+								GitHub :
+								<a
+									href="https://github.com/niiharamegumu"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="ml-1"
+								>
+									https://github.com/niiharamegumu
+								</a>
+							</li>
+							<li>
+								My Old Personal Website :
+								<a
+									href="https://megumu.me/"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="ml-1"
+								>
+									https://megumu.me/
+								</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</section>
 		</div>
