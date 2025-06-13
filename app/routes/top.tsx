@@ -22,8 +22,8 @@ export default function Top() {
 				<div className="space-y-6">
 					<div>
 						<p>
-							Front-end engineer based in Miyazaki, Japan. Born and raised locally, exploring
-							sustainable ways to live and work in my hometown.
+							A web engineer based in Miyazaki City, Miyazaki Prefecture, Japan. Born and raised
+							locally, I’m seeking sustainable ways to live and work in my hometown.
 						</p>
 					</div>
 
