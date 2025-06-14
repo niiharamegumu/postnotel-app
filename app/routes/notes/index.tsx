@@ -9,6 +9,7 @@ import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
+import { Calendar1 } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -52,6 +53,12 @@ export default function Index() {
 		}
 	};
 
+	const handleTodayClick = () => {
+		const today = new Date();
+		setSelectedDate(today);
+		navigate(`?date=${format(today, "yyyy-MM-dd")}`);
+	};
+
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
 			<div className="flex flex-col md:flex-row md:gap-8">
@@ -77,6 +84,11 @@ export default function Index() {
 							day_today: "bg-none text-destructive",
 						}}
 					/>
+					<div className="flex align-center gap-2 mt-2">
+						<div className="cursor-pointer p-2 rounded bg-muted" onClick={handleTodayClick}>
+							<Calendar1 size={24} className="" />
+						</div>
+					</div>
 				</div>
 				<section className="w-full">
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
@@ -133,7 +145,7 @@ export default function Index() {
 									))}
 								</ul>
 							) : (
-								<p className="text-primary">ノートがありません。</p>
+								<p className="text-primary text-center mt-10">ノートがありません。</p>
 							)}
 						</>
 					)}
