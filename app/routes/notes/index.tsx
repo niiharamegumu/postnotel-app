@@ -10,6 +10,7 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Calendar1 } from "lucide-react";
+import type { UserInfo } from "~/types/user";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -29,7 +30,8 @@ export function meta() {
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function Index() {
-	const { onClickEditNote } = useOutletContext<{
+	const { userInfo, onClickEditNote } = useOutletContext<{
+		userInfo: UserInfo | null;
 		onClickEditNote: (note: Note) => void;
 	}>();
 
@@ -57,6 +59,12 @@ export default function Index() {
 		const today = new Date();
 		setSelectedDate(today);
 		navigate(`?date=${format(today, "yyyy-MM-dd")}`);
+	};
+
+	const handleEditNote = (note: Note) => {
+		// userInfoがない場合は何もしない
+		if (!userInfo) return;
+		onClickEditNote(note);
 	};
 
 	return (
@@ -119,7 +127,7 @@ export default function Index() {
 																			? "bg-secondary"
 																			: "bg-primary"
 																	}`}
-																	onClick={() => onClickEditNote(note)}
+																	onClick={() => handleEditNote(note)}
 																>
 																	<img
 																		src={img}
@@ -131,7 +139,10 @@ export default function Index() {
 														</div>
 													</div>
 												)}
-												<div className="cursor-pointer" onClick={() => onClickEditNote(note)}>
+												<div
+													className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere`}
+													onClick={() => handleEditNote(note)}
+												>
 													<NoteContent note={note} />
 												</div>
 												<span className="text-xs text-muted-foreground ml-2">
