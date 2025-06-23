@@ -5,7 +5,7 @@ import { ja } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
-import { fetchDays, fetchNotesByDate } from "~/features/notes/api/get";
+import { fetchDays, fetchNotes } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -18,7 +18,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const date = dateParam
 		? formatInTimeZone(new Date(dateParam), "Asia/Tokyo", "yyyy-MM-dd")
 		: formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-	const notes = await fetchNotesByDate(request, context, parseISO(date));
+	const notes = await fetchNotes(request, context, { date: parseISO(date) });
 	const noteDays = await fetchDays(request, context);
 	return { notes, date, noteDays };
 }
