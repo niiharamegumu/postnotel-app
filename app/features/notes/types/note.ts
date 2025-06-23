@@ -1,4 +1,5 @@
 import type { AccessLevel } from "~/constants/accessLevel";
+import type { NoteContentType } from "~/constants/noteContentType";
 
 export type Note = {
 	noteId: string;
@@ -9,6 +10,7 @@ export type Note = {
 		count: number;
 	};
 	images: string[];
+	contentType: NoteContentType;
 	createdAt: string;
 	updatedAt: string;
 };
