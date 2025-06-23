@@ -11,6 +11,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Calendar1 } from "lucide-react";
 import type { UserInfo } from "~/types/user";
+import { noteContentTypeLabels } from "~/constants/noteContentType";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -140,7 +141,7 @@ export default function Index() {
 													</div>
 												)}
 												<div
-													className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere`}
+													className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
 													onClick={() => handleEditNote(note)}
 												>
 													<NoteContent note={note} />
@@ -150,6 +151,7 @@ export default function Index() {
 													{note.accessLevel === AccessLevel.Private && (
 														<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
 													)}
+													<span className="ms-2">{noteContentTypeLabels[note.contentType]}</span>
 												</span>
 											</li>
 										</Suspense>
