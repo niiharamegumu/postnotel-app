@@ -14,7 +14,7 @@ export default async function NoteContent({ note }: Props) {
 
 	return (
 		<div
-			className={`rounded-xl px-4 py-2 mb-1 whitespace-pre-line ${
+			className={`px-4 py-2 whitespace-pre-line ${
 				note.accessLevel === AccessLevel.Private
 					? "bg-secondary text-primary"
 					: "bg-primary text-secondary"
