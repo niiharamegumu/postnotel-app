@@ -64,6 +64,7 @@ export default function Wines() {
 			}
 		} finally {
 			setLoading(false);
+			setOpen(false);
 			setUploadedImages([]);
 			if (fileInputRef.current) {
 				fileInputRef.current.value = "";
