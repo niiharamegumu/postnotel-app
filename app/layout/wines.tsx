@@ -179,89 +179,91 @@ export default function Wines() {
 				<Outlet context={userInfo} />
 				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center gap-2">
 					<FloatMenu userInfo={userInfo} />
-					<Suspense
-						fallback={
-							<Button className="w-[48px]">
-								<Bot />
-							</Button>
-						}
-					>
-						<Drawer
-							open={open}
-							onOpenChange={(isOpen) => {
-								setOpen(isOpen);
-							}}
-						>
-							<DrawerTrigger>
-								<Button>
-									<AnimatePresence mode="wait" initial={false}>
-										<motion.span
-											key={open ? "close" : "Bot"}
-											initial={{ opacity: 0, scale: 0.7 }}
-											animate={{ opacity: 1, scale: 1 }}
-											exit={{ opacity: 0, scale: 0.7 }}
-											transition={{ duration: 0.18, ease: "easeInOut" }}
-										>
-											{open ? <X /> : <Bot />}
-										</motion.span>
-									</AnimatePresence>
+					{userInfo && (
+						<Suspense
+							fallback={
+								<Button className="w-[48px]">
+									<Bot />
 								</Button>
-							</DrawerTrigger>
-							<DrawerContent className="w-full h-[50vh] px-4">
-								<div className="flex flex-nowrap gap-2 overflow-x-auto">
-									{uploadedImages.length > 0 && (
-										<div className="w-full p-2 flex justify-start flex-nowrap items-center gap-2 pt-6">
-											{uploadedImages.map((imageUrl, index) => (
-												<div key={imageUrl} className="rounded p-1 relative shrink-0">
-													<img
-														src={imageUrl}
-														alt={`Uploaded ${index + 1}`}
-														className="max-w-[50vw] max-h-[40vh] object-cover rounded md:max-h-[30vh]"
-													/>
-													<button
-														type="button"
-														onClick={() => removeImage(index)}
-														className="absolute -top-2 -right-2 text-secondary rounded-full p-1 bg-muted-foreground"
-														aria-label="Remove image"
-													>
-														<X size={30} />
-													</button>
-												</div>
-											))}
-										</div>
-									)}
-								</div>
+							}
+						>
+							<Drawer
+								open={open}
+								onOpenChange={(isOpen) => {
+									setOpen(isOpen);
+								}}
+							>
+								<DrawerTrigger>
+									<Button>
+										<AnimatePresence mode="wait" initial={false}>
+											<motion.span
+												key={open ? "close" : "Bot"}
+												initial={{ opacity: 0, scale: 0.7 }}
+												animate={{ opacity: 1, scale: 1 }}
+												exit={{ opacity: 0, scale: 0.7 }}
+												transition={{ duration: 0.18, ease: "easeInOut" }}
+											>
+												{open ? <X /> : <Bot />}
+											</motion.span>
+										</AnimatePresence>
+									</Button>
+								</DrawerTrigger>
+								<DrawerContent className="w-full h-[50vh] px-4">
+									<div className="flex flex-nowrap gap-2 overflow-x-auto">
+										{uploadedImages.length > 0 && (
+											<div className="w-full p-2 flex justify-start flex-nowrap items-center gap-2 pt-6">
+												{uploadedImages.map((imageUrl, index) => (
+													<div key={imageUrl} className="rounded p-1 relative shrink-0">
+														<img
+															src={imageUrl}
+															alt={`Uploaded ${index + 1}`}
+															className="max-w-[50vw] max-h-[40vh] object-cover rounded md:max-h-[30vh]"
+														/>
+														<button
+															type="button"
+															onClick={() => removeImage(index)}
+															className="absolute -top-2 -right-2 text-secondary rounded-full p-1 bg-muted-foreground"
+															aria-label="Remove image"
+														>
+															<X size={30} />
+														</button>
+													</div>
+												))}
+											</div>
+										)}
+									</div>
 
-								<DrawerFooter className="flex items-center flex-row justify-between">
-									<div className="flex items-center gap-2">
-										<Button
-											variant="outline"
-											type="button"
-											onClick={() => fileInputRef.current?.click()}
-										>
-											<ImagePlus />
-										</Button>
-										<input
-											ref={fileInputRef}
-											type="file"
-											accept="image/*"
-											multiple
-											onChange={handleFileChange}
-											className="hidden"
-										/>
-									</div>
-									<div className="flex items-center gap-2">
-										<Button variant="default" onClick={requestAI} disabled={loading}>
-											{loading ? "Request AI..." : "Request AI"}
-										</Button>
-										<DrawerClose>
-											<Button variant="outline">Cancel</Button>
-										</DrawerClose>
-									</div>
-								</DrawerFooter>
-							</DrawerContent>
-						</Drawer>
-					</Suspense>
+									<DrawerFooter className="flex items-center flex-row justify-between">
+										<div className="flex items-center gap-2">
+											<Button
+												variant="outline"
+												type="button"
+												onClick={() => fileInputRef.current?.click()}
+											>
+												<ImagePlus />
+											</Button>
+											<input
+												ref={fileInputRef}
+												type="file"
+												accept="image/*"
+												multiple
+												onChange={handleFileChange}
+												className="hidden"
+											/>
+										</div>
+										<div className="flex items-center gap-2">
+											<Button variant="default" onClick={requestAI} disabled={loading}>
+												{loading ? "Request AI..." : "Request AI"}
+											</Button>
+											<DrawerClose>
+												<Button variant="outline">Cancel</Button>
+											</DrawerClose>
+										</div>
+									</DrawerFooter>
+								</DrawerContent>
+							</Drawer>
+						</Suspense>
+					)}
 				</div>
 			</main>
 		</div>

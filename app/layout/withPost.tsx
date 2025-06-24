@@ -107,14 +107,14 @@ export default function WithPost() {
 				<Outlet context={contextValue} />
 				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center gap-2">
 					<FloatMenu userInfo={userInfo} />
-					<Suspense
-						fallback={
-							<Button>
-								<Plus />
-							</Button>
-						}
-					>
-						{userInfo && (
+					{userInfo && (
+						<Suspense
+							fallback={
+								<Button>
+									<Plus />
+								</Button>
+							}
+						>
 							<BlockNoteDrawer
 								onSubmit={noteDrawerHandler}
 								noteDrawerType={noteDrawerType}
@@ -126,8 +126,8 @@ export default function WithPost() {
 								note={targetNote}
 								targetDate={targetDate}
 							/>
-						)}
-					</Suspense>
+						</Suspense>
+					)}
 				</div>
 			</main>
 		</div>
