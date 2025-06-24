@@ -44,7 +44,7 @@ export default function Index() {
 								}
 							>
 								<li className="flex flex-col items-start">
-									<h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+									<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
 										{format(new Date(note.createdAt), "yyyy年MM月dd日 HH時mm分")}
 										<Link to={`/notes?date=${format(new Date(note.createdAt), "yyyy-MM-dd")}`}>
 											<SquareArrowOutUpRight />
