@@ -118,12 +118,12 @@ export default function Index() {
 										>
 											<li className="flex flex-col items-start">
 												{note.images?.length > 0 && (
-													<div className="mb-1">
-														<div className="flex gap-1 flex-wrap">
+													<div className="mb-2">
+														<div className="flex gap-2 flex-nowrap overflow-x-auto">
 															{note.images.map((img, i) => (
 																<div
 																	key={`${note.noteId}-img-${i}`}
-																	className={`rounded-xl overflow-hidden p-2 cursor-pointer ${
+																	className={`rounded-xl p-2 cursor-pointer shrink-0 ${
 																		note.accessLevel === AccessLevel.Private
 																			? "bg-secondary"
 																			: "bg-primary"
@@ -133,7 +133,7 @@ export default function Index() {
 																	<img
 																		src={img}
 																		alt={`ノート添付 #${i + 1}`}
-																		className="w-48 h-auto object-cover rounded-xl"
+																		className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
 																	/>
 																</div>
 															))}

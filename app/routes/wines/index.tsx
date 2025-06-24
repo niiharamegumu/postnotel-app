@@ -1,12 +1,13 @@
 import { fetchNotes } from "~/features/notes/api/get";
 import type { Route } from "./+types";
 import { lazy, Suspense } from "react";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import { format } from "date-fns";
 import { Skeleton } from "~/components/ui/skeleton";
 import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
+import { SquareArrowOutUpRight } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const targetContentType = NoteContentType.WineByAi; // ワインノートを取得するためのコンテンツタイプ
@@ -43,16 +44,19 @@ export default function Index() {
 								}
 							>
 								<li className="flex flex-col items-start">
-									<h2 className="text-xl font-semibold mb-2">
+									<h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
 										{format(new Date(note.createdAt), "yyyy年MM月dd日 HH時mm分")}
+										<Link to={`/notes?date=${format(new Date(note.createdAt), "yyyy-MM-dd")}`}>
+											<SquareArrowOutUpRight />
+										</Link>
 									</h2>
 									{note.images?.length > 0 && (
 										<div className="mb-3">
-											<div className="flex gap-2 flex-wrap">
+											<div className="flex gap-2 flex-nowrap overflow-x-auto">
 												{note.images.map((img, i) => (
 													<div
 														key={`${note.noteId}-img-${i}`}
-														className={`rounded-xl overflow-hidden p-2 ${
+														className={`rounded-xl overflow-hidden p-2 shrink-0 ${
 															note.accessLevel === AccessLevel.Private
 																? "bg-secondary"
 																: "bg-primary"
@@ -61,7 +65,7 @@ export default function Index() {
 														<img
 															src={img}
 															alt={`ワイン画像 #${i + 1}`}
-															className="w-48 h-auto object-cover rounded-xl"
+															className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
 														/>
 													</div>
 												))}
