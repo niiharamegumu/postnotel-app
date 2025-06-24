@@ -50,4 +50,7 @@ export const endpoints = {
 	image: {
 		getUploadUrl: "/v1/image/upload-url",
 	},
+	wines: {
+		recognize: "/v1/wine-labels/recognize",
+	},
 };

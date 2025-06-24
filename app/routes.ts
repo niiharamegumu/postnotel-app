@@ -1,10 +1,7 @@
 import { type RouteConfig, layout, prefix, route } from "@react-router/dev/routes";
 
 export default [
-	layout("layout/base.tsx", [
-		route("/", "routes/top.tsx"),
-		route("/wines", "routes/wines/index.tsx"),
-	]),
+	layout("layout/base.tsx", [route("/", "routes/top.tsx")]),
 
 	// notes
 	layout("layout/withPost.tsx", [...prefix("notes", [route("/", "routes/notes/index.tsx")])]),
@@ -22,6 +19,9 @@ export default [
 		// get upload URL
 		route("/get-upload-url", "routes/image/getUploadUrl.tsx"),
 	]),
+
+	layout("layout/wines.tsx", [route("/wines", "routes/wines/index.tsx")]),
+	...prefix("wines", [route("/recognize", "routes/wines/recognize.tsx")]),
 
 	...prefix("auth", [
 		// login
