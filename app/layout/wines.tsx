@@ -1,5 +1,5 @@
 import { Bot, ImagePlus, X } from "lucide-react";
-import { Suspense, useState, useRef } from "react";
+import { Suspense, useState } from "react";
 import { Outlet, useNavigate, useOutletContext } from "react-router";
 import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
@@ -12,22 +12,19 @@ import {
 } from "~/components/ui/drawer";
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserInfo } from "~/types/user";
-import imageCompression from "browser-image-compression";
-import { imageCompressionOptions } from "~/constants/imageFile";
 import { toast } from "sonner";
-import type { UploadUrlResponse } from "~/features/image/types/image";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { AccessLevel } from "~/constants/accessLevel";
 import { format } from "date-fns";
+import { useImageUpload } from "~/hooks/useImageUpload";
 
 export default function Wines() {
 	const navigate = useNavigate();
 
 	const userInfo = useOutletContext<UserInfo | null>();
-	const fileInputRef = useRef<HTMLInputElement>(null);
+	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } = useImageUpload();
 
 	const [open, setOpen] = useState(false);
-	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 
 	const requestAI = async (): Promise<void> => {
@@ -65,114 +62,10 @@ export default function Wines() {
 		} finally {
 			setLoading(false);
 			setOpen(false);
-			setUploadedImages([]);
-			if (fileInputRef.current) {
-				fileInputRef.current.value = "";
-			}
+			resetImages();
 		}
 	};
 
-	// 単一画像のアップロード処理
-	const handleSingleImageUpload = async (file: File) => {
-		try {
-			// ファイル名から拡張子を取得
-			const fileNameParts = file.name.split(".");
-			const ext =
-				fileNameParts.length > 1 ? fileNameParts[fileNameParts.length - 1].toLowerCase() : "";
-
-			// Content-Typeを取得
-			const contentType = file.type;
-
-			// 画像アップロードURL取得（URLパラメータを追加）
-			const getUrlResponse = await fetch(
-				`/image/get-upload-url?ext=${encodeURIComponent(ext)}&contentType=${encodeURIComponent(contentType)}`,
-			);
-
-			if (!getUrlResponse.ok) {
-				throw new Error("Failed to get upload URL");
-			}
-
-			const uploadData = (await getUrlResponse.json()) as UploadUrlResponse;
-
-			// 画像アップロード
-			const uploadResponse = await fetch(uploadData.url, {
-				method: uploadData.method,
-				headers: {
-					"Content-Type": file.type,
-				},
-				body: file,
-			});
-
-			if (!uploadResponse.ok) {
-				throw new Error("Failed to upload image");
-			}
-
-			const imageUrl = `${uploadData.storageBaseUrl}/temporary/${uploadData.fileName}`;
-
-			// 画像URLを配列に追加
-			setUploadedImages((prev) => [...prev, imageUrl]);
-
-			return imageUrl;
-		} catch (error) {
-			console.error("Image upload failed:", error);
-			toast.error("画像のアップロードに失敗しました");
-			return null;
-		}
-	};
-
-	// 複数画像アップロード処理
-	const handleImageUpload = async (files: File[]) => {
-		let successCount = 0;
-
-		for (const file of files) {
-			const result = await handleSingleImageUpload(file);
-			if (result) successCount++;
-		}
-
-		if (successCount > 0) {
-			toast.success(`${successCount}枚の画像をアップロードしました`);
-		}
-	};
-
-	// ファイル選択時の処理
-	const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
-		if (!files || files.length === 0) return;
-
-		const validFiles: File[] = [];
-
-		// 各ファイルを検証
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			if (!file.type.startsWith("image/")) {
-				toast.error("画像ファイルではありません");
-				continue;
-			}
-			// heicやheif形式の画像はブラウザで直接扱えないため、スキップ
-			if (file.type === "image/heic" || file.type === "image/heif") {
-				toast.error("HEIC/HEIF形式の画像には対応していません");
-				continue;
-			}
-			const compressedFile = await imageCompression(file, imageCompressionOptions);
-
-			validFiles.push(compressedFile);
-		}
-
-		// 有効なファイルがあればアップロード処理
-		if (validFiles.length > 0) {
-			handleImageUpload(validFiles);
-		}
-
-		// ファイル選択をリセット（同じファイルを再選択できるように）
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
-	};
-
-	// 特定の画像を削除する関数
-	const removeImage = (index: number) => {
-		setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-	};
 
 	return (
 		<div className="flex flex-col min-h-screen">

@@ -9,7 +9,7 @@ import {
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, ImagePlus, Plus, Trash2, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { AccessLevel } from "~/constants/accessLevel";
@@ -19,9 +19,7 @@ import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
 import { useNavigate } from "react-router";
 import { format } from "date-fns";
-import imageCompression from "browser-image-compression";
-import { imageCompressionOptions } from "~/constants/imageFile";
-import type { UploadUrlResponse } from "~/features/image/types/image";
+import { useImageUpload } from "~/hooks/useImageUpload";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -48,8 +46,7 @@ export default function BlockNoteDrawer({
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
 	const navigate = useNavigate();
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+	const { fileInputRef, uploadedImages, setUploadedImages, handleFileChange, removeImage, resetImages } = useImageUpload();
 
 	// BlockNoteの初期化
 	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -77,13 +74,13 @@ export default function BlockNoteDrawer({
 		if (open) {
 			initializeEditor();
 		}
-	}, [note, editor, noteDrawerType, open]);
+	}, [note, editor, noteDrawerType, open, setUploadedImages]);
 
 	const resetDrawer = () => {
 		setOpen(false);
 		setNoteDrawerType(ActionType.Create);
 		setIsPrivate(true);
-		setUploadedImages([]); // 空の配列にリセット
+		resetImages();
 		editor.replaceBlocks(editor.document, []);
 	};
 
@@ -145,107 +142,6 @@ export default function BlockNoteDrawer({
 		}
 	};
 
-	// 単一画像のアップロード処理
-	const handleSingleImageUpload = async (file: File) => {
-		try {
-			// ファイル名から拡張子を取得
-			const fileNameParts = file.name.split(".");
-			const ext =
-				fileNameParts.length > 1 ? fileNameParts[fileNameParts.length - 1].toLowerCase() : "";
-
-			// Content-Typeを取得
-			const contentType = file.type;
-
-			// 画像アップロードURL取得（URLパラメータを追加）
-			const getUrlResponse = await fetch(
-				`/image/get-upload-url?ext=${encodeURIComponent(ext)}&contentType=${encodeURIComponent(contentType)}`,
-			);
-
-			if (!getUrlResponse.ok) {
-				throw new Error("Failed to get upload URL");
-			}
-
-			const uploadData = (await getUrlResponse.json()) as UploadUrlResponse;
-
-			// 画像アップロード
-			const uploadResponse = await fetch(uploadData.url, {
-				method: uploadData.method,
-				headers: {
-					"Content-Type": file.type,
-				},
-				body: file,
-			});
-
-			if (!uploadResponse.ok) {
-				throw new Error("Failed to upload image");
-			}
-
-			const imageUrl = `${uploadData.storageBaseUrl}/temporary/${uploadData.fileName}`;
-
-			// 画像URLを配列に追加
-			setUploadedImages((prev) => [...prev, imageUrl]);
-
-			return imageUrl;
-		} catch (error) {
-			console.error("Image upload failed:", error);
-			toast.error("画像のアップロードに失敗しました");
-			return null;
-		}
-	};
-
-	// 複数画像アップロード処理
-	const handleImageUpload = async (files: File[]) => {
-		let successCount = 0;
-
-		for (const file of files) {
-			const result = await handleSingleImageUpload(file);
-			if (result) successCount++;
-		}
-
-		if (successCount > 0) {
-			toast.success(`${successCount}枚の画像をアップロードしました`);
-		}
-	};
-
-	// ファイル選択時の処理
-	const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
-		if (!files || files.length === 0) return;
-
-		const validFiles: File[] = [];
-
-		// 各ファイルを検証
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			if (!file.type.startsWith("image/")) {
-				toast.error("画像ファイルではありません");
-				continue;
-			}
-			// heicやheif形式の画像はブラウザで直接扱えないため、スキップ
-			if (file.type === "image/heic" || file.type === "image/heif") {
-				toast.error("HEIC/HEIF形式の画像には対応していません");
-				continue;
-			}
-			const compressedFile = await imageCompression(file, imageCompressionOptions);
-
-			validFiles.push(compressedFile);
-		}
-
-		// 有効なファイルがあればアップロード処理
-		if (validFiles.length > 0) {
-			handleImageUpload(validFiles);
-		}
-
-		// ファイル選択をリセット（同じファイルを再選択できるように）
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
-	};
-
-	// 特定の画像を削除する関数
-	const removeImage = (index: number) => {
-		setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-	};
 
 	return (
 		<Drawer
