@@ -17,17 +17,24 @@ import { ApiResponseError } from "~/api/error/apiResponseError";
 import { AccessLevel } from "~/constants/accessLevel";
 import { format } from "date-fns";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { StatusCodes } from "http-status-codes";
 
 export default function Wines() {
 	const navigate = useNavigate();
 
 	const userInfo = useOutletContext<UserInfo | null>();
-	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } = useImageUpload();
+	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } =
+		useImageUpload();
 
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 
 	const requestAI = async (): Promise<void> => {
+		if (uploadedImages.length === 0) {
+			toast.error("画像を選択してください");
+			return;
+		}
+
 		setLoading(true);
 		try {
 			const noteDay = format(new Date(), "yyyy-MM-dd");
@@ -36,6 +43,11 @@ export default function Wines() {
 				const parts = url.split("/");
 				return parts[parts.length - 1];
 			});
+
+			if (imagesFileNames.some((name) => !name || name.trim() === "")) {
+				throw new Error("無効な画像ファイルが含まれています");
+			}
+
 			const body = JSON.stringify({
 				noteDay,
 				accessLevel,
@@ -44,19 +56,36 @@ export default function Wines() {
 
 			const res = await fetch("/wines/recognize", {
 				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
 				body,
 			});
+
 			if (!res.ok) {
-				throw new ApiResponseError(res.status, "処理に失敗しました");
+				const errorData = (await res.json().catch(() => ({}))) as {
+					error?: string;
+					details?: string;
+				};
+				let errorMessage = errorData.error || "処理に失敗しました";
+
+				if (errorData.details && res.status === StatusCodes.BAD_REQUEST) {
+					errorMessage += `: ${errorData.details}`;
+				}
+
+				throw new ApiResponseError(res.status, errorMessage);
 			}
 
 			navigate("/wines");
 			toast.success("ワインノートの作成をAIへリクエストしました");
 		} catch (error) {
+			console.error("ワインノートの作成に失敗:", error);
+
 			if (error instanceof ApiResponseError) {
 				toast.error(error.message);
+			} else if (error instanceof Error) {
+				toast.error(error.message);
 			} else {
-				console.error("ワインノートの作成に失敗:", error);
 				toast.error("ワインノートの作成に失敗しました");
 			}
 		} finally {
@@ -65,7 +94,6 @@ export default function Wines() {
 			resetImages();
 		}
 	};
-
 
 	return (
 		<div className="flex flex-col min-h-screen">
@@ -146,7 +174,11 @@ export default function Wines() {
 											/>
 										</div>
 										<div className="flex items-center gap-2">
-											<Button variant="default" onClick={requestAI} disabled={loading}>
+											<Button
+												variant="default"
+												onClick={requestAI}
+												disabled={loading || uploadedImages.length === 0}
+											>
 												{loading ? "Request AI..." : "Request AI"}
 											</Button>
 											<DrawerClose>
