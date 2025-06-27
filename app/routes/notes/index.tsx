@@ -9,7 +9,6 @@ import { fetchDays, fetchNotes } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
-import { Calendar1 } from "lucide-react";
 import type { UserInfo } from "~/types/user";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 
@@ -47,6 +46,7 @@ export default function Index() {
 	};
 
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
+	const [currentMonth, setCurrentMonth] = useState<Date>(new Date(date));
 
 	const handleSelect = (selected: Date | undefined) => {
 		if (selected) {
@@ -59,11 +59,11 @@ export default function Index() {
 	const handleTodayClick = () => {
 		const today = new Date();
 		setSelectedDate(today);
+		setCurrentMonth(today);
 		navigate(`?date=${format(today, "yyyy-MM-dd")}`);
 	};
 
 	const handleEditNote = (note: Note) => {
-		// userInfoがない場合は何もしない
 		if (!userInfo) return;
 		onClickEditNote(note);
 	};
@@ -76,22 +76,37 @@ export default function Index() {
 						mode="single"
 						selected={selectedDate}
 						onSelect={handleSelect}
+						month={currentMonth}
+						onMonthChange={setCurrentMonth}
 						locale={ja}
 						formatters={{
 							formatCaption: (month: Date) => format(month, "yyyy年M月", { locale: ja }),
+						}}
+						components={{
+							CaptionLabel: (props) => (
+								<span
+									{...props}
+									onClick={handleTodayClick}
+									className="cursor-pointer hover:text-primary"
+								>
+									{props.children}
+								</span>
+							),
 						}}
 						modifiers={{
 							hasNote: (date) => noteDays.some((d) => d === format(date, "yyyy-MM-dd")),
 							todayNotSelected: (date) => {
 								const today = new Date();
 								const isToday = format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
-								const isSelected = format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+								const isSelected =
+									format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
 								return isToday && !isSelected;
 							},
 						}}
 						modifiersClassNames={{
 							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
-							todayNotSelected: "[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
+							todayNotSelected:
+								"[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
 						}}
 						className="p-0"
 						classNames={{
@@ -103,11 +118,6 @@ export default function Index() {
 							selected: "[&>button]:bg-red-400 [&>button]:text-primary",
 						}}
 					/>
-					<div className="flex align-center gap-2 mt-2">
-						<div className="cursor-pointer p-2 rounded bg-muted" onClick={handleTodayClick}>
-							<Calendar1 size={24} className="" />
-						</div>
-					</div>
 				</div>
 				<section className="w-full">
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
