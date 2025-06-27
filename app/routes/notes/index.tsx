@@ -63,7 +63,6 @@ export default function Index() {
 	};
 
 	const handleEditNote = (note: Note) => {
-		// userInfoがない場合は何もしない
 		if (!userInfo) return;
 		onClickEditNote(note);
 	};
@@ -85,13 +84,15 @@ export default function Index() {
 							todayNotSelected: (date) => {
 								const today = new Date();
 								const isToday = format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
-								const isSelected = format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+								const isSelected =
+									format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
 								return isToday && !isSelected;
 							},
 						}}
 						modifiersClassNames={{
 							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
-							todayNotSelected: "[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
+							todayNotSelected:
+								"[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
 						}}
 						className="p-0"
 						classNames={{
