@@ -82,15 +82,25 @@ export default function Index() {
 						}}
 						modifiers={{
 							hasNote: (date) => noteDays.some((d) => d === format(date, "yyyy-MM-dd")),
+							todayNotSelected: (date) => {
+								const today = new Date();
+								const isToday = format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
+								const isSelected = format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+								return isToday && !isSelected;
+							},
 						}}
 						modifiersClassNames={{
-							hasNote: "bg-green-300 text-green-600",
+							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
+							todayNotSelected: "[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
 						}}
 						className="p-0"
 						classNames={{
-							head_row: "flex w-full justify-between",
-							row: "flex w-full justify-between",
-							day_today: "bg-none text-destructive",
+							month_grid: "w-full",
+							weekdays: "flex w-full justify-between",
+							weekday: "flex-1 text-center",
+							week: "flex w-full justify-between",
+							day: "flex-1 flex items-center justify-center",
+							selected: "[&>button]:bg-red-400 [&>button]:text-primary",
 						}}
 					/>
 					<div className="flex align-center gap-2 mt-2">
