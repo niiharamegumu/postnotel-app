@@ -16,7 +16,7 @@ function validateBody(body: unknown): body is Body {
 	}
 
 	const candidate = body as Record<string, unknown>;
-	
+
 	return (
 		typeof candidate.accessLevel === "string" &&
 		typeof candidate.noteDay === "string" &&
@@ -29,17 +29,17 @@ function validateBody(body: unknown): body is Body {
 export async function action({ request, context }: ActionFunctionArgs): Promise<Response> {
 	try {
 		const body = await request.json();
-		
+
 		if (!validateBody(body)) {
 			return new Response(
-				JSON.stringify({ 
-					error: "Invalid request body", 
-					details: "Required fields: accessLevel, noteDay, images (non-empty array)" 
+				JSON.stringify({
+					error: "Invalid request body",
+					details: "Required fields: accessLevel, noteDay, images (non-empty array)",
 				}),
-				{ 
+				{
 					status: StatusCodes.BAD_REQUEST,
-					headers: { "Content-Type": "application/json" }
-				}
+					headers: { "Content-Type": "application/json" },
+				},
 			);
 		}
 
@@ -54,35 +54,36 @@ export async function action({ request, context }: ActionFunctionArgs): Promise<
 		if (!res.ok) {
 			const errorText = await res.text();
 			console.error(`API error: ${res.status} - ${errorText}`);
-			
+
 			return new Response(
 				JSON.stringify({
 					error: "Failed to process wine recognition",
 					status: res.status,
-					details: res.status >= StatusCodes.INTERNAL_SERVER_ERROR ? "Internal server error" : errorText
+					details:
+						res.status >= StatusCodes.INTERNAL_SERVER_ERROR ? "Internal server error" : errorText,
 				}),
 				{
 					status: res.status,
-					headers: { "Content-Type": "application/json" }
-				}
+					headers: { "Content-Type": "application/json" },
+				},
 			);
 		}
 
 		return res;
 	} catch (error) {
 		console.error("Failed to recognize wine label:", error);
-		
+
 		const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-		
+
 		return new Response(
 			JSON.stringify({
 				error: "Failed to recognize wine label",
-				details: errorMessage
+				details: errorMessage,
 			}),
-			{ 
+			{
 				status: StatusCodes.INTERNAL_SERVER_ERROR,
-				headers: { "Content-Type": "application/json" }
-			}
+				headers: { "Content-Type": "application/json" },
+			},
 		);
 	}
 }

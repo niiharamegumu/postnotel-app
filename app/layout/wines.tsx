@@ -23,7 +23,8 @@ export default function Wines() {
 	const navigate = useNavigate();
 
 	const userInfo = useOutletContext<UserInfo | null>();
-	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } = useImageUpload();
+	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } =
+		useImageUpload();
 
 	const [open, setOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -42,8 +43,8 @@ export default function Wines() {
 				const parts = url.split("/");
 				return parts[parts.length - 1];
 			});
-			
-			if (imagesFileNames.some(name => !name || name.trim() === "")) {
+
+			if (imagesFileNames.some((name) => !name || name.trim() === "")) {
 				throw new Error("無効な画像ファイルが含まれています");
 			}
 
@@ -62,13 +63,16 @@ export default function Wines() {
 			});
 
 			if (!res.ok) {
-				const errorData = await res.json().catch(() => ({})) as { error?: string; details?: string };
+				const errorData = (await res.json().catch(() => ({}))) as {
+					error?: string;
+					details?: string;
+				};
 				let errorMessage = errorData.error || "処理に失敗しました";
-				
+
 				if (errorData.details && res.status === StatusCodes.BAD_REQUEST) {
 					errorMessage += `: ${errorData.details}`;
 				}
-				
+
 				throw new ApiResponseError(res.status, errorMessage);
 			}
 
@@ -76,7 +80,7 @@ export default function Wines() {
 			toast.success("ワインノートの作成をAIへリクエストしました");
 		} catch (error) {
 			console.error("ワインノートの作成に失敗:", error);
-			
+
 			if (error instanceof ApiResponseError) {
 				toast.error(error.message);
 			} else if (error instanceof Error) {
@@ -90,7 +94,6 @@ export default function Wines() {
 			resetImages();
 		}
 	};
-
 
 	return (
 		<div className="flex flex-col min-h-screen">
@@ -171,9 +174,9 @@ export default function Wines() {
 											/>
 										</div>
 										<div className="flex items-center gap-2">
-											<Button 
-												variant="default" 
-												onClick={requestAI} 
+											<Button
+												variant="default"
+												onClick={requestAI}
 												disabled={loading || uploadedImages.length === 0}
 											>
 												{loading ? "Request AI..." : "Request AI"}
