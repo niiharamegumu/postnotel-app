@@ -10,6 +10,11 @@ export type GetNotesParams = {
 	offset?: number;
 };
 
+export type GetNoteDaysParams = {
+	startDate: Date;
+	endDate: Date;
+};
+
 export const endpoints = {
 	auth: {
 		login: "/v1/auth/google/login",
@@ -42,7 +47,13 @@ export const endpoints = {
 
 			return path;
 		},
-		days: "/v1/notes/days",
+		days: (params: GetNoteDaysParams) => {
+			const queryParams = [
+				`startDate=${format(params.startDate, "yyyy-MM-dd")}`,
+				`endDate=${format(params.endDate, "yyyy-MM-dd")}`
+			];
+			return `/v1/notes/days?${queryParams.join("&")}`;
+		},
 		create: "/v1/notes",
 		update: (id: string) => `/v1/notes/${id}`,
 		delete: (id: string) => `/v1/notes/${id}`,
