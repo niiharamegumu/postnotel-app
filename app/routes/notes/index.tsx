@@ -62,6 +62,7 @@ export default function Index() {
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
 	const [currentMonth, setCurrentMonth] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
+	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 
 	const handleSelect = (selected: Date | undefined) => {
 		if (selected) {
@@ -84,16 +85,17 @@ export default function Index() {
 	};
 
 	const handleSwipe = (direction: "left" | "right") => {
-		const newDate = direction === "left" ? getNextDate(selectedDate) : getPreviousDate(selectedDate);
-		
+		const newDate =
+			direction === "left" ? getNextDate(selectedDate) : getPreviousDate(selectedDate);
+
 		const today = new Date();
 		const maxFutureDate = addDays(today, 365);
 		const minPastDate = subDays(today, 365 * 2);
-		
+
 		if (newDate > maxFutureDate || newDate < minPastDate) {
 			return;
 		}
-		
+
 		setSelectedDate(newDate);
 		setCurrentMonth(newDate);
 		navigateToDate(newDate, navigate);
@@ -150,41 +152,58 @@ export default function Index() {
 						}}
 					/>
 				</div>
-				<motion.section 
+				<motion.section
 					className="w-full min-h-screen md:min-h-[80vh]"
 					initial={{ x: 0, opacity: 1 }}
 					animate={{ x: 0, opacity: 1 }}
-					transition={{ 
-						type: "spring", 
-						stiffness: 300, 
-						damping: 30 
+					transition={{
+						type: "spring",
+						stiffness: 300,
+						damping: 30,
 					}}
-					onPanStart={() => setIsSwipeActive(true)}
+					onPanStart={(event, info) => {
+						setSwipeDirection(null);
+						setIsSwipeActive(false);
+					}}
 					onPan={(event, info) => {
 						const horizontalDistance = Math.abs(info.offset.x);
 						const verticalDistance = Math.abs(info.offset.y);
-						
-						if (verticalDistance > horizontalDistance * 1.5) {
-							return;
+
+						// スワイプ方向を決定（一度決まったら変更しない）
+						if (swipeDirection === null && (horizontalDistance > 20 || verticalDistance > 20)) {
+							if (horizontalDistance > verticalDistance * 1.2) {
+								setSwipeDirection("horizontal");
+								setIsSwipeActive(true);
+							} else {
+								setSwipeDirection("vertical");
+								setIsSwipeActive(false);
+							}
 						}
-						
-						if (horizontalDistance > 20) {
+
+						// 水平スワイプの場合のみpreventDefault
+						if (swipeDirection === "horizontal" && horizontalDistance > 30) {
 							event.preventDefault();
 						}
 					}}
 					onPanEnd={(event, info) => {
-						setIsSwipeActive(false);
-						const swipeThreshold = 50;
-						if (Math.abs(info.offset.x) > swipeThreshold && Math.abs(info.offset.y) < 100) {
+						const horizontalDistance = Math.abs(info.offset.x);
+						const swipeThreshold = 80;
+
+						// 水平スワイプかつ閾値を超えた場合のみ日付変更
+						if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
 							const direction = info.offset.x > 0 ? "right" : "left";
 							handleSwipe(direction);
 						}
+
+						// 状態をリセット
+						setIsSwipeActive(false);
+						setSwipeDirection(null);
 					}}
 					drag={false}
 					style={{
 						filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
 						transition: "filter 0.2s ease",
-						touchAction: "pan-y pinch-zoom"
+						touchAction: "pan-y pinch-zoom",
 					}}
 				>
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
