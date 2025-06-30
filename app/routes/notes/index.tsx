@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO, addDays, subDays } from "date-fns";
+import { format, parseISO, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -21,7 +21,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		? formatInTimeZone(new Date(dateParam), "Asia/Tokyo", "yyyy-MM-dd")
 		: formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
 	const notes = await fetchNotes(request, context, { date: parseISO(date) });
-	const noteDays = await fetchDays(request, context);
+
+	const selectedDate = parseISO(date);
+	const startDate = startOfMonth(selectedDate);
+	const endDate = endOfMonth(selectedDate);
+
+	const noteDays = await fetchDays(request, context, { startDate, endDate });
 	return { notes, date, noteDays };
 }
 
@@ -80,6 +85,13 @@ export default function Index() {
 		navigate(`?date=${format(today, "yyyy-MM-dd")}`);
 	};
 
+	const handleMonthChange = (month: Date) => {
+		setCurrentMonth(month);
+		const firstDayOfMonth = startOfMonth(month);
+		setSelectedDate(firstDayOfMonth);
+		navigate(`?date=${format(firstDayOfMonth, "yyyy-MM-dd")}`);
+	};
+
 	const handleEditNote = (note: Note) => {
 		if (!userInfo) return;
 		onClickEditNote(note);
@@ -111,7 +123,7 @@ export default function Index() {
 						selected={selectedDate}
 						onSelect={handleSelect}
 						month={currentMonth}
-						onMonthChange={setCurrentMonth}
+						onMonthChange={handleMonthChange}
 						locale={ja}
 						formatters={{
 							formatCaption: (month: Date) => format(month, "yyyy年M月", { locale: ja }),
