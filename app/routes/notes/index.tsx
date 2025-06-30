@@ -12,6 +12,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import type { UserInfo } from "~/types/user";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion } from "framer-motion";
+import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -48,7 +49,7 @@ export default function Index() {
 		userInfo: UserInfo | null;
 		onClickEditNote: (note: Note) => void;
 	}>();
-
+	usePreventBackNavigation();
 	const navigate = useNavigate();
 	const navigation = useNavigation();
 	const isLoading = navigation.state === "loading";
@@ -161,7 +162,7 @@ export default function Index() {
 						stiffness: 300,
 						damping: 30,
 					}}
-					onPanStart={(event, info) => {
+					onPanStart={() => {
 						setSwipeDirection(null);
 						setIsSwipeActive(false);
 					}}
@@ -185,7 +186,7 @@ export default function Index() {
 							event.preventDefault();
 						}
 					}}
-					onPanEnd={(event, info) => {
+					onPanEnd={(_, info) => {
 						const horizontalDistance = Math.abs(info.offset.x);
 						const swipeThreshold = 80;
 
