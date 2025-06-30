@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { Calendar } from "~/components/ui/calendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -11,6 +11,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { UserInfo } from "~/types/user";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
+import { motion } from "framer-motion";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -28,6 +29,19 @@ export function meta() {
 }
 
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
+
+const navigateToDate = (date: Date, navigate: (path: string) => void) => {
+	const dateStr = format(date, "yyyy-MM-dd");
+	navigate(`?date=${dateStr}`);
+};
+
+const getPreviousDate = (currentDate: Date): Date => {
+	return subDays(currentDate, 1);
+};
+
+const getNextDate = (currentDate: Date): Date => {
+	return addDays(currentDate, 1);
+};
 
 export default function Index() {
 	const { userInfo, onClickEditNote } = useOutletContext<{
@@ -47,6 +61,7 @@ export default function Index() {
 
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
 	const [currentMonth, setCurrentMonth] = useState<Date>(new Date(date));
+	const [isSwipeActive, setIsSwipeActive] = useState(false);
 
 	const handleSelect = (selected: Date | undefined) => {
 		if (selected) {
@@ -66,6 +81,22 @@ export default function Index() {
 	const handleEditNote = (note: Note) => {
 		if (!userInfo) return;
 		onClickEditNote(note);
+	};
+
+	const handleSwipe = (direction: "left" | "right") => {
+		const newDate = direction === "left" ? getNextDate(selectedDate) : getPreviousDate(selectedDate);
+		
+		const today = new Date();
+		const maxFutureDate = addDays(today, 365);
+		const minPastDate = subDays(today, 365 * 2);
+		
+		if (newDate > maxFutureDate || newDate < minPastDate) {
+			return;
+		}
+		
+		setSelectedDate(newDate);
+		setCurrentMonth(newDate);
+		navigateToDate(newDate, navigate);
 	};
 
 	return (
@@ -119,7 +150,43 @@ export default function Index() {
 						}}
 					/>
 				</div>
-				<section className="w-full">
+				<motion.section 
+					className="w-full min-h-screen md:min-h-[80vh]"
+					initial={{ x: 0, opacity: 1 }}
+					animate={{ x: 0, opacity: 1 }}
+					transition={{ 
+						type: "spring", 
+						stiffness: 300, 
+						damping: 30 
+					}}
+					onPanStart={() => setIsSwipeActive(true)}
+					onPan={(event, info) => {
+						const horizontalDistance = Math.abs(info.offset.x);
+						const verticalDistance = Math.abs(info.offset.y);
+						
+						if (verticalDistance > horizontalDistance * 1.5) {
+							return;
+						}
+						
+						if (horizontalDistance > 20) {
+							event.preventDefault();
+						}
+					}}
+					onPanEnd={(event, info) => {
+						setIsSwipeActive(false);
+						const swipeThreshold = 50;
+						if (Math.abs(info.offset.x) > swipeThreshold && Math.abs(info.offset.y) < 100) {
+							const direction = info.offset.x > 0 ? "right" : "left";
+							handleSwipe(direction);
+						}
+					}}
+					drag={false}
+					style={{
+						filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
+						transition: "filter 0.2s ease",
+						touchAction: "pan-y pinch-zoom"
+					}}
+				>
 					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
@@ -178,11 +245,13 @@ export default function Index() {
 									))}
 								</ul>
 							) : (
-								<p className="text-primary text-center mt-10">ノートがありません。</p>
+								<div className="flex items-center justify-center min-h-[60vh]">
+									<p className="text-primary text-center">ノートがありません。</p>
+								</div>
 							)}
 						</>
 					)}
-				</section>
+				</motion.section>
 			</div>
 		</Suspense>
 	);
