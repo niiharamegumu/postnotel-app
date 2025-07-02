@@ -104,7 +104,7 @@ export default function Wines() {
 					{userInfo && (
 						<Suspense
 							fallback={
-								<Button className="w-[48px]">
+								<Button className="border-solid border-secondary border-1">
 									<Bot />
 								</Button>
 							}
@@ -116,7 +116,7 @@ export default function Wines() {
 								}}
 							>
 								<DrawerTrigger>
-									<Button>
+									<Button className="border-solid border-secondary border-1">
 										<AnimatePresence mode="wait" initial={false}>
 											<motion.span
 												key={open ? "close" : "Bot"}

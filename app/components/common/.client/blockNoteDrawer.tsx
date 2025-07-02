@@ -46,7 +46,14 @@ export default function BlockNoteDrawer({
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
 	const navigate = useNavigate();
-	const { fileInputRef, uploadedImages, setUploadedImages, handleFileChange, removeImage, resetImages } = useImageUpload();
+	const {
+		fileInputRef,
+		uploadedImages,
+		setUploadedImages,
+		handleFileChange,
+		removeImage,
+		resetImages,
+	} = useImageUpload();
 
 	// BlockNoteの初期化
 	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -142,7 +149,6 @@ export default function BlockNoteDrawer({
 		}
 	};
 
-
 	return (
 		<Drawer
 			open={open}
@@ -154,7 +160,7 @@ export default function BlockNoteDrawer({
 			}}
 		>
 			<DrawerTrigger>
-				<Button>
+				<Button className="border-solid border-secondary border-1">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
 							key={open ? "close" : "plus"}
