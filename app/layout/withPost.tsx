@@ -110,7 +110,7 @@ export default function WithPost() {
 					{userInfo && (
 						<Suspense
 							fallback={
-								<Button>
+								<Button className="border-solid border-secondary border-1">
 									<Plus />
 								</Button>
 							}

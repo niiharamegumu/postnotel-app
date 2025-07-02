@@ -1,0 +1,69 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Development Commands
+
+- **Start development server**: `npm run dev` (available at http://localhost:5173)
+- **Build for production**: `npm run build`
+- **Type checking**: `npm run typecheck` (includes wrangler types generation and react-router typegen)
+- **Deploy**: `npm run deploy` (builds and deploys to Cloudflare Workers)
+- **Preview build**: `npm run preview`
+- **Start with Wrangler**: `npm run start` (for Cloudflare Workers development)
+
+## Code Formatting and Linting
+
+This project uses Biome for code formatting and linting:
+- **Indentation**: Tabs (not spaces)
+- **Line width**: 100 characters
+- **Quote style**: Double quotes for JavaScript
+- **Auto-organize imports**: Enabled
+- Run Biome via your editor or `npx @biomejs/biome` commands
+
+## TypeScript Guidelines
+- In TypeScript, avoid using `any` or `unknown` types whenever possible.
+- In TypeScript, do not use `class` unless absolutely necessary.
+
+## Architecture Overview
+
+This is a **React Router v7** application deployed on **Cloudflare Workers** with the following architecture:
+
+### Tech Stack
+- **Framework**: React Router v7 with SSR
+- **Runtime**: Cloudflare Workers
+- **Styling**: TailwindCSS v4
+- **Rich Text Editor**: BlockNote
+- **Form Handling**: React Hook Form with Zod validation
+- **UI Components**: Radix UI primitives with custom styling
+
+### Project Structure
+- **`app/routes/`**: File-based routing with layouts
+- **`app/features/`**: Feature-based organization (auth, notes, image, etc.)
+- **`app/components/`**: Reusable UI components (common/, ui/)
+- **`app/lib/`**: Utility functions and shared logic
+- **`app/constants/`**: Application constants and enums
+- **`workers/app.ts`**: Cloudflare Workers entry point
+
+### Key Features
+- **Notes Management**: Create, read, update, delete notes with rich text editing
+- **Authentication**: Google OAuth integration
+- **Image Upload**: Image handling with compression
+- **Wine Recognition**: Wine-related functionality
+- **Dark Theme**: Default dark mode styling
+
+### Routing Configuration
+Routes are defined in `app/routes.ts` using React Router's configuration API with:
+- **Base layout** (`layout/base.tsx`) for the home page
+- **WithPost layout** (`layout/withPost.tsx`) for notes listing
+- **Wines layout** (`layout/wines.tsx`) for wine-related pages
+- **Feature-based route prefixes** (notes/, auth/, image/, wines/)
+
+### Data Fetching
+- Uses custom `fetcher` utility (`app/lib/fetcher.ts`) for API calls
+- Server-side data loading via React Router loaders
+- User authentication state managed globally via root loader
+
+### Deployment
+- Deploys to Cloudflare Workers using Wrangler
+- Configuration in `wrangler.toml`
+- Use `npm run deploy` for production deployments
