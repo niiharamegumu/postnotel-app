@@ -64,4 +64,10 @@ export const endpoints = {
 	wines: {
 		recognize: "/v1/wine-labels/recognize",
 	},
+	tags: {
+		list: "/v1/tags",
+		create: "/v1/tags",
+		update: (id: string) => `/v1/tags/${id}`,
+		delete: (id: string) => `/v1/tags/${id}`,
+	},
 };
