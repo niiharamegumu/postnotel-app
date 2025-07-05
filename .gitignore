@@ -11,3 +11,5 @@
 .wrangler
 .dev.vars*
 
+# Issue配下
+/issue/
