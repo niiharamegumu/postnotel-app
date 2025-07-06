@@ -10,7 +10,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, ImagePlus, Plus, Trash2, X } from "lucide-react";
+import { Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { AccessLevel } from "~/constants/accessLevel";
 import { toast } from "sonner";
@@ -20,6 +20,10 @@ import { ActionType } from "~/features/notes/constants/actionType";
 import { useNavigate } from "react-router";
 import { format } from "date-fns";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { TagSelector } from "~/features/tags/components/TagSelector";
+import { useTags } from "~/features/tags/hooks/useTags";
+import type { Tag } from "~/features/tags/types/tag";
+import { TagBadge } from "~/features/tags/components/TagBadge";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -45,6 +49,7 @@ export default function BlockNoteDrawer({
 	note,
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
+	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 	const navigate = useNavigate();
 	const {
 		fileInputRef,
@@ -54,6 +59,7 @@ export default function BlockNoteDrawer({
 		removeImage,
 		resetImages,
 	} = useImageUpload();
+	const { tags, createTag, loading: tagsLoading } = useTags();
 
 	// BlockNoteの初期化
 	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -72,6 +78,11 @@ export default function BlockNoteDrawer({
 					setIsPrivate(note.accessLevel === AccessLevel.Private);
 
 					setUploadedImages(note.images);
+
+					// タグの設定
+					if (note.tags?.tags) {
+						setSelectedTags(note.tags.tags);
+					}
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
@@ -87,6 +98,7 @@ export default function BlockNoteDrawer({
 		setOpen(false);
 		setNoteDrawerType(ActionType.Create);
 		setIsPrivate(true);
+		setSelectedTags([]);
 		resetImages();
 		editor.replaceBlocks(editor.document, []);
 	};
@@ -109,6 +121,7 @@ export default function BlockNoteDrawer({
 				content: markdown,
 				accessLevel,
 				images: imagesFileNames,
+				tagIds: selectedTags.map((tag) => tag.id),
 			});
 		} catch (e) {
 			if (e instanceof ApiResponseError) {
@@ -147,6 +160,10 @@ export default function BlockNoteDrawer({
 			setLoading(false);
 			resetDrawer();
 		}
+	};
+
+	const onTagRemove = (tagId: string) => {
+		setSelectedTags((prev) => prev.filter((tag) => tag.id !== tagId));
 	};
 
 	return (
@@ -197,6 +214,28 @@ export default function BlockNoteDrawer({
 					</div>
 				)}
 				<div className="h-full overflow-y-auto">
+					<TagSelector
+						availableTags={tags}
+						selectedTags={selectedTags}
+						onTagSelect={(tag) =>
+							setSelectedTags((prev) => {
+								// 重複チェック
+								if (prev.some((t) => t.id === tag.id)) {
+									return prev;
+								}
+								return [...prev, tag];
+							})
+						}
+						onTagRemove={onTagRemove}
+						onCreateTag={createTag}
+					/>
+					{selectedTags.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{selectedTags.map((tag) => (
+								<TagBadge key={tag.id} tag={tag} onRemove={onTagRemove} />
+							))}
+						</div>
+					)}
 					<BlockNoteView editor={editor} className="py-4" />
 				</div>
 				<DrawerFooter className="flex items-center flex-row justify-between">
@@ -215,6 +254,9 @@ export default function BlockNoteDrawer({
 							onChange={handleFileChange}
 							className="hidden"
 						/>
+						<Button variant="outline" type="button">
+							<Tags />
+						</Button>
 						{noteDrawerType === ActionType.Edit && (
 							<Button variant="outline" type="button" onClick={deleteNote} disabled={loading}>
 								<Trash2 />
