@@ -225,7 +225,7 @@ export default function BlockNoteDrawer({
 					)}
 					<BlockNoteView editor={editor} className="py-4" />
 				</div>
-				<DrawerFooter className="flex items-center flex-row justify-between">
+				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
 							{isPrivate ? <EyeOff /> : <Eye />}
@@ -256,21 +256,23 @@ export default function BlockNoteDrawer({
 										))}
 									</div>
 								)}
-								<TagSelector
-									availableTags={tags}
-									selectedTags={selectedTags}
-									onTagSelect={(tag) =>
-										setSelectedTags((prev) => {
-											// 重複チェック
-											if (prev.some((t) => t.id === tag.id)) {
-												return prev;
-											}
-											return [...prev, tag];
-										})
-									}
-									onTagRemove={onTagRemove}
-									onCreateTag={createTag}
-								/>
+								<div className="overflow-y-auto">
+									<TagSelector
+										availableTags={tags}
+										selectedTags={selectedTags}
+										onTagSelect={(tag) =>
+											setSelectedTags((prev) => {
+												// 重複チェック
+												if (prev.some((t) => t.id === tag.id)) {
+													return prev;
+												}
+												return [...prev, tag];
+											})
+										}
+										onTagRemove={onTagRemove}
+										onCreateTag={createTag}
+									/>
+								</div>
 								<DrawerFooter className="px-0 py-2">
 									<DrawerClose asChild>
 										<Button variant="outline">Close</Button>
