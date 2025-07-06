@@ -273,10 +273,10 @@ export default function Index() {
 													)}
 													<div>{noteContentTypeLabels[note.contentType]}</div>
 													{note.tags && note.tags.tags.length > 0 && (
-														<div className="flex items-center gap-2 ml-2">
+														<div className="flex items-center gap-2">
 															{note.tags.tags.map((tag) => (
 																<div key={tag.id} className="flex gap-1 items-center">
-																	<Tag size={12} />
+																	<Tag size={12} color="#75b1ff" />
 																	{tag.name}
 																</div>
 															))}
