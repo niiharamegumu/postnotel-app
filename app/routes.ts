@@ -23,6 +23,12 @@ export default [
 	layout("layout/wines.tsx", [route("/wines", "routes/wines/index.tsx")]),
 	...prefix("wines", [route("/recognize", "routes/wines/recognize.tsx")]),
 
+	// tags
+	...prefix("tags", [
+		route("/", "routes/tags/index.tsx"),
+		route("/create", "routes/tags/create.tsx"),
+	]),
+
 	...prefix("auth", [
 		// login
 		route("/login", "routes/auth/login.tsx"),
