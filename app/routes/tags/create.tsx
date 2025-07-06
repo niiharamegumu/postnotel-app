@@ -23,9 +23,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 		}
 
 		const newTag: Tag = await response.json();
-		return { success: true, tag: newTag };
+		return newTag;
 	} catch (error) {
 		console.error("Create tag error:", error);
-		return { success: false, error: "タグの作成に失敗しました" };
+		return null;
 	}
 }
