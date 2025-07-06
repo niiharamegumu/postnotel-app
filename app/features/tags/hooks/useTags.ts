@@ -56,10 +56,10 @@ export function useTags() {
 				throw new Error("タグの作成に失敗しました");
 			}
 
-			const result = (await response.json()) as Tag;
-			if (result) {
-				setTags((prev) => [...prev, result]);
-				return result;
+			const tag = (await response.json()) as Tag;
+			if (tag) {
+				setTags((prev) => [...prev, tag]);
+				return tag;
 			}
 			throw new Error("タグの作成に失敗しました");
 		} catch (err) {
