@@ -50,6 +50,7 @@ export default function BlockNoteDrawer({
 }: BlockNoteDrawerProps) {
 	const [isPrivate, setIsPrivate] = useState(true);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+	const [tagSelectorOpen, setTagSelectorOpen] = useState(false);
 	const navigate = useNavigate();
 	const {
 		fileInputRef,
@@ -59,7 +60,7 @@ export default function BlockNoteDrawer({
 		removeImage,
 		resetImages,
 	} = useImageUpload();
-	const { tags, createTag, loading: tagsLoading } = useTags();
+	const { tags, createTag } = useTags();
 
 	// BlockNoteの初期化
 	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -99,6 +100,7 @@ export default function BlockNoteDrawer({
 		setNoteDrawerType(ActionType.Create);
 		setIsPrivate(true);
 		setSelectedTags([]);
+		setTagSelectorOpen(false);
 		resetImages();
 		editor.replaceBlocks(editor.document, []);
 	};
@@ -214,23 +216,8 @@ export default function BlockNoteDrawer({
 					</div>
 				)}
 				<div className="h-full overflow-y-auto">
-					<TagSelector
-						availableTags={tags}
-						selectedTags={selectedTags}
-						onTagSelect={(tag) =>
-							setSelectedTags((prev) => {
-								// 重複チェック
-								if (prev.some((t) => t.id === tag.id)) {
-									return prev;
-								}
-								return [...prev, tag];
-							})
-						}
-						onTagRemove={onTagRemove}
-						onCreateTag={createTag}
-					/>
 					{selectedTags.length > 0 && (
-						<div className="flex flex-wrap gap-2">
+						<div className="flex flex-wrap gap-2 mb-4">
 							{selectedTags.map((tag) => (
 								<TagBadge key={tag.id} tag={tag} onRemove={onTagRemove} />
 							))}
@@ -254,9 +241,43 @@ export default function BlockNoteDrawer({
 							onChange={handleFileChange}
 							className="hidden"
 						/>
-						<Button variant="outline" type="button">
-							<Tags />
-						</Button>
+						<Drawer open={tagSelectorOpen} onOpenChange={setTagSelectorOpen}>
+							<DrawerTrigger asChild>
+								<Button variant="outline" type="button">
+									<Tags />
+								</Button>
+							</DrawerTrigger>
+							<DrawerContent className="w-full max-h-[60vh] px-4">
+								<h3 className="text-lg font-semibold mb-2">Select Tags</h3>
+								{selectedTags.length > 0 && (
+									<div className="flex flex-wrap gap-2 mb-2">
+										{selectedTags.map((tag) => (
+											<TagBadge key={tag.id} tag={tag} onRemove={onTagRemove} />
+										))}
+									</div>
+								)}
+								<TagSelector
+									availableTags={tags}
+									selectedTags={selectedTags}
+									onTagSelect={(tag) =>
+										setSelectedTags((prev) => {
+											// 重複チェック
+											if (prev.some((t) => t.id === tag.id)) {
+												return prev;
+											}
+											return [...prev, tag];
+										})
+									}
+									onTagRemove={onTagRemove}
+									onCreateTag={createTag}
+								/>
+								<DrawerFooter className="px-0 py-2">
+									<DrawerClose asChild>
+										<Button variant="outline">Close</Button>
+									</DrawerClose>
+								</DrawerFooter>
+							</DrawerContent>
+						</Drawer>
 						{noteDrawerType === ActionType.Edit && (
 							<Button variant="outline" type="button" onClick={deleteNote} disabled={loading}>
 								<Trash2 />
