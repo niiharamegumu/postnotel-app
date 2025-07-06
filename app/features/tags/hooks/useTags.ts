@@ -57,11 +57,12 @@ export function useTags() {
 			}
 
 			const tag = (await response.json()) as Tag;
-			if (tag) {
-				setTags((prev) => [...prev, tag]);
-				return tag;
+			if (!tag) {
+				throw new Error("タグの作成に失敗しました");
 			}
-			throw new Error("タグの作成に失敗しました");
+			setTags((prev) => [...prev, tag]);
+			toast.success(`Tag「${tag.name}」を作成しました`);
+			return tag;
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : "タグの作成に失敗しました";
 			setError(errorMessage);
