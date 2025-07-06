@@ -1,12 +1,13 @@
 import type { AccessLevel } from "~/constants/accessLevel";
 import type { NoteContentType } from "~/constants/noteContentType";
+import type { Tag } from "~/features/tags/types/tag";
 
 export type Note = {
 	noteId: string;
 	content: string;
 	accessLevel: AccessLevel;
 	tags: {
-		tags: string[];
+		tags: Tag[];
 		count: number;
 	};
 	images: string[];
@@ -29,4 +30,5 @@ export type NoteApiRequest = {
 	content: string;
 	accessLevel: AccessLevel;
 	images: string[];
+	tagIds?: string[];
 };
