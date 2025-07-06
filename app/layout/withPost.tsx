@@ -26,13 +26,14 @@ export default function WithPost() {
 	const targetDate = date ? new Date(date) : new Date();
 
 	const createNote = async (params: NoteApiRequest): Promise<void> => {
-		const { content, accessLevel, images } = params;
+		const { content, accessLevel, images, tagIds } = params;
 		if (!content) return;
 
 		const body = JSON.stringify({
 			content,
 			accessLevel,
 			images: images,
+			tagIds: tagIds,
 			noteDay: format(targetDate, "yyyy-MM-dd"),
 		});
 
@@ -50,7 +51,7 @@ export default function WithPost() {
 	};
 
 	const editNote = async (params: NoteApiRequest): Promise<void> => {
-		const { content, accessLevel, images } = params;
+		const { content, accessLevel, images, tagIds } = params;
 		if (!content) return;
 		if (!targetNote) return;
 
@@ -58,6 +59,7 @@ export default function WithPost() {
 			content,
 			accessLevel,
 			images,
+			tagIds,
 		});
 
 		const res = await fetch(`/notes/${targetNote.noteId}/update`, {

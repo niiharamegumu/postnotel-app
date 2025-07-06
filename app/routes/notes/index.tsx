@@ -13,6 +13,7 @@ import type { UserInfo } from "~/types/user";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
+import { Tag } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -265,13 +266,23 @@ export default function Index() {
 												>
 													<NoteContent note={note} />
 												</div>
-												<span className="text-xs text-muted-foreground ml-2">
-													{format(new Date(note.createdAt), "HH:mm")}
+												<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
+													<div>{format(new Date(note.createdAt), "HH:mm")}</div>
 													{note.accessLevel === AccessLevel.Private && (
-														<span className="ms-2">{accessLevelLabels[note.accessLevel]}</span>
+														<div>{accessLevelLabels[note.accessLevel]}</div>
 													)}
-													<span className="ms-2">{noteContentTypeLabels[note.contentType]}</span>
-												</span>
+													<div>{noteContentTypeLabels[note.contentType]}</div>
+													{note.tags && note.tags.tags.length > 0 && (
+														<div className="flex items-center gap-2">
+															{note.tags.tags.map((tag) => (
+																<div key={tag.id} className="flex gap-1 items-center">
+																	<Tag size={12} color="#75b1ff" />
+																	{tag.name}
+																</div>
+															))}
+														</div>
+													)}
+												</div>
 											</li>
 										</Suspense>
 									))}

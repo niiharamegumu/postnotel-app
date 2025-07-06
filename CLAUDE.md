@@ -67,3 +67,7 @@ Routes are defined in `app/routes.ts` using React Router's configuration API wit
 - Deploys to Cloudflare Workers using Wrangler
 - Configuration in `wrangler.toml`
 - Use `npm run deploy` for production deployments
+
+### Context
+- `./context/PostNotel_API_Documentation.md` is REST API context
+- `context/PostNotel_Frontend_Specification.md` is frontend context
