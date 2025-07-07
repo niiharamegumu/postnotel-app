@@ -1,7 +1,11 @@
 import { type RouteConfig, layout, prefix, route } from "@react-router/dev/routes";
 
 export default [
-	layout("layout/base.tsx", [route("/", "routes/top.tsx")]),
+	layout("layout/base.tsx", [
+		route("/", "routes/top.tsx"),
+
+		...prefix("notes", [route("/tag/:tagId", "routes/notes/tag.tsx")]),
+	]),
 
 	// notes
 	layout("layout/withPost.tsx", [...prefix("notes", [route("/", "routes/notes/index.tsx")])]),
