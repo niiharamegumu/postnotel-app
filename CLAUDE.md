@@ -5,11 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - **Start development server**: `npm run dev` (available at http://localhost:5173)
-- **Build for production**: `npm run build`
-- **Type checking**: `npm run typecheck` (includes wrangler types generation and react-router typegen)
-- **Deploy**: `npm run deploy` (builds and deploys to Cloudflare Workers)
 - **Preview build**: `npm run preview`
-- **Start with Wrangler**: `npm run start` (for Cloudflare Workers development)
 
 ## Code Formatting and Linting
 
@@ -23,6 +19,8 @@ This project uses Biome for code formatting and linting:
 ## TypeScript Guidelines
 - In TypeScript, avoid using `any` or `unknown` types whenever possible.
 - In TypeScript, do not use `class` unless absolutely necessary.
+- In TypeScript, Variables must always have an explicitly defined type.
+- In TypeScript, Explicitly specify types for function parameters and return values.
 
 ## Architecture Overview
 
@@ -68,6 +66,7 @@ Routes are defined in `app/routes.ts` using React Router's configuration API wit
 - Configuration in `wrangler.toml`
 - Use `npm run deploy` for production deployments
 
-### Context
+### Context of the Specification
+Make sure to check the following files as part of the specifications.
 - `./context/PostNotel_API_Documentation.md` is REST API context
 - `context/PostNotel_Frontend_Specification.md` is frontend context

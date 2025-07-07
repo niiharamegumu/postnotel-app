@@ -17,7 +17,6 @@ export type Note = {
 };
 
 export type NotesByDateResponse = {
-	noteDate: string;
 	notes: Note[];
 	notesCount: number;
 };
