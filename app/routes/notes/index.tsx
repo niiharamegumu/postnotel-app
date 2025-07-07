@@ -13,7 +13,7 @@ import type { UserInfo } from "~/types/user";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
-import { Tag } from "lucide-react";
+import { TagLink } from "~/components/common/TagLink";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -275,10 +275,7 @@ export default function Index() {
 													{note.tags && note.tags.tags.length > 0 && (
 														<div className="flex items-center gap-2">
 															{note.tags.tags.map((tag) => (
-																<div key={tag.id} className="flex gap-1 items-center">
-																	<Tag size={12} color="#75b1ff" />
-																	{tag.name}
-																</div>
+																<TagLink key={tag.id} id={tag.id} name={tag.name} />
 															))}
 														</div>
 													)}
