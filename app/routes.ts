@@ -4,7 +4,10 @@ export default [
 	layout("layout/base.tsx", [
 		route("/", "routes/top.tsx"),
 
-		...prefix("notes", [route("/tag/:tagId", "routes/notes/tag.tsx")]),
+		...prefix("notes", [
+			route("/tag/:tagId", "routes/notes/tag.tsx"),
+			route("/images", "routes/notes/images.tsx"),
+		]),
 	]),
 
 	// notes

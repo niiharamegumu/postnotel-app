@@ -8,6 +8,7 @@ export type GetNotesParams = {
 	contentType?: string;
 	limit?: number;
 	offset?: number;
+	hasImages?: boolean;
 };
 
 export type GetNoteDaysParams = {
@@ -30,7 +31,7 @@ export const endpoints = {
 			const queryParams: string[] = [];
 
 			if (params) {
-				const { date, q, tagIds, accessLevel, contentType, limit, offset } = params;
+				const { date, q, tagIds, accessLevel, contentType, limit, offset, hasImages } = params;
 
 				if (date) queryParams.push(`date=${format(date, "yyyy-MM-dd")}`);
 				if (q) queryParams.push(`q=${encodeURIComponent(q)}`);
@@ -39,6 +40,7 @@ export const endpoints = {
 				if (contentType) queryParams.push(`contentType=${contentType}`);
 				if (limit !== undefined) queryParams.push(`limit=${limit}`);
 				if (offset !== undefined) queryParams.push(`offset=${offset}`);
+				if (hasImages !== undefined) queryParams.push(`hasImages=${hasImages}`);
 			}
 
 			if (queryParams.length > 0) {
