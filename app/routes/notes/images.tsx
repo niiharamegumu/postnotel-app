@@ -5,9 +5,13 @@ import type { NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types/images";
 import { fetchNotes } from "~/features/notes/api/get";
 import { Skeleton } from "~/components/ui/skeleton";
+import { NoteContentType } from "~/constants/noteContentType";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const notes = await fetchNotes(request, context, { hasImages: true });
+	const notes = await fetchNotes(request, context, {
+		hasImages: true,
+		contentType: NoteContentType.Note,
+	});
 	return { notes };
 }
 

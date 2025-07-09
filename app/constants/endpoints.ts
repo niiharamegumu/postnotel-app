@@ -1,11 +1,13 @@
 import { format } from "date-fns";
+import type { AccessLevel } from "./accessLevel";
+import type { NoteContentType } from "./noteContentType";
 
 export type GetNotesParams = {
 	date?: Date;
 	q?: string;
 	tagIds?: string[];
-	accessLevel?: string;
-	contentType?: string;
+	accessLevel?: AccessLevel;
+	contentType?: NoteContentType;
 	limit?: number;
 	offset?: number;
 	hasImages?: boolean;
@@ -52,7 +54,7 @@ export const endpoints = {
 		days: (params: GetNoteDaysParams) => {
 			const queryParams = [
 				`startDate=${format(params.startDate, "yyyy-MM-dd")}`,
-				`endDate=${format(params.endDate, "yyyy-MM-dd")}`
+				`endDate=${format(params.endDate, "yyyy-MM-dd")}`,
 			];
 			return `/v1/notes/days?${queryParams.join("&")}`;
 		},
