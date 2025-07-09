@@ -170,7 +170,7 @@ export default function Index() {
 					{/* PC用タグ一覧表示 */}
 					{tags && tags.length > 0 && (
 						<div className="hidden md:block mt-4 max-w-100">
-							<div className="flex justify-between flex-wrap">
+							<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
 								{tags.map((tag) => (
 									<TagLink key={tag.id} id={tag.id} name={tag.name} />
 								))}
@@ -308,7 +308,7 @@ export default function Index() {
 			{/* SP用タグ一覧表示 */}
 			{tags && tags.length > 0 && (
 				<div className="block md:hidden mt-4">
-					<div className="flex justify-between flex-wrap gap-2">
+					<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
 						{tags.map((tag) => (
 							<TagLink key={tag.id} id={tag.id} name={tag.name} />
 						))}
