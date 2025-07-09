@@ -14,6 +14,7 @@ import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
+import { useTags } from "~/features/tags/hooks/useTags";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -70,6 +71,7 @@ export default function Index() {
 	const [currentMonth, setCurrentMonth] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
+	const { tags } = useTags();
 
 	const handleSelect = (selected: Date | undefined) => {
 		if (selected) {
@@ -165,6 +167,16 @@ export default function Index() {
 							selected: "[&>button]:bg-red-400 [&>button]:text-primary",
 						}}
 					/>
+					{/* PC用タグ一覧表示 */}
+					{tags && tags.length > 0 && (
+						<div className="hidden md:block mt-4 max-w-100">
+							<div className="flex justify-between flex-wrap">
+								{tags.map((tag) => (
+									<TagLink key={tag.id} id={tag.id} name={tag.name} />
+								))}
+							</div>
+						</div>
+					)}
 				</div>
 				<motion.section
 					className="w-full min-h-screen md:min-h-[80vh]"
@@ -293,6 +305,16 @@ export default function Index() {
 					)}
 				</motion.section>
 			</div>
+			{/* SP用タグ一覧表示 */}
+			{tags && tags.length > 0 && (
+				<div className="block md:hidden mt-4">
+					<div className="flex justify-between flex-wrap gap-2">
+						{tags.map((tag) => (
+							<TagLink key={tag.id} id={tag.id} name={tag.name} />
+						))}
+					</div>
+				</div>
+			)}
 		</Suspense>
 	);
 }
