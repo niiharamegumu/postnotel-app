@@ -43,18 +43,19 @@ export default function ImagesPage() {
 				</div>
 				<section className="w-full min-h-screen">
 					{imageEntries.length > 0 ? (
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-1">
 							{imageEntries.map((entry, index) => (
 								<Link
 									key={`${entry.noteId}-${index}`}
 									to={`/notes?date=${entry.dateKey}`}
-									className="block aspect-square overflow-hidden rounded hover:opacity-80 transition-opacity bg-primary p-1"
+									className="block aspect-square rounded hover:opacity-80 transition-opacity bg-primary p-1"
 								>
 									<img
 										src={entry.imageUrl}
 										alt=""
 										className="w-full h-full object-cover"
 										loading="lazy"
+										decoding="async"
 									/>
 								</Link>
 							))}
