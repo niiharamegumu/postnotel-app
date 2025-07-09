@@ -7,7 +7,7 @@ import type { Route } from "./+types/tag";
 import { fetchNotes } from "~/features/notes/api/get";
 import { fetcher } from "~/lib/fetcher";
 import { endpoints } from "~/constants/endpoints";
-import type { TagsResponse } from "~/features/tags/types/tag";
+import type { Tag as TagType, TagsResponse } from "~/features/tags/types/tag";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -38,7 +38,7 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 	// Get notes for this tag
 	const notes = await fetchNotes(request, context, { tagIds: [tagId] });
 
-	return { notes, tag };
+	return { notes, tag, tags: tagsData.tags };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -52,9 +52,10 @@ export function meta({ data }: Route.MetaArgs) {
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function TagNotesPage() {
-	const { notes, tag } = useLoaderData<typeof loader>() as {
+	const { notes, tag, tags } = useLoaderData<typeof loader>() as {
 		notes: NotesByDateResponse | null;
-		tag: { id: string; name: string };
+		tag: TagType;
+		tags: TagType[];
 	};
 
 	// Group notes by date
@@ -84,6 +85,13 @@ export default function TagNotesPage() {
 					</div>
 					<p className="text-sm text-muted-foreground">{notes?.notes.length || 0}件</p>
 				</div>
+				{tags && tags.length > 0 && (
+					<div className="flex justify-start flex-wrap gap-2">
+						{tags.map((tag) => (
+							<TagLink key={tag.id} id={tag.id} name={tag.name} />
+						))}
+					</div>
+				)}
 				<section className="w-full min-h-screen">
 					{sortedDates.length > 0 ? (
 						<div className="space-y-6">
