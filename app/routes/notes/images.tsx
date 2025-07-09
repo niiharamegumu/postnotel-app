@@ -53,7 +53,7 @@ export default function ImagesPage() {
 									<img
 										src={entry.imageUrl}
 										alt=""
-										className="w-full h-full object-contain"
+										className="w-full h-full object-cover"
 										loading="lazy"
 									/>
 								</Link>
