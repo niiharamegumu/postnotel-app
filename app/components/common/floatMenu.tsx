@@ -63,6 +63,11 @@ export default function FloatMenu({ userInfo }: Props) {
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem>
+					<Link to="/notes/images" className="flex w-full">
+						Images
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
 					<Link to="/wines" className="flex w-full">
 						Wines
 					</Link>
