@@ -1,8 +1,17 @@
 import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
-import { Calendar } from "~/components/ui/calendar";
+import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
+import {
+	format,
+	parseISO,
+	addDays,
+	subDays,
+	startOfWeek,
+	endOfWeek,
+	addWeeks,
+	subWeeks,
+} from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -25,8 +34,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const notes = await fetchNotes(request, context, { date: parseISO(date) });
 
 	const selectedDate = parseISO(date);
-	const startDate = startOfMonth(selectedDate);
-	const endDate = endOfMonth(selectedDate);
+	const startDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
+	const endDate = endOfWeek(selectedDate, { weekStartsOn: 0 });
 
 	const noteDays = await fetchDays(request, context, { startDate, endDate });
 	return { notes, date, noteDays };
@@ -43,12 +52,12 @@ const navigateToDate = (date: Date, navigate: (path: string) => void) => {
 	navigate(`?date=${dateStr}`);
 };
 
-const getPreviousDate = (currentDate: Date): Date => {
-	return subDays(currentDate, 1);
+const getPreviousWeek = (currentDate: Date): Date => {
+	return subWeeks(currentDate, 1);
 };
 
-const getNextDate = (currentDate: Date): Date => {
-	return addDays(currentDate, 1);
+const getNextWeek = (currentDate: Date): Date => {
+	return addWeeks(currentDate, 1);
 };
 
 export default function Index() {
@@ -68,31 +77,21 @@ export default function Index() {
 	};
 
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
-	const [currentMonth, setCurrentMonth] = useState<Date>(new Date(date));
+	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 	const { tags } = useTags();
 
-	const handleSelect = (selected: Date | undefined) => {
-		if (selected) {
-			setSelectedDate(selected);
-			const dateStr = format(selected, "yyyy-MM-dd");
-			navigate(`?date=${dateStr}`);
-		}
+	const handleDateSelect = (selected: Date) => {
+		setSelectedDate(selected);
+		const dateStr = format(selected, "yyyy-MM-dd");
+		navigate(`?date=${dateStr}`);
 	};
 
-	const handleTodayClick = () => {
-		const today = new Date();
-		setSelectedDate(today);
-		setCurrentMonth(today);
-		navigate(`?date=${format(today, "yyyy-MM-dd")}`);
-	};
-
-	const handleMonthChange = (month: Date) => {
-		setCurrentMonth(month);
-		const firstDayOfMonth = startOfMonth(month);
-		setSelectedDate(firstDayOfMonth);
-		navigate(`?date=${format(firstDayOfMonth, "yyyy-MM-dd")}`);
+	const handleWeekChange = (date: Date) => {
+		setSelectedDate(date);
+		setCurrentWeek(date);
+		navigate(`?date=${format(date, "yyyy-MM-dd")}`);
 	};
 
 	const handleEditNote = (note: Note) => {
@@ -102,81 +101,32 @@ export default function Index() {
 
 	const handleSwipe = (direction: "left" | "right") => {
 		const newDate =
-			direction === "left" ? getNextDate(selectedDate) : getPreviousDate(selectedDate);
+			direction === "left" ? getNextWeek(selectedDate) : getPreviousWeek(selectedDate);
 
 		const today = new Date();
-		const maxFutureDate = addDays(today, 365);
-		const minPastDate = subDays(today, 365 * 2);
+		const maxFutureDate = addWeeks(today, 52);
+		const minPastDate = subWeeks(today, 104);
 
 		if (newDate > maxFutureDate || newDate < minPastDate) {
 			return;
 		}
 
 		setSelectedDate(newDate);
-		setCurrentMonth(newDate);
+		setCurrentWeek(newDate);
 		navigateToDate(newDate, navigate);
 	};
 
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
-			<div className="flex flex-col md:flex-row md:gap-8">
-				<div className="w-auto">
-					<Calendar
-						mode="single"
-						selected={selectedDate}
-						onSelect={handleSelect}
-						month={currentMonth}
-						onMonthChange={handleMonthChange}
-						locale={ja}
-						formatters={{
-							formatCaption: (month: Date) => format(month, "yyyy年M月", { locale: ja }),
-						}}
-						components={{
-							CaptionLabel: (props) => (
-								<span
-									{...props}
-									onClick={handleTodayClick}
-									className="cursor-pointer hover:text-primary"
-								>
-									{props.children}
-								</span>
-							),
-						}}
-						modifiers={{
-							hasNote: (date) => noteDays.some((d) => d === format(date, "yyyy-MM-dd")),
-							todayNotSelected: (date) => {
-								const today = new Date();
-								const isToday = format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
-								const isSelected =
-									format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
-								return isToday && !isSelected;
-							},
-						}}
-						modifiersClassNames={{
-							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
-							todayNotSelected:
-								"[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
-						}}
+			<div className="max-w-2xl mx-auto space-y-6">
+				<div className="w-full">
+					<WeekCalendar
+						selectedDate={selectedDate}
+						onDateSelect={handleDateSelect}
+						onWeekChange={handleWeekChange}
+						noteDays={noteDays}
 						className="p-0"
-						classNames={{
-							month_grid: "w-full",
-							weekdays: "flex w-full justify-between",
-							weekday: "flex-1 text-center",
-							week: "flex w-full justify-between",
-							day: "flex-1 flex items-center justify-center",
-							selected: "[&>button]:bg-red-400 [&>button]:text-primary",
-						}}
 					/>
-					{/* PC用タグ一覧表示 */}
-					{tags && tags.length > 0 && (
-						<div className="hidden md:block mt-4 max-w-100">
-							<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
-								{tags.map((tag) => (
-									<TagLink key={tag.id} id={tag.id} name={tag.name} />
-								))}
-							</div>
-						</div>
-					)}
 				</div>
 				<motion.section
 					className="w-full min-h-screen md:min-h-[80vh]"
@@ -232,7 +182,7 @@ export default function Index() {
 						touchAction: "pan-y pinch-zoom",
 					}}
 				>
-					<h2 className="mt-4 mb-2 text-center text-sm font-bold text-primary md:text-left md:mb-4 md:mt-0">
+					<h2 className="mt-4 mb-2 text-left text-sm font-bold text-primary md:mb-4 md:mt-0">
 						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 					</h2>
 					{isLoading ? null : (
@@ -304,17 +254,17 @@ export default function Index() {
 						</>
 					)}
 				</motion.section>
-			</div>
-			{/* SP用タグ一覧表示 */}
-			{tags && tags.length > 0 && (
-				<div className="block md:hidden mt-4">
-					<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
-						{tags.map((tag) => (
-							<TagLink key={tag.id} id={tag.id} name={tag.name} />
-						))}
+				{/* SP用タグ一覧表示 */}
+				{tags && tags.length > 0 && (
+					<div className="mt-4">
+						<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
+							{tags.map((tag) => (
+								<TagLink key={tag.id} id={tag.id} name={tag.name} />
+							))}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
+			</div>
 		</Suspense>
 	);
 }
