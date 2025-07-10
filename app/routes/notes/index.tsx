@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { ja } from "date-fns/locale";
-import { format, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -43,12 +43,12 @@ const navigateToDate = (date: Date, navigate: (path: string) => void) => {
 	navigate(`?date=${dateStr}`);
 };
 
-const getPreviousWeek = (currentDate: Date): Date => {
-	return subWeeks(currentDate, 1);
+const getPreviousDay = (currentDate: Date): Date => {
+	return subDays(currentDate, 1);
 };
 
-const getNextWeek = (currentDate: Date): Date => {
-	return addWeeks(currentDate, 1);
+const getNextDay = (currentDate: Date): Date => {
+	return addDays(currentDate, 1);
 };
 
 export default function Index() {
@@ -92,11 +92,11 @@ export default function Index() {
 
 	const handleSwipe = (direction: "left" | "right") => {
 		const newDate =
-			direction === "left" ? getNextWeek(selectedDate) : getPreviousWeek(selectedDate);
+			direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
 
 		const today = new Date();
-		const maxFutureDate = addWeeks(today, 52);
-		const minPastDate = subWeeks(today, 104);
+		const maxFutureDate = addDays(today, 365);
+		const minPastDate = subDays(today, 730);
 
 		if (newDate > maxFutureDate || newDate < minPastDate) {
 			return;
