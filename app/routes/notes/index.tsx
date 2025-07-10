@@ -2,16 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { ja } from "date-fns/locale";
-import {
-	format,
-	parseISO,
-	addDays,
-	subDays,
-	startOfWeek,
-	endOfWeek,
-	addWeeks,
-	subWeeks,
-} from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, addWeeks, subWeeks } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -34,8 +25,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const notes = await fetchNotes(request, context, { date: parseISO(date) });
 
 	const selectedDate = parseISO(date);
-	const startDate = startOfWeek(selectedDate, { weekStartsOn: 0 });
-	const endDate = endOfWeek(selectedDate, { weekStartsOn: 0 });
+	const startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
+	const endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
 	const noteDays = await fetchDays(request, context, { startDate, endDate });
 	return { notes, date, noteDays };

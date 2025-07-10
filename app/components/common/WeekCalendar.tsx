@@ -19,8 +19,8 @@ export function WeekCalendar({
 	noteDays,
 	className,
 }: WeekCalendarProps) {
-	const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
-	const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 0 });
+	const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
+	const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
 	const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
 	const handlePreviousWeek = () => {
