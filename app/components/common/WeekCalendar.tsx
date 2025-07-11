@@ -60,11 +60,25 @@ export function WeekCalendar({
 	const handlePreviousMonth = () => {
 		const previousMonth = subMonths(selectedDate, 1);
 		onWeekChange(previousMonth);
+		
+		// 月変更時にnoteDaysを更新
+		if (onNoteDaysChange) {
+			const monthStart = startOfMonth(previousMonth);
+			const monthEnd = endOfMonth(previousMonth);
+			onNoteDaysChange(monthStart, monthEnd);
+		}
 	};
 
 	const handleNextMonth = () => {
 		const nextMonth = addMonths(selectedDate, 1);
 		onWeekChange(nextMonth);
+		
+		// 月変更時にnoteDaysを更新
+		if (onNoteDaysChange) {
+			const monthStart = startOfMonth(nextMonth);
+			const monthEnd = endOfMonth(nextMonth);
+			onNoteDaysChange(monthStart, monthEnd);
+		}
 	};
 
 	const handleTodayClick = () => {
@@ -105,39 +119,39 @@ export function WeekCalendar({
 	return (
 		<div className={cn("p-0", className)}>
 			{/* 週ヘッダー */}
-			<div className="flex h-7 items-center justify-between mb-4 gap-2">
+			<div className="flex h-7 items-center mb-4 gap-2">
 				<span className="text-sm font-bold">
 					{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 				</span>
-				<div className="flex items-center gap-3">
+				<div className="ml-auto flex items-center gap-4">
 					<span onClick={handleTodayClick}>
 						<CalendarCheck size={20} />
 					</span>
 					<span onClick={handleViewModeToggle} className="cursor-pointer">
 						{viewMode === "week" ? <CalendarArrowDown size={20} /> : <CalendarArrowUp size={20} />}
 					</span>
-				</div>
-				<div className="flex gap-1">
-					<button
-						type="button"
-						onClick={viewMode === "week" ? handlePreviousWeek : handlePreviousMonth}
-						className={cn(
-							buttonVariants({ variant: "outline" }),
-							"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-						)}
-					>
-						<ChevronLeft className="h-4 w-4" />
-					</button>
-					<button
-						type="button"
-						onClick={viewMode === "week" ? handleNextWeek : handleNextMonth}
-						className={cn(
-							buttonVariants({ variant: "outline" }),
-							"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-						)}
-					>
-						<ChevronRight className="h-4 w-4" />
-					</button>
+					<div className="flex gap-1">
+						<button
+							type="button"
+							onClick={viewMode === "week" ? handlePreviousWeek : handlePreviousMonth}
+							className={cn(
+								buttonVariants({ variant: "outline" }),
+								"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+							)}
+						>
+							<ChevronLeft className="h-4 w-4" />
+						</button>
+						<button
+							type="button"
+							onClick={viewMode === "week" ? handleNextWeek : handleNextMonth}
+							className={cn(
+								buttonVariants({ variant: "outline" }),
+								"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+							)}
+						>
+							<ChevronRight className="h-4 w-4" />
+						</button>
+					</div>
 				</div>
 			</div>
 
