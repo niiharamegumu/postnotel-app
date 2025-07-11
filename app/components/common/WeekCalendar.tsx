@@ -212,8 +212,8 @@ export function WeekCalendar({
 								"size-8 rounded-md p-0 font-normal transition-none flex items-center justify-center text-sm",
 								"hover:bg-accent hover:text-accent-foreground",
 							),
-							selected: "[&>button]:bg-red-400 [&>button]:text-primary",
 							today: "[&>button]:border-2 [&>button]:border-primary [&>button]:bg-transparent",
+							selected: "[&>button]:!bg-red-400 [&>button]:!text-primary [&>button]:!border-0",
 						}}
 						modifiers={{
 							hasNote: (date) => hasNote(date),
