@@ -35,7 +35,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 		<html lang="ja" className="dark">
 			<head>
 				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+				<meta
+					name="viewport"
+					content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+				/>
 				<link rel="icon" href="/favicon.jpg" />
 				<link rel="apple-touch-icon" href="/icon-180.png" />
 				<Meta />
