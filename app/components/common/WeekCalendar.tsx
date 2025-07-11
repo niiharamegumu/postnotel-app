@@ -2,7 +2,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks }
 import { ja } from "date-fns/locale";
 import { cn } from "~/lib/utils";
 import { buttonVariants } from "~/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarCheck, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface WeekCalendarProps {
 	selectedDate: Date;
@@ -54,12 +54,12 @@ export function WeekCalendar({
 	return (
 		<div className={cn("p-0", className)}>
 			{/* 週ヘッダー */}
-			<div className="flex h-7 items-center justify-center mb-4 gap-2">
-				<span
-					onClick={handleTodayClick}
-					className="cursor-pointer hover:text-primary truncate text-sm font-medium"
-				>
+			<div className="flex h-7 items-center justify-between mb-4 gap-2">
+				<span className="text-sm font-bold">
 					{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
+				</span>
+				<span onClick={handleTodayClick}>
+					<CalendarCheck size={18} />
 				</span>
 				<div className="flex gap-1">
 					<button
