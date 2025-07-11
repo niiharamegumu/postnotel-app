@@ -193,7 +193,7 @@ export default function BlockNoteDrawer({
 					</AnimatePresence>
 				</Button>
 			</DrawerTrigger>
-			<DrawerContent className="max-h-[80vh] px-4">
+			<DrawerContent className="w-full h-[80vh] max-h-[80vh] px-4">
 				{uploadedImages.length > 0 && (
 					<div className="w-full p-2 flex justify-start flex-wrap items-center gap-2">
 						{uploadedImages.map((imageUrl, index) => (
