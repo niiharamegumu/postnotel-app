@@ -172,9 +172,6 @@ export default function Index() {
 						touchAction: "pan-y pinch-zoom",
 					}}
 				>
-					<h2 className="mt-4 mb-2 text-left text-sm font-bold text-primary md:mb-4 md:mt-0">
-						{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
-					</h2>
 					{isLoading ? null : (
 						<>
 							{notes && notes.notes.length > 0 ? (

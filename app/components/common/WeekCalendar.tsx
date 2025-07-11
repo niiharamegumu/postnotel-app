@@ -54,33 +54,35 @@ export function WeekCalendar({
 	return (
 		<div className={cn("p-0", className)}>
 			{/* 週ヘッダー */}
-			<div className="relative flex h-7 items-center justify-center mb-4">
-				<button
-					type="button"
-					onClick={handlePreviousWeek}
-					className={cn(
-						buttonVariants({ variant: "outline" }),
-						"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1",
-					)}
-				>
-					<ChevronLeft className="h-4 w-4" />
-				</button>
+			<div className="flex h-7 items-center justify-center mb-4 gap-2">
 				<span
 					onClick={handleTodayClick}
 					className="cursor-pointer hover:text-primary truncate text-sm font-medium"
 				>
-					{format(weekStart, "yyyy年M月", { locale: ja })} 第{Math.ceil(weekStart.getDate() / 7)}週
+					{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 				</span>
-				<button
-					type="button"
-					onClick={handleNextWeek}
-					className={cn(
-						buttonVariants({ variant: "outline" }),
-						"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1",
-					)}
-				>
-					<ChevronRight className="h-4 w-4" />
-				</button>
+				<div className="flex gap-1">
+					<button
+						type="button"
+						onClick={handlePreviousWeek}
+						className={cn(
+							buttonVariants({ variant: "outline" }),
+							"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+						)}
+					>
+						<ChevronLeft className="h-4 w-4" />
+					</button>
+					<button
+						type="button"
+						onClick={handleNextWeek}
+						className={cn(
+							buttonVariants({ variant: "outline" }),
+							"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+						)}
+					>
+						<ChevronRight className="h-4 w-4" />
+					</button>
+				</div>
 			</div>
 
 			{/* 週表示 */}
