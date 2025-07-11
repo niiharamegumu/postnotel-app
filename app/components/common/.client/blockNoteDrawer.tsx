@@ -193,7 +193,7 @@ export default function BlockNoteDrawer({
 					</AnimatePresence>
 				</Button>
 			</DrawerTrigger>
-			<DrawerContent className="px-4 h-[100svh] !mt-0 !max-h-none !rounded-none">
+			<DrawerContent className="px-4 !mt-0 !max-h-[90dvh]">
 				{uploadedImages.length > 0 && (
 					<div className="w-full p-2 flex justify-start flex-wrap items-center gap-2">
 						{uploadedImages.map((imageUrl, index) => (
@@ -216,15 +216,13 @@ export default function BlockNoteDrawer({
 					</div>
 				)}
 				{selectedTags.length > 0 && (
-					<div className="flex flex-wrap gap-2 mt-4 mb-2">
+					<div className="flex flex-wrap gap-2 py-2">
 						{selectedTags.map((tag) => (
 							<TagBadge key={tag.id} tag={tag} onRemove={onTagRemove} />
 						))}
 					</div>
 				)}
-				<div className="h-full overflow-y-auto">
-					<BlockNoteView editor={editor} className="py-4" />
-				</div>
+				<BlockNoteView editor={editor} className="overflow-y-auto" />
 				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
