@@ -116,6 +116,11 @@ export default function Index() {
 		setSelectedDate(newDate);
 		setCurrentWeek(newDate);
 		navigateToDate(newDate, navigate);
+		
+		// swipe時にnoteDaysを更新
+		const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
+		const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
+		handleNoteDaysChange(weekStart, weekEnd);
 	};
 
 	const handleNoteDaysChange = (startDate: Date, endDate: Date) => {
