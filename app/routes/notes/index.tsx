@@ -1,7 +1,12 @@
-import { lazy, Suspense, useState } from "react";
-import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
+import { lazy, Suspense, useState, useEffect } from "react";
+import {
+	useLoaderData,
+	useNavigate,
+	useNavigation,
+	useOutletContext,
+	useFetcher,
+} from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
-import { ja } from "date-fns/locale";
 import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
@@ -71,7 +76,9 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
+	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 	const { tags } = useTags();
+	const fetcher = useFetcher<{ noteDays: string[] }>();
 
 	const handleDateSelect = (selected: Date) => {
 		setSelectedDate(selected);
@@ -83,6 +90,11 @@ export default function Index() {
 		setSelectedDate(date);
 		setCurrentWeek(date);
 		navigate(`?date=${format(date, "yyyy-MM-dd")}`);
+		
+		// 週変更時にnoteDaysを更新
+		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+		const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+		handleNoteDaysChange(weekStart, weekEnd);
 	};
 
 	const handleEditNote = (note: Note) => {
@@ -106,6 +118,20 @@ export default function Index() {
 		navigateToDate(newDate, navigate);
 	};
 
+	const handleNoteDaysChange = (startDate: Date, endDate: Date) => {
+		const searchParams = new URLSearchParams();
+		searchParams.set("startDate", format(startDate, "yyyy-MM-dd"));
+		searchParams.set("endDate", format(endDate, "yyyy-MM-dd"));
+
+		fetcher.load(`/note-days?${searchParams.toString()}`);
+	};
+
+	useEffect(() => {
+		if (fetcher.data && fetcher.state === "idle") {
+			setCurrentNoteDays(fetcher.data.noteDays);
+		}
+	}, [fetcher.data, fetcher.state]);
+
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
 			<div className="max-w-2xl mx-auto space-y-6">
@@ -114,7 +140,8 @@ export default function Index() {
 						selectedDate={selectedDate}
 						onDateSelect={handleDateSelect}
 						onWeekChange={handleWeekChange}
-						noteDays={noteDays}
+						noteDays={currentNoteDays}
+						onNoteDaysChange={handleNoteDaysChange}
 						className="p-0"
 					/>
 				</div>
