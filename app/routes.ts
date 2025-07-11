@@ -27,6 +27,8 @@ export default [
 		route("/get-upload-url", "routes/image/getUploadUrl.tsx"),
 	]),
 
+	route("/note-days", "routes/note-days/index.ts"),
+
 	layout("layout/wines.tsx", [route("/wines", "routes/wines/index.tsx")]),
 	...prefix("wines", [route("/recognize", "routes/wines/recognize.tsx")]),
 
