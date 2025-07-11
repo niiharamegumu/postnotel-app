@@ -17,6 +17,10 @@ body {
   }
 }
 
+html {
+  touch-action: manipulation;
+}
+
 :root {
   --radius: 1rem;
   --background: oklch(1 0 0);

@@ -91,8 +91,7 @@ export default function Index() {
 	};
 
 	const handleSwipe = (direction: "left" | "right") => {
-		const newDate =
-			direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
+		const newDate = direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
 
 		const today = new Date();
 		const maxFutureDate = addDays(today, 365);
@@ -245,7 +244,6 @@ export default function Index() {
 						</>
 					)}
 				</motion.section>
-				{/* SP用タグ一覧表示 */}
 				{tags && tags.length > 0 && (
 					<div className="mt-4">
 						<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">

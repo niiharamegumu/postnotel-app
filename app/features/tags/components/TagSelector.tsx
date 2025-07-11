@@ -66,6 +66,11 @@ export function TagSelector({
 					placeholder="タグを検索または作成..."
 					value={inputValue}
 					onValueChange={setInputValue}
+					className="text-base"
+					autoComplete="off"
+					autoCorrect="off"
+					spellCheck="false"
+					autoCapitalize="none"
 				/>
 				<CommandList>
 					<CommandEmpty>
