@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
 import { useState, useMemo, useCallback } from "react";
-
-type ViewMode = "week" | "month";
+import { ViewMode } from "~/constants/viewMode";
 
 interface WeekCalendarProps {
 	selectedDate: Date;
@@ -44,7 +43,7 @@ export function WeekCalendar({
 	onViewModeChange,
 	className,
 }: WeekCalendarProps) {
-	const [viewMode, setViewMode] = useState<ViewMode>("week");
+	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
 	
 	const weekDays = useMemo(() => {
 		const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -92,7 +91,7 @@ export function WeekCalendar({
 	}, [onWeekChange]);
 
 	const handleViewModeToggle = useCallback(() => {
-		const newViewMode = viewMode === "week" ? "month" : "week";
+		const newViewMode = viewMode === ViewMode.Week ? ViewMode.Month : ViewMode.Week;
 		setViewMode(newViewMode);
 
 		if (onViewModeChange) {
@@ -100,7 +99,7 @@ export function WeekCalendar({
 		}
 
 		if (onNoteDaysChange) {
-			if (newViewMode === "month") {
+			if (newViewMode === ViewMode.Month) {
 				const monthStart = startOfMonth(selectedDate);
 				const monthEnd = endOfMonth(selectedDate);
 				onNoteDaysChange(monthStart, monthEnd);
@@ -137,12 +136,12 @@ export function WeekCalendar({
 						<CalendarCheck size={20} />
 					</span>
 					<span onClick={handleViewModeToggle} className="cursor-pointer">
-						{viewMode === "week" ? <CalendarArrowDown size={20} /> : <CalendarArrowUp size={20} />}
+						{viewMode === ViewMode.Week ? <CalendarArrowDown size={20} /> : <CalendarArrowUp size={20} />}
 					</span>
 					<div className="flex gap-1">
 						<button
 							type="button"
-							onClick={viewMode === "week" ? handlePreviousWeek : handlePreviousMonth}
+							onClick={viewMode === ViewMode.Week ? handlePreviousWeek : handlePreviousMonth}
 							className={cn(
 								buttonVariants({ variant: "outline" }),
 								"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
@@ -152,7 +151,7 @@ export function WeekCalendar({
 						</button>
 						<button
 							type="button"
-							onClick={viewMode === "week" ? handleNextWeek : handleNextMonth}
+							onClick={viewMode === ViewMode.Week ? handleNextWeek : handleNextMonth}
 							className={cn(
 								buttonVariants({ variant: "outline" }),
 								"h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
@@ -165,7 +164,7 @@ export function WeekCalendar({
 			</div>
 
 			{/* 週表示 */}
-			{viewMode === "week" && (
+			{viewMode === ViewMode.Week && (
 				<div className="w-full">
 					{/* 曜日ヘッダー */}
 					<div className="flex w-full justify-between mb-2">
@@ -209,7 +208,7 @@ export function WeekCalendar({
 			)}
 
 			{/* 月表示 */}
-			{viewMode === "month" && (
+			{viewMode === ViewMode.Month && (
 				<div className="w-full">
 					<Calendar
 						mode="single"

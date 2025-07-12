@@ -16,6 +16,7 @@ import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import ClientOnly from "~/components/common/ClientOnly";
+import { ViewMode } from "~/constants/viewMode";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -79,7 +80,7 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
-	const [viewMode, setViewMode] = useState<"week" | "month">("week");
+	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
 	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
 	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
@@ -140,7 +141,7 @@ export default function Index() {
 			navigateToDate(newDate, navigate);
 
 			// swipe時にnoteDaysを更新（viewModeに応じて期間を変更）
-			if (viewMode === "month") {
+			if (viewMode === ViewMode.Month) {
 				const monthStart = startOfMonth(newDate);
 				const monthEnd = endOfMonth(newDate);
 				handleNoteDaysChange(monthStart, monthEnd);
