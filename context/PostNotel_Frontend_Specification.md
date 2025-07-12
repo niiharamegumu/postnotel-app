@@ -45,6 +45,11 @@ app/
 ├── features/            # 機能別モジュール
 │   ├── auth/           # 認証機能
 │   ├── notes/          # ノート管理機能
+│   │   └── hooks/      # ノート関連カスタムフック
+│   ├── tags/           # タグ管理機能
+│   │   └── hooks/      # タグ関連カスタムフック
+│   ├── wines/          # ワイン機能
+│   │   └── hooks/      # ワイン関連カスタムフック
 │   └── image/          # 画像ハンドリング
 ├── routes/             # ルートコンポーネント
 │   ├── api/           # BFF APIエンドポイント
@@ -59,7 +64,7 @@ app/
 │   ├── wines/         # ワイン機能View（index）
 │   └── top.tsx        # ホームページ
 ├── layout/            # レイアウトコンポーネント
-├── hooks/             # カスタムReactフック
+├── hooks/             # 共通カスタムReactフック
 ├── lib/               # ユーティリティライブラリ
 ├── constants/         # アプリケーション定数
 ├── types/             # TypeScript型定義
@@ -152,6 +157,36 @@ app/
 - **ImageUpload**: 画像アップロードコンポーネント
 - **TagSelector**: タグ選択コンポーネント
 - **AccessLevelToggle**: アクセスレベル切り替え
+
+### カスタムフック設計
+
+#### 共通CRUD操作フック
+- **`useNotes`**: ノートのCRUD操作（作成・更新・削除）
+  - 統一されたエラーハンドリング
+  - ローディング状態管理
+  - Toast通知の自動表示
+  - ナビゲーション処理
+
+- **`useNoteDays`**: カレンダー用日付データ取得
+  - React Router useFetcherを内部利用
+  - 週単位での日付範囲取得
+  - キャッシュ機能
+
+- **`useWineRecognition`**: ワイン認識処理
+  - 画像バリデーション
+  - AI認識API呼び出し
+  - エラーハンドリング
+
+- **`useTags`**: タグ管理操作
+  - タグ一覧取得・作成
+  - 楽観的UI更新
+  - 自動リフレッシュ
+
+#### 設計原則
+- **一貫性**: 全フックで統一されたAPI設計
+- **再利用性**: 複数コンポーネントで利用可能
+- **型安全性**: TypeScript完全対応
+- **エラー処理**: 統一されたエラーハンドリングパターン
 
 ## データモデル
 
@@ -256,9 +291,10 @@ interface NoteDay {
 
 ### データフェッチング戦略
 - **React Router Loaders**: サーバーサイドでのデータプリフェッチ（バックエンドAPI経由）
+- **カスタムフック**: 共通化されたCRUD操作（`useNotes`, `useNoteDays`, `useWineRecognition`）
 - **Client-side Fetch**: クライアントサイドでのBFF API呼び出し（`/api/*` エンドポイント）
 - **Optimistic Updates**: 楽観的UI更新
-- **Error Handling**: エラー境界とフォールバック
+- **Error Handling**: 統一されたエラー処理とフォールバック
 
 ### API アーキテクチャ
 - **View Routes**: UI表示用ルート（React Router loader/action でバックエンドAPI呼び出し）

@@ -1,23 +1,20 @@
-import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
-import { Outlet, useNavigate, useOutletContext, useSearchParams } from "react-router";
-import { toast } from "sonner";
-import { ApiResponseError } from "~/api/error/apiResponseError";
+import { Outlet, useOutletContext, useSearchParams } from "react-router";
 import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
 import { ActionType } from "~/features/notes/constants/actionType";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import type { UserInfo } from "~/types/user";
+import { useNotes } from "~/features/notes/hooks/useNotes";
 
 const BlockNoteDrawer = lazy(() => import("~/components/common/.client/blockNoteDrawer"));
 
 export default function WithPost() {
 	const userInfo = useOutletContext<UserInfo | null>();
-	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
+	const { createNote, updateNote, loading } = useNotes();
 
-	const [loading, setLoading] = useState(false); // 処理中かどうか
 	const [isNoteDrawerOpen, setNoteDrawerOpen] = useState(false); // noteのドロワーの開閉状態
 	const [noteDrawerType, setNoteDrawerType] = useState<ActionType>(ActionType.Create); // noteのドロワーのタイプ
 	const [targetNote, setTargetNote] = useState<Note | null>(null);
@@ -25,63 +22,22 @@ export default function WithPost() {
 	const date = searchParams.get("date");
 	const targetDate = date ? new Date(date) : new Date();
 
-	const createNote = async (params: NoteApiRequest): Promise<void> => {
-		const { content, accessLevel, images, tagIds } = params;
-		if (!content) return;
-
-		const body = JSON.stringify({
-			content,
-			accessLevel,
-			images: images,
-			tagIds: tagIds,
-			noteDay: format(targetDate, "yyyy-MM-dd"),
-		});
-
-		const res = await fetch("/api/notes/create", {
-			method: "POST",
-			body,
-		});
-
-		if (!res.ok) {
-			throw new ApiResponseError(res.status, "ノートの作成に失敗しました");
-		}
-
-		navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-		toast.success("ノートを作成しました");
+	const handleCreateNote = async (params: NoteApiRequest): Promise<void> => {
+		await createNote(params, targetDate);
 	};
 
-	const editNote = async (params: NoteApiRequest): Promise<void> => {
-		const { content, accessLevel, images, tagIds } = params;
-		if (!content) return;
+	const handleEditNote = async (params: NoteApiRequest): Promise<void> => {
 		if (!targetNote) return;
-
-		const body = JSON.stringify({
-			content,
-			accessLevel,
-			images,
-			tagIds,
-		});
-
-		const res = await fetch(`/api/notes/${targetNote.noteId}/update`, {
-			method: "POST",
-			body,
-		});
-
-		if (!res.ok) {
-			throw new ApiResponseError(res.status, "ノートの編集に失敗しました");
-		}
-
-		navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-		toast.success("ノートを編集しました");
+		await updateNote(targetNote.noteId, params, targetDate);
 	};
 
-	let noteDrawerHandler = createNote;
+	let noteDrawerHandler = handleCreateNote;
 	switch (noteDrawerType) {
 		case ActionType.Create:
-			noteDrawerHandler = createNote;
+			noteDrawerHandler = handleCreateNote;
 			break;
 		case ActionType.Edit:
-			noteDrawerHandler = editNote;
+			noteDrawerHandler = handleEditNote;
 			break;
 	}
 
@@ -122,7 +78,6 @@ export default function WithPost() {
 								noteDrawerType={noteDrawerType}
 								setNoteDrawerType={setNoteDrawerType}
 								loading={loading}
-								setLoading={setLoading}
 								open={isNoteDrawerOpen}
 								setOpen={setNoteDrawerOpen}
 								note={targetNote}

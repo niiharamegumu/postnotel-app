@@ -20,6 +20,7 @@ import { motion, type PanInfo } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
+import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -76,9 +77,9 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
-	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 	const { tags } = useTags();
-	const fetcher = useFetcher<{ noteDays: string[] }>();
+	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
+	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 
 	const handleDateSelect = (selected: Date) => {
 		setSelectedDate(selected);
@@ -127,18 +128,14 @@ export default function Index() {
 	};
 
 	const handleNoteDaysChange = (startDate: Date, endDate: Date) => {
-		const searchParams = new URLSearchParams();
-		searchParams.set("startDate", format(startDate, "yyyy-MM-dd"));
-		searchParams.set("endDate", format(endDate, "yyyy-MM-dd"));
-
-		fetcher.load(`/api/note-days?${searchParams.toString()}`);
+		fetchNoteDays(startDate, endDate);
 	};
 
 	useEffect(() => {
-		if (fetcher.data && fetcher.state === "idle") {
-			setCurrentNoteDays(fetcher.data.noteDays);
+		if (hookNoteDays.length > 0) {
+			setCurrentNoteDays(hookNoteDays);
 		}
-	}, [fetcher.data, fetcher.state]);
+	}, [hookNoteDays]);
 
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
