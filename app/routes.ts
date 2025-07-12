@@ -12,40 +12,39 @@ export default [
 
 	// notes
 	layout("layout/withPost.tsx", [...prefix("notes", [route("/", "routes/notes/index.tsx")])]),
-	...prefix("notes", [
-		// create
-		route("/create", "routes/notes/create.tsx"),
-		// update
-		route("/:id/update", "routes/notes/update.tsx"),
-		// delete
-		route("/:id/delete", "routes/notes/delete.tsx"),
-	]),
 
-	// image
-	...prefix("image", [
-		// get upload URL
-		route("/get-upload-url", "routes/image/getUploadUrl.tsx"),
-	]),
-
-	route("/note-days", "routes/note-days/index.ts"),
-
+	// wines
 	layout("layout/wines.tsx", [route("/wines", "routes/wines/index.tsx")]),
-	...prefix("wines", [route("/recognize", "routes/wines/recognize.tsx")]),
 
-	// tags
-	...prefix("tags", [
-		route("/", "routes/tags/index.tsx"),
-		route("/create", "routes/tags/create.tsx"),
-	]),
-
+	// auth
 	...prefix("auth", [
-		// login
 		route("/login", "routes/auth/login.tsx"),
-		// redirect
-		route("/redirect", "routes/auth/redirect.tsx"),
-		// logout
-		route("/logout", "routes/auth/logout.tsx"),
-		// auth callback
 		route("/callback", "routes/auth/callback.tsx"),
 	]),
+
+	// ====== Start of BFF API endpoints =====
+	...prefix("api", [
+		...prefix("image", [route("/get-upload-url", "routes/api/image/get-upload-url.tsx")]),
+
+		...prefix("notes", [
+			route("/create", "routes/api/notes/create.tsx"),
+			route("/:id/update", "routes/api/notes/update.tsx"),
+			route("/:id/delete", "routes/api/notes/delete.tsx"),
+		]),
+
+		route("/note-days", "routes/api/note-days/index.ts"),
+
+		...prefix("wines", [route("/recognize", "routes/api/wines/recognize.tsx")]),
+
+		...prefix("tags", [
+			route("/", "routes/api/tags/index.tsx"),
+			route("/create", "routes/api/tags/create.tsx"),
+		]),
+
+		...prefix("auth", [
+			route("/redirect", "routes/api/auth/redirect.tsx"),
+			route("/logout", "routes/api/auth/logout.tsx"),
+		]),
+	]),
+	// ====== End of BFF API endpoints =====
 ] satisfies RouteConfig;
