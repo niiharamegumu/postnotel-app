@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
-import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -16,6 +16,7 @@ import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import ClientOnly from "~/components/common/ClientOnly";
+import { ViewMode } from "~/constants/viewMode";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -79,6 +80,7 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
+	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
 	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
 	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
@@ -138,12 +140,18 @@ export default function Index() {
 			setCurrentWeek(newDate);
 			navigateToDate(newDate, navigate);
 
-			// swipe時にnoteDaysを更新
-			const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
-			const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
-			handleNoteDaysChange(weekStart, weekEnd);
+			// swipe時にnoteDaysを更新（viewModeに応じて期間を変更）
+			if (viewMode === ViewMode.Month) {
+				const monthStart = startOfMonth(newDate);
+				const monthEnd = endOfMonth(newDate);
+				handleNoteDaysChange(monthStart, monthEnd);
+			} else {
+				const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
+				const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
+				handleNoteDaysChange(weekStart, weekEnd);
+			}
 		},
-		[selectedDate, navigate, handleNoteDaysChange],
+		[selectedDate, navigate, handleNoteDaysChange, viewMode],
 	);
 
 	useEffect(() => {
@@ -162,6 +170,7 @@ export default function Index() {
 						onWeekChange={handleWeekChange}
 						noteDays={currentNoteDays}
 						onNoteDaysChange={handleNoteDaysChange}
+						onViewModeChange={setViewMode}
 						className="p-0"
 					/>
 				</div>
