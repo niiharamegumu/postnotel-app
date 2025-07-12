@@ -12,7 +12,7 @@ export function useTags() {
 		setError(null);
 
 		try {
-			const response = await fetch("/tags", {
+			const response = await fetch("/api/tags", {
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
@@ -43,7 +43,7 @@ export function useTags() {
 
 		try {
 			const body: CreateTagRequest = { name };
-			const response = await fetch("/tags/create", {
+			const response = await fetch("/api/tags/create", {
 				method: "POST",
 				credentials: "include",
 				headers: {

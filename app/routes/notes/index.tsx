@@ -131,7 +131,7 @@ export default function Index() {
 		searchParams.set("startDate", format(startDate, "yyyy-MM-dd"));
 		searchParams.set("endDate", format(endDate, "yyyy-MM-dd"));
 
-		fetcher.load(`/note-days?${searchParams.toString()}`);
+		fetcher.load(`/api/note-days?${searchParams.toString()}`);
 	};
 
 	useEffect(() => {

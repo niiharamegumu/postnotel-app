@@ -145,7 +145,7 @@ export default function BlockNoteDrawer({
 
 		setLoading(true);
 		try {
-			const res = await fetch(`/notes/${note.noteId}/delete`, {
+			const res = await fetch(`/api/notes/${note.noteId}/delete`, {
 				method: "POST",
 			});
 			if (!res.ok) throw new ApiResponseError(res.status, "ノートの削除に失敗しました");

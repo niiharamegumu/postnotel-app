@@ -54,7 +54,7 @@ export default function Wines() {
 				images: imagesFileNames,
 			});
 
-			const res = await fetch("/wines/recognize", {
+			const res = await fetch("/api/wines/recognize", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

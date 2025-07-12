@@ -37,7 +37,7 @@ export default function WithPost() {
 			noteDay: format(targetDate, "yyyy-MM-dd"),
 		});
 
-		const res = await fetch("/notes/create", {
+		const res = await fetch("/api/notes/create", {
 			method: "POST",
 			body,
 		});
@@ -62,7 +62,7 @@ export default function WithPost() {
 			tagIds,
 		});
 
-		const res = await fetch(`/notes/${targetNote.noteId}/update`, {
+		const res = await fetch(`/api/notes/${targetNote.noteId}/update`, {
 			method: "POST",
 			body,
 		});

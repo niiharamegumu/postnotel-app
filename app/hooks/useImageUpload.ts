@@ -17,7 +17,7 @@ export const useImageUpload = () => {
 			const contentType = file.type;
 
 			const getUrlResponse = await fetch(
-				`/image/get-upload-url?ext=${encodeURIComponent(ext)}&contentType=${encodeURIComponent(contentType)}`,
+				`/api/image/get-upload-url?ext=${encodeURIComponent(ext)}&contentType=${encodeURIComponent(contentType)}`,
 			);
 
 			if (!getUrlResponse.ok) {
