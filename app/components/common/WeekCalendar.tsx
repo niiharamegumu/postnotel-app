@@ -31,6 +31,7 @@ interface WeekCalendarProps {
 	onWeekChange: (date: Date) => void;
 	noteDays: string[];
 	onNoteDaysChange?: (startDate: Date, endDate: Date) => void;
+	onViewModeChange?: React.Dispatch<React.SetStateAction<ViewMode>>;
 	className?: string;
 }
 
@@ -40,6 +41,7 @@ export function WeekCalendar({
 	onWeekChange,
 	noteDays,
 	onNoteDaysChange,
+	onViewModeChange,
 	className,
 }: WeekCalendarProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
@@ -93,6 +95,10 @@ export function WeekCalendar({
 		const newViewMode = viewMode === "week" ? "month" : "week";
 		setViewMode(newViewMode);
 
+		if (onViewModeChange) {
+			onViewModeChange(newViewMode);
+		}
+
 		if (onNoteDaysChange) {
 			if (newViewMode === "month") {
 				const monthStart = startOfMonth(selectedDate);
@@ -104,7 +110,7 @@ export function WeekCalendar({
 				onNoteDaysChange(weekStart, weekEnd);
 			}
 		}
-	}, [viewMode, selectedDate, onNoteDaysChange]);
+	}, [viewMode, selectedDate, onNoteDaysChange, onViewModeChange]);
 
 	const isToday = useCallback((date: Date): boolean => {
 		const today = new Date();
