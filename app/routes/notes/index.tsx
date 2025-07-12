@@ -253,7 +253,7 @@ export default function Index() {
 															onClick={() => handleEditNote(note)}
 														>
 															<ClientOnly
-																fallback={<div className="text-primary p-4">{note.content}</div>}
+																fallback={<Skeleton className="h-20 w-full" />}
 															>
 																<NoteContent note={note} />
 															</ClientOnly>
