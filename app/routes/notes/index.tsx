@@ -83,22 +83,35 @@ export default function Index() {
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
 	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 
-	const handleDateSelect = (selected: Date) => {
-		setSelectedDate(selected);
-		const dateStr = format(selected, "yyyy-MM-dd");
-		navigate(`?date=${dateStr}`);
-	};
+	const handleDateSelect = useCallback(
+		(selected: Date) => {
+			setSelectedDate(selected);
+			const dateStr = format(selected, "yyyy-MM-dd");
+			navigate(`?date=${dateStr}`);
+		},
+		[navigate],
+	);
 
-	const handleWeekChange = (date: Date) => {
-		setSelectedDate(date);
-		setCurrentWeek(date);
-		navigate(`?date=${format(date, "yyyy-MM-dd")}`);
+	const handleNoteDaysChange = useCallback(
+		(startDate: Date, endDate: Date) => {
+			fetchNoteDays(startDate, endDate);
+		},
+		[fetchNoteDays],
+	);
 
-		// 週変更時にnoteDaysを更新
-		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-		const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-		handleNoteDaysChange(weekStart, weekEnd);
-	};
+	const handleWeekChange = useCallback(
+		(date: Date) => {
+			setSelectedDate(date);
+			setCurrentWeek(date);
+			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
+
+			// 週変更時にnoteDaysを更新
+			const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+			handleNoteDaysChange(weekStart, weekEnd);
+		},
+		[navigate, handleNoteDaysChange],
+	);
 
 	const handleEditNote = useCallback(
 		(note: Note) => {
@@ -108,30 +121,30 @@ export default function Index() {
 		[userInfo, onClickEditNote],
 	);
 
-	const handleSwipe = (direction: "left" | "right") => {
-		const newDate = direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
+	const handleSwipe = useCallback(
+		(direction: "left" | "right") => {
+			const newDate =
+				direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
 
-		const today = new Date();
-		const maxFutureDate = addDays(today, 365);
-		const minPastDate = subDays(today, 730);
+			const today = new Date();
+			const maxFutureDate = addDays(today, 365);
+			const minPastDate = subDays(today, 730);
 
-		if (newDate > maxFutureDate || newDate < minPastDate) {
-			return;
-		}
+			if (newDate > maxFutureDate || newDate < minPastDate) {
+				return;
+			}
 
-		setSelectedDate(newDate);
-		setCurrentWeek(newDate);
-		navigateToDate(newDate, navigate);
+			setSelectedDate(newDate);
+			setCurrentWeek(newDate);
+			navigateToDate(newDate, navigate);
 
-		// swipe時にnoteDaysを更新
-		const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
-		const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
-		handleNoteDaysChange(weekStart, weekEnd);
-	};
-
-	const handleNoteDaysChange = (startDate: Date, endDate: Date) => {
-		fetchNoteDays(startDate, endDate);
-	};
+			// swipe時にnoteDaysを更新
+			const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
+			handleNoteDaysChange(weekStart, weekEnd);
+		},
+		[selectedDate, navigate, handleNoteDaysChange],
+	);
 
 	useEffect(() => {
 		if (hookNoteDays.length > 0) {
@@ -188,20 +201,23 @@ export default function Index() {
 						},
 						[swipeDirection],
 					)}
-					onPanEnd={(_, info: PanInfo) => {
-						const horizontalDistance = Math.abs(info.offset.x);
-						const swipeThreshold = window.innerWidth / 3;
+					onPanEnd={useCallback(
+						(_event: PointerEvent, info: PanInfo) => {
+							const horizontalDistance = Math.abs(info.offset.x);
+							const swipeThreshold = window.innerWidth / 3;
 
-						// 水平スワイプかつ閾値を超えた場合のみ日付変更
-						if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
-							const direction = info.offset.x > 0 ? "right" : "left";
-							handleSwipe(direction);
-						}
+							// 水平スワイプかつ閾値を超えた場合のみ日付変更
+							if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
+								const direction = info.offset.x > 0 ? "right" : "left";
+								handleSwipe(direction);
+							}
 
-						// 状態をリセット
-						setIsSwipeActive(false);
-						setSwipeDirection(null);
-					}}
+							// 状態をリセット
+							setIsSwipeActive(false);
+							setSwipeDirection(null);
+						},
+						[swipeDirection, handleSwipe],
+					)}
 					drag={false}
 					style={{
 						filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
@@ -252,9 +268,7 @@ export default function Index() {
 															className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
 															onClick={() => handleEditNote(note)}
 														>
-															<ClientOnly
-																fallback={<Skeleton className="h-20 w-full" />}
-															>
+															<ClientOnly fallback={<Skeleton className="h-20 w-full" />}>
 																<NoteContent note={note} />
 															</ClientOnly>
 														</div>

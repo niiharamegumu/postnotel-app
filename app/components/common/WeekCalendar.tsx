@@ -21,7 +21,7 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 type ViewMode = "week" | "month";
 
@@ -43,21 +43,24 @@ export function WeekCalendar({
 	className,
 }: WeekCalendarProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>("week");
-	const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
-	const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
-	const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+	
+	const weekDays = useMemo(() => {
+		const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
+		const end = endOfWeek(selectedDate, { weekStartsOn: 1 });
+		return eachDayOfInterval({ start, end });
+	}, [selectedDate]);
 
-	const handlePreviousWeek = () => {
+	const handlePreviousWeek = useCallback(() => {
 		const previousWeek = subWeeks(selectedDate, 1);
 		onWeekChange(previousWeek);
-	};
+	}, [selectedDate, onWeekChange]);
 
-	const handleNextWeek = () => {
+	const handleNextWeek = useCallback(() => {
 		const nextWeek = addWeeks(selectedDate, 1);
 		onWeekChange(nextWeek);
-	};
+	}, [selectedDate, onWeekChange]);
 
-	const handlePreviousMonth = () => {
+	const handlePreviousMonth = useCallback(() => {
 		const previousMonth = subMonths(selectedDate, 1);
 		onWeekChange(previousMonth);
 		
@@ -67,9 +70,9 @@ export function WeekCalendar({
 			const monthEnd = endOfMonth(previousMonth);
 			onNoteDaysChange(monthStart, monthEnd);
 		}
-	};
+	}, [selectedDate, onWeekChange, onNoteDaysChange]);
 
-	const handleNextMonth = () => {
+	const handleNextMonth = useCallback(() => {
 		const nextMonth = addMonths(selectedDate, 1);
 		onWeekChange(nextMonth);
 		
@@ -79,14 +82,14 @@ export function WeekCalendar({
 			const monthEnd = endOfMonth(nextMonth);
 			onNoteDaysChange(monthStart, monthEnd);
 		}
-	};
+	}, [selectedDate, onWeekChange, onNoteDaysChange]);
 
-	const handleTodayClick = () => {
+	const handleTodayClick = useCallback(() => {
 		const today = new Date();
 		onWeekChange(today);
-	};
+	}, [onWeekChange]);
 
-	const handleViewModeToggle = () => {
+	const handleViewModeToggle = useCallback(() => {
 		const newViewMode = viewMode === "week" ? "month" : "week";
 		setViewMode(newViewMode);
 
@@ -101,20 +104,20 @@ export function WeekCalendar({
 				onNoteDaysChange(weekStart, weekEnd);
 			}
 		}
-	};
+	}, [viewMode, selectedDate, onNoteDaysChange]);
 
-	const isToday = (date: Date): boolean => {
+	const isToday = useCallback((date: Date): boolean => {
 		const today = new Date();
 		return format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
-	};
+	}, []);
 
-	const isSelected = (date: Date): boolean => {
+	const isSelected = useCallback((date: Date): boolean => {
 		return format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
-	};
+	}, [selectedDate]);
 
-	const hasNote = (date: Date): boolean => {
+	const hasNote = useCallback((date: Date): boolean => {
 		return noteDays.some((d) => d === format(date, "yyyy-MM-dd"));
-	};
+	}, [noteDays]);
 
 	return (
 		<div className={cn("p-0", className)}>

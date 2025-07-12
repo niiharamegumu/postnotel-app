@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import type { Tag } from "../types/tag";
+import { memo, useCallback } from "react";
 
 interface TagBadgeProps {
 	tag: Tag;
@@ -8,7 +9,11 @@ interface TagBadgeProps {
 	removable?: boolean;
 }
 
-export function TagBadge({ tag, onRemove, removable = true }: TagBadgeProps) {
+export const TagBadge = memo(function TagBadge({ tag, onRemove, removable = true }: TagBadgeProps) {
+	const handleRemove = useCallback(() => {
+		onRemove(tag.id);
+	}, [onRemove, tag.id]);
+
 	return (
 		<div className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-sm">
 			<span>{tag.name}</span>
@@ -17,11 +22,11 @@ export function TagBadge({ tag, onRemove, removable = true }: TagBadgeProps) {
 					variant="ghost"
 					size="sm"
 					className="h-4 w-4 p-0 hover:bg-secondary-foreground/10"
-					onClick={() => onRemove(tag.id)}
+					onClick={handleRemove}
 				>
 					<X className="h-3 w-3" />
 				</Button>
 			)}
 		</div>
 	);
-}
+});
