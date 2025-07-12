@@ -1,11 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
-import {
-	useLoaderData,
-	useNavigate,
-	useNavigation,
-	useOutletContext,
-	useFetcher,
-} from "react-router";
+import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
@@ -20,6 +14,8 @@ import { motion, type PanInfo } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
+import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
+import ClientOnly from "~/components/common/ClientOnly";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -33,7 +29,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
 	const endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
-	const noteDays = await fetchDays(request, context, { startDate, endDate });
+	let noteDays: string[] = [];
+	try {
+		noteDays = await fetchDays(request, context, { startDate, endDate });
+	} catch (error) {
+		console.error("Failed to fetch note days:", error);
+		noteDays = [];
+	}
+
 	return { notes, date, noteDays };
 }
 
@@ -76,26 +79,39 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
-	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 	const { tags } = useTags();
-	const fetcher = useFetcher<{ noteDays: string[] }>();
+	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
+	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 
-	const handleDateSelect = (selected: Date) => {
-		setSelectedDate(selected);
-		const dateStr = format(selected, "yyyy-MM-dd");
-		navigate(`?date=${dateStr}`);
-	};
+	const handleDateSelect = useCallback(
+		(selected: Date) => {
+			setSelectedDate(selected);
+			const dateStr = format(selected, "yyyy-MM-dd");
+			navigate(`?date=${dateStr}`);
+		},
+		[navigate],
+	);
 
-	const handleWeekChange = (date: Date) => {
-		setSelectedDate(date);
-		setCurrentWeek(date);
-		navigate(`?date=${format(date, "yyyy-MM-dd")}`);
+	const handleNoteDaysChange = useCallback(
+		(startDate: Date, endDate: Date) => {
+			fetchNoteDays(startDate, endDate);
+		},
+		[fetchNoteDays],
+	);
 
-		// 週変更時にnoteDaysを更新
-		const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-		const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-		handleNoteDaysChange(weekStart, weekEnd);
-	};
+	const handleWeekChange = useCallback(
+		(date: Date) => {
+			setSelectedDate(date);
+			setCurrentWeek(date);
+			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
+
+			// 週変更時にnoteDaysを更新
+			const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+			handleNoteDaysChange(weekStart, weekEnd);
+		},
+		[navigate, handleNoteDaysChange],
+	);
 
 	const handleEditNote = useCallback(
 		(note: Note) => {
@@ -105,40 +121,36 @@ export default function Index() {
 		[userInfo, onClickEditNote],
 	);
 
-	const handleSwipe = (direction: "left" | "right") => {
-		const newDate = direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
+	const handleSwipe = useCallback(
+		(direction: "left" | "right") => {
+			const newDate =
+				direction === "left" ? getNextDay(selectedDate) : getPreviousDay(selectedDate);
 
-		const today = new Date();
-		const maxFutureDate = addDays(today, 365);
-		const minPastDate = subDays(today, 730);
+			const today = new Date();
+			const maxFutureDate = addDays(today, 365);
+			const minPastDate = subDays(today, 730);
 
-		if (newDate > maxFutureDate || newDate < minPastDate) {
-			return;
-		}
+			if (newDate > maxFutureDate || newDate < minPastDate) {
+				return;
+			}
 
-		setSelectedDate(newDate);
-		setCurrentWeek(newDate);
-		navigateToDate(newDate, navigate);
+			setSelectedDate(newDate);
+			setCurrentWeek(newDate);
+			navigateToDate(newDate, navigate);
 
-		// swipe時にnoteDaysを更新
-		const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
-		const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
-		handleNoteDaysChange(weekStart, weekEnd);
-	};
-
-	const handleNoteDaysChange = (startDate: Date, endDate: Date) => {
-		const searchParams = new URLSearchParams();
-		searchParams.set("startDate", format(startDate, "yyyy-MM-dd"));
-		searchParams.set("endDate", format(endDate, "yyyy-MM-dd"));
-
-		fetcher.load(`/note-days?${searchParams.toString()}`);
-	};
+			// swipe時にnoteDaysを更新
+			const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
+			handleNoteDaysChange(weekStart, weekEnd);
+		},
+		[selectedDate, navigate, handleNoteDaysChange],
+	);
 
 	useEffect(() => {
-		if (fetcher.data && fetcher.state === "idle") {
-			setCurrentNoteDays(fetcher.data.noteDays);
+		if (hookNoteDays.length > 0) {
+			setCurrentNoteDays(hookNoteDays);
 		}
-	}, [fetcher.data, fetcher.state]);
+	}, [hookNoteDays]);
 
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
@@ -189,20 +201,23 @@ export default function Index() {
 						},
 						[swipeDirection],
 					)}
-					onPanEnd={(_, info: PanInfo) => {
-						const horizontalDistance = Math.abs(info.offset.x);
-						const swipeThreshold = window.innerWidth / 3;
+					onPanEnd={useCallback(
+						(_event: PointerEvent, info: PanInfo) => {
+							const horizontalDistance = Math.abs(info.offset.x);
+							const swipeThreshold = window.innerWidth / 3;
 
-						// 水平スワイプかつ閾値を超えた場合のみ日付変更
-						if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
-							const direction = info.offset.x > 0 ? "right" : "left";
-							handleSwipe(direction);
-						}
+							// 水平スワイプかつ閾値を超えた場合のみ日付変更
+							if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
+								const direction = info.offset.x > 0 ? "right" : "left";
+								handleSwipe(direction);
+							}
 
-						// 状態をリセット
-						setIsSwipeActive(false);
-						setSwipeDirection(null);
-					}}
+							// 状態をリセット
+							setIsSwipeActive(false);
+							setSwipeDirection(null);
+						},
+						[swipeDirection, handleSwipe],
+					)}
 					drag={false}
 					style={{
 						filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
@@ -253,7 +268,9 @@ export default function Index() {
 															className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
 															onClick={() => handleEditNote(note)}
 														>
-															<NoteContent note={note} />
+															<ClientOnly fallback={<Skeleton className="h-20 w-full" />}>
+																<NoteContent note={note} />
+															</ClientOnly>
 														</div>
 														<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
 															<div>{format(new Date(note.createdAt), "HH:mm")}</div>

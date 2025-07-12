@@ -1,6 +1,6 @@
 import { Bot, ImagePlus, X } from "lucide-react";
 import { Suspense, useState } from "react";
-import { Outlet, useNavigate, useOutletContext } from "react-router";
+import { Outlet, useOutletContext } from "react-router";
 import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,86 +12,24 @@ import {
 } from "~/components/ui/drawer";
 import { motion, AnimatePresence } from "framer-motion";
 import type { UserInfo } from "~/types/user";
-import { toast } from "sonner";
-import { ApiResponseError } from "~/api/error/apiResponseError";
-import { AccessLevel } from "~/constants/accessLevel";
-import { format } from "date-fns";
 import { useImageUpload } from "~/hooks/useImageUpload";
-import { StatusCodes } from "http-status-codes";
+import { useWineRecognition } from "~/features/wines/hooks/useWineRecognition";
 
 export default function Wines() {
-	const navigate = useNavigate();
-
 	const userInfo = useOutletContext<UserInfo | null>();
 	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } =
 		useImageUpload();
+	const { recognizeWine, loading } = useWineRecognition();
 
 	const [open, setOpen] = useState(false);
-	const [loading, setLoading] = useState(false);
 
 	const requestAI = async (): Promise<void> => {
-		if (uploadedImages.length === 0) {
-			toast.error("画像を選択してください");
-			return;
-		}
-
-		setLoading(true);
 		try {
-			const noteDay = format(new Date(), "yyyy-MM-dd");
-			const accessLevel = AccessLevel.Public;
-			const imagesFileNames = uploadedImages.map((url) => {
-				const parts = url.split("/");
-				return parts[parts.length - 1];
-			});
-
-			if (imagesFileNames.some((name) => !name || name.trim() === "")) {
-				throw new Error("無効な画像ファイルが含まれています");
-			}
-
-			const body = JSON.stringify({
-				noteDay,
-				accessLevel,
-				images: imagesFileNames,
-			});
-
-			const res = await fetch("/wines/recognize", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body,
-			});
-
-			if (!res.ok) {
-				const errorData = (await res.json().catch(() => ({}))) as {
-					error?: string;
-					details?: string;
-				};
-				let errorMessage = errorData.error || "処理に失敗しました";
-
-				if (errorData.details && res.status === StatusCodes.BAD_REQUEST) {
-					errorMessage += `: ${errorData.details}`;
-				}
-
-				throw new ApiResponseError(res.status, errorMessage);
-			}
-
-			navigate("/wines");
-			toast.success("ワインノートの作成をAIへリクエストしました");
-		} catch (error) {
-			console.error("ワインノートの作成に失敗:", error);
-
-			if (error instanceof ApiResponseError) {
-				toast.error(error.message);
-			} else if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error("ワインノートの作成に失敗しました");
-			}
-		} finally {
-			setLoading(false);
+			await recognizeWine(uploadedImages);
 			setOpen(false);
 			resetImages();
+		} catch (error) {
+			console.error("ワインノートの作成に失敗:", error);
 		}
 	};
 
@@ -115,7 +53,7 @@ export default function Wines() {
 									setOpen(isOpen);
 								}}
 							>
-								<DrawerTrigger>
+								<DrawerTrigger asChild>
 									<Button className="border-solid border-secondary border-1">
 										<AnimatePresence mode="wait" initial={false}>
 											<motion.span

@@ -17,20 +17,18 @@ import { toast } from "sonner";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
-import { useNavigate } from "react-router";
-import { format } from "date-fns";
 import { useImageUpload } from "~/hooks/useImageUpload";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { TagBadge } from "~/features/tags/components/TagBadge";
+import { useNotes } from "~/features/notes/hooks/useNotes";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
 	noteDrawerType: ActionType;
 	setNoteDrawerType: React.Dispatch<React.SetStateAction<ActionType>>;
 	loading: boolean;
-	setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 	open: boolean;
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	note: Note | null;
@@ -42,16 +40,15 @@ export default function BlockNoteDrawer({
 	noteDrawerType,
 	setNoteDrawerType,
 	loading,
-	setLoading,
 	open,
 	setOpen,
 	targetDate,
 	note,
 }: BlockNoteDrawerProps) {
+	const { deleteNote } = useNotes();
 	const [isPrivate, setIsPrivate] = useState(true);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 	const [tagSelectorOpen, setTagSelectorOpen] = useState(false);
-	const navigate = useNavigate();
 	const {
 		fileInputRef,
 		uploadedImages,
@@ -107,7 +104,6 @@ export default function BlockNoteDrawer({
 
 	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
-		setLoading(true);
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
 			if (!markdown) {
@@ -132,35 +128,21 @@ export default function BlockNoteDrawer({
 				console.error(e);
 			}
 		} finally {
-			setLoading(false);
 			resetDrawer();
 		}
 	};
 
-	const deleteNote = async () => {
+	const handleDeleteNote = async () => {
 		if (!note) return;
 
 		const isConfirmed = window.confirm("このノートを削除しますか？");
 		if (!isConfirmed || noteDrawerType !== ActionType.Edit) return;
 
-		setLoading(true);
 		try {
-			const res = await fetch(`/notes/${note.noteId}/delete`, {
-				method: "POST",
-			});
-			if (!res.ok) throw new ApiResponseError(res.status, "ノートの削除に失敗しました");
-
-			navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-			toast.success("ノートを削除しました");
-		} catch (error) {
-			if (error instanceof ApiResponseError) {
-				toast.error(error.message);
-			} else {
-				console.error("Failed to delete note:", error);
-			}
-		} finally {
-			setLoading(false);
+			await deleteNote(note.noteId, targetDate);
 			resetDrawer();
+		} catch (error) {
+			console.error("Failed to delete note:", error);
 		}
 	};
 
@@ -178,7 +160,7 @@ export default function BlockNoteDrawer({
 				setOpen(isOpen);
 			}}
 		>
-			<DrawerTrigger>
+			<DrawerTrigger asChild>
 				<Button className="border-solid border-secondary border-1">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
@@ -279,7 +261,7 @@ export default function BlockNoteDrawer({
 							</DrawerContent>
 						</Drawer>
 						{noteDrawerType === ActionType.Edit && (
-							<Button variant="outline" type="button" onClick={deleteNote} disabled={loading}>
+							<Button variant="outline" type="button" onClick={handleDeleteNote} disabled={loading}>
 								<Trash2 />
 							</Button>
 						)}

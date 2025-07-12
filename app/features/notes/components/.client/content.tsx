@@ -1,4 +1,5 @@
 import { useCreateBlockNote } from "@blocknote/react";
+import { useEffect, useState } from "react";
 import type { Note } from "../../types/note";
 import parse, { type HTMLReactParserOptions, type Element, type Text } from "html-react-parser";
 import { AccessLevel } from "~/constants/accessLevel";
@@ -7,18 +8,32 @@ type Props = {
 	note: Note;
 };
 
-export default async function NoteContent({ note }: Props) {
+export default function NoteContent({ note }: Props) {
+	const [html, setHtml] = useState<string>("");
 	const editor = useCreateBlockNote();
-	const blocks = await editor.tryParseMarkdownToBlocks(note.content);
-	const HTMLFromBlocks = await editor.blocksToFullHTML(blocks);
+
+	useEffect(() => {
+		const processMarkdown = async () => {
+			try {
+				const blocks = await editor.tryParseMarkdownToBlocks(note.content);
+				const HTMLFromBlocks = await editor.blocksToFullHTML(blocks);
+				setHtml(HTMLFromBlocks);
+			} catch (error) {
+				console.error("Failed to process markdown:", error);
+				setHtml(note.content);
+			}
+		};
+
+		processMarkdown();
+	}, [note.content, editor]);
 
 	const options: HTMLReactParserOptions = {
 		replace: (domNode) => {
-			if (domNode.type === 'tag' && domNode.name === 'a') {
+			if (domNode.type === "tag" && domNode.name === "a") {
 				const element = domNode as Element;
 				const href = element.attribs?.href;
 				const children = element.children;
-				
+
 				if (href) {
 					return (
 						<a
@@ -30,16 +45,14 @@ export default async function NoteContent({ note }: Props) {
 						>
 							{parse(
 								children
-									?.map((child) => 
-										child.type === 'text' ? (child as Text).data : ''
-									)
-									.join('') || href
+									?.map((child) => (child.type === "text" ? (child as Text).data : ""))
+									.join("") || href,
 							)}
 						</a>
 					);
 				}
 			}
-		}
+		},
 	};
 
 	return (
@@ -50,7 +63,7 @@ export default async function NoteContent({ note }: Props) {
 					: "bg-primary text-secondary"
 			}`}
 		>
-			{parse(HTMLFromBlocks, options)}
+			{html ? parse(html, options) : note.content}
 		</div>
 	);
 }

@@ -1,5 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
 	Command,
 	CommandEmpty,
@@ -30,26 +30,33 @@ export function TagSelector({
 	className,
 }: TagSelectorProps) {
 	const [inputValue, setInputValue] = useState("");
-	const filteredTags = availableTags.filter((tag) =>
-		tag.name.toLowerCase().includes(inputValue.toLowerCase()),
-	);
-	const isTagSelected = (tagId: string) => selectedTags.some((tag) => tag.id === tagId);
+	
+	const filteredTags = useMemo(() => 
+		availableTags.filter((tag) =>
+			tag.name.toLowerCase().includes(inputValue.toLowerCase()),
+		)
+	, [availableTags, inputValue]);
+	
+	const isTagSelected = useCallback((tagId: string) => 
+		selectedTags.some((tag) => tag.id === tagId)
+	, [selectedTags]);
 
-	const canCreateNewTag =
+	const canCreateNewTag = useMemo(() =>
 		inputValue.trim() !== "" && // 空でないこと
 		!availableTags.some((tag) => tag.name.toLowerCase() === inputValue.toLowerCase()) && // 既存のタグと重複しないこと
-		tagNameSchema.safeParse(inputValue).success; // スキーマに合致すること
+		tagNameSchema.safeParse(inputValue).success // スキーマに合致すること
+	, [inputValue, availableTags]);
 
-	const handleTagSelect = (tag: Tag) => {
+	const handleTagSelect = useCallback((tag: Tag) => {
 		if (isTagSelected(tag.id)) {
 			onTagRemove(tag.id);
 		} else {
 			onTagSelect(tag);
 		}
 		setInputValue("");
-	};
+	}, [isTagSelected, onTagRemove, onTagSelect]);
 
-	const handleCreateTag = async () => {
+	const handleCreateTag = useCallback(async () => {
 		if (!canCreateNewTag) return;
 
 		const newTag = await onCreateTag(inputValue.trim());
@@ -57,7 +64,7 @@ export function TagSelector({
 			onTagSelect(newTag);
 			setInputValue("");
 		}
-	};
+	}, [canCreateNewTag, onCreateTag, inputValue, onTagSelect]);
 
 	return (
 		<div className={cn("w-full space-y-2", className)}>

@@ -33,6 +33,8 @@ PostNotelは、カレンダーベースの日記・ノートアプリケーシ�
 ### リクエストフローと制限
 - リクエストはBFF経由で行うこと
 - **React Router v7** のloader, actionからREST APIを利用すること
+- **BFF APIエンドポイント**: `/api/*` パスでBFF機能を提供
+- **View用エンドポイント**: UI表示用のルート（`/`, `/notes`, `/auth/login`等）
 
 ### ディレクトリ構成
 ```
@@ -43,14 +45,26 @@ app/
 ├── features/            # 機能別モジュール
 │   ├── auth/           # 認証機能
 │   ├── notes/          # ノート管理機能
+│   │   └── hooks/      # ノート関連カスタムフック
+│   ├── tags/           # タグ管理機能
+│   │   └── hooks/      # タグ関連カスタムフック
+│   ├── wines/          # ワイン機能
+│   │   └── hooks/      # ワイン関連カスタムフック
 │   └── image/          # 画像ハンドリング
 ├── routes/             # ルートコンポーネント
-│   ├── auth/          # 認証関連ルート
-│   ├── notes/         # ノート関連ルート
-│   ├── wines/         # ワイン機能ルート
+│   ├── api/           # BFF APIエンドポイント
+│   │   ├── auth/      # 認証API（logout, redirect, callback）
+│   │   ├── notes/     # ノート管理API（create, update, delete）
+│   │   ├── tags/      # タグ管理API（list, create）
+│   │   ├── image/     # 画像API（get-upload-url）
+│   │   ├── wines/     # ワイン認識API（recognize）
+│   │   └── note-days/ # ノート日付API
+│   ├── auth/          # 認証関連View（login, callback）
+│   ├── notes/         # ノート関連View（index, tag, images）
+│   ├── wines/         # ワイン機能View（index）
 │   └── top.tsx        # ホームページ
 ├── layout/            # レイアウトコンポーネント
-├── hooks/             # カスタムReactフック
+├── hooks/             # 共通カスタムReactフック
 ├── lib/               # ユーティリティライブラリ
 ├── constants/         # アプリケーション定数
 ├── types/             # TypeScript型定義
@@ -144,6 +158,36 @@ app/
 - **TagSelector**: タグ選択コンポーネント
 - **AccessLevelToggle**: アクセスレベル切り替え
 
+### カスタムフック設計
+
+#### 共通CRUD操作フック
+- **`useNotes`**: ノートのCRUD操作（作成・更新・削除）
+  - 統一されたエラーハンドリング
+  - ローディング状態管理
+  - Toast通知の自動表示
+  - ナビゲーション処理
+
+- **`useNoteDays`**: カレンダー用日付データ取得
+  - React Router useFetcherを内部利用
+  - 週単位での日付範囲取得
+  - キャッシュ機能
+
+- **`useWineRecognition`**: ワイン認識処理
+  - 画像バリデーション
+  - AI認識API呼び出し
+  - エラーハンドリング
+
+- **`useTags`**: タグ管理操作
+  - タグ一覧取得・作成
+  - 楽観的UI更新
+  - 自動リフレッシュ
+
+#### 設計原則
+- **一貫性**: 全フックで統一されたAPI設計
+- **再利用性**: 複数コンポーネントで利用可能
+- **型安全性**: TypeScript完全対応
+- **エラー処理**: 統一されたエラーハンドリングパターン
+
 ## データモデル
 
 ### Note（ノート）
@@ -193,7 +237,30 @@ interface NoteDay {
 
 ## API統合
 
-### エンドポイント仕様
+### BFF APIエンドポイント（フロントエンド→BFF）
+
+#### View用エンドポイント
+- `GET /` - トップページ
+- `GET /notes` - ノート一覧ページ
+- `GET /notes/tag/:tagId` - タグ別ノート表示
+- `GET /notes/images` - 画像一覧表示
+- `GET /wines` - ワイン一覧ページ
+- `GET /auth/login` - ログインページ
+- `GET /auth/callback` - OAuth コールバック
+
+#### BFF APIエンドポイント（`/api/*`）
+- `GET /api/image/get-upload-url` - 画像アップロード用URL取得
+- `POST /api/notes/create` - ノート作成
+- `POST /api/notes/:id/update` - ノート更新
+- `POST /api/notes/:id/delete` - ノート削除
+- `GET /api/note-days` - ノート日付データ取得
+- `POST /api/wines/recognize` - ワイン認識処理
+- `GET /api/tags` - タグ一覧取得
+- `POST /api/tags/create` - タグ作成
+- `GET /api/auth/redirect` - 認証リダイレクト
+- `POST /api/auth/logout` - ログアウト処理
+
+### バックエンドAPIエンドポイント（BFF→バックエンド）
 
 #### 認証関連
 - `GET /v1/auth/google/login` - Google OAuth開始
@@ -223,9 +290,16 @@ interface NoteDay {
 - `POST /v1/wine-labels/recognize` - ワインラベル認識
 
 ### データフェッチング戦略
-- **React Router Loaders**: サーバーサイドでのデータプリフェッチ
+- **React Router Loaders**: サーバーサイドでのデータプリフェッチ（バックエンドAPI経由）
+- **カスタムフック**: 共通化されたCRUD操作（`useNotes`, `useNoteDays`, `useWineRecognition`）
+- **Client-side Fetch**: クライアントサイドでのBFF API呼び出し（`/api/*` エンドポイント）
 - **Optimistic Updates**: 楽観的UI更新
-- **Error Handling**: エラー境界とフォールバック
+- **Error Handling**: 統一されたエラー処理とフォールバック
+
+### API アーキテクチャ
+- **View Routes**: UI表示用ルート（React Router loader/action でバックエンドAPI呼び出し）
+- **BFF API Routes**: クライアントサイド JavaScript から呼び出される `/api/*` エンドポイント
+- **バックエンドAPI**: BFFが呼び出す実際のREST API (`/v1/*`)
 
 ## パフォーマンス最適化
 
