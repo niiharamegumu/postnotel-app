@@ -1,11 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
-import {
-	useLoaderData,
-	useNavigate,
-	useNavigation,
-	useOutletContext,
-	useFetcher,
-} from "react-router";
+import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
@@ -21,6 +15,7 @@ import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
+import ClientOnly from "~/components/common/ClientOnly";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -34,7 +29,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
 	const endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
-	const noteDays = await fetchDays(request, context, { startDate, endDate });
+	let noteDays: string[] = [];
+	try {
+		noteDays = await fetchDays(request, context, { startDate, endDate });
+	} catch (error) {
+		console.error("Failed to fetch note days:", error);
+		noteDays = [];
+	}
+
 	return { notes, date, noteDays };
 }
 
@@ -250,7 +252,11 @@ export default function Index() {
 															className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
 															onClick={() => handleEditNote(note)}
 														>
-															<NoteContent note={note} />
+															<ClientOnly
+																fallback={<div className="text-primary p-4">{note.content}</div>}
+															>
+																<NoteContent note={note} />
+															</ClientOnly>
 														</div>
 														<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
 															<div>{format(new Date(note.createdAt), "HH:mm")}</div>

@@ -7,6 +7,7 @@ import { ActionType } from "~/features/notes/constants/actionType";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import type { UserInfo } from "~/types/user";
 import { useNotes } from "~/features/notes/hooks/useNotes";
+import ClientOnly from "~/components/common/ClientOnly";
 
 const BlockNoteDrawer = lazy(() => import("~/components/common/.client/blockNoteDrawer"));
 
@@ -66,24 +67,32 @@ export default function WithPost() {
 				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center gap-2">
 					<FloatMenu userInfo={userInfo} />
 					{userInfo && (
-						<Suspense
+						<ClientOnly
 							fallback={
 								<Button className="border-solid border-secondary border-1">
 									<Plus />
 								</Button>
 							}
 						>
-							<BlockNoteDrawer
-								onSubmit={noteDrawerHandler}
-								noteDrawerType={noteDrawerType}
-								setNoteDrawerType={setNoteDrawerType}
-								loading={loading}
-								open={isNoteDrawerOpen}
-								setOpen={setNoteDrawerOpen}
-								note={targetNote}
-								targetDate={targetDate}
-							/>
-						</Suspense>
+							<Suspense
+								fallback={
+									<Button className="border-solid border-secondary border-1">
+										<Plus />
+									</Button>
+								}
+							>
+								<BlockNoteDrawer
+									onSubmit={noteDrawerHandler}
+									noteDrawerType={noteDrawerType}
+									setNoteDrawerType={setNoteDrawerType}
+									loading={loading}
+									open={isNoteDrawerOpen}
+									setOpen={setNoteDrawerOpen}
+									note={targetNote}
+									targetDate={targetDate}
+								/>
+							</Suspense>
+						</ClientOnly>
 					)}
 				</div>
 			</main>
