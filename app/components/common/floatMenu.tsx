@@ -22,7 +22,7 @@ export default function FloatMenu({ userInfo }: Props) {
 	const [open, setOpen] = useState(false);
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
-			<DropdownMenuTrigger className="outline-none">
+			<DropdownMenuTrigger asChild className="outline-none">
 				<Button className="border-solid border-secondary border-1">
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
@@ -46,28 +46,28 @@ export default function FloatMenu({ userInfo }: Props) {
 							</Avatar>
 							{userInfo.name}
 						</DropdownMenuLabel>
-						<DropdownMenuItem>
+						<DropdownMenuItem asChild>
 							<Link to="/auth/logout">Logout</Link>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 					</div>
 				)}
-				<DropdownMenuItem>
+				<DropdownMenuItem asChild>
 					<Link to="/" className="flex w-full">
 						Top
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem>
+				<DropdownMenuItem asChild>
 					<Link to="/notes" className="flex w-full">
 						Notes
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem>
+				<DropdownMenuItem asChild>
 					<Link to="/notes/images" className="flex w-full">
 						Images
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem>
+				<DropdownMenuItem asChild>
 					<Link to="/wines" className="flex w-full">
 						Wines
 					</Link>

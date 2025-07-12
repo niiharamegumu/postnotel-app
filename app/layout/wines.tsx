@@ -53,7 +53,7 @@ export default function Wines() {
 									setOpen(isOpen);
 								}}
 							>
-								<DrawerTrigger>
+								<DrawerTrigger asChild>
 									<Button className="border-solid border-secondary border-1">
 										<AnimatePresence mode="wait" initial={false}>
 											<motion.span
