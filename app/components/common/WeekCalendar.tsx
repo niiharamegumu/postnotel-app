@@ -21,30 +21,57 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
-import { useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { ViewMode } from "~/constants/viewMode";
 
 interface WeekCalendarProps {
 	selectedDate: Date;
 	noteDays: string[];
-	viewMode: ViewMode;
 	onDateSelect: (date: Date) => void;
 	onWeekChange: (date: Date) => void;
-	onNoteDaysChange: (startDate: Date, endDate: Date) => void;
-	onViewModeChange: React.Dispatch<React.SetStateAction<ViewMode>>;
+	onDateRangeChange?: (startDate: Date, endDate: Date) => void;
+	onCalendarReady?: (
+		getDateRange: (newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode },
+	) => void;
 	className?: string;
 }
 
 export function WeekCalendar({
 	selectedDate,
 	noteDays,
-	viewMode,
 	onDateSelect,
 	onWeekChange,
-	onNoteDaysChange,
-	onViewModeChange,
+	onDateRangeChange,
+	onCalendarReady,
 	className,
 }: WeekCalendarProps) {
+	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
+
+	// スワイプ時に使用する期間計算関数を外部に提供
+	const getDateRangeForSwipe = useCallback(
+		(newDate: Date) => {
+			if (viewMode === ViewMode.Month) {
+				return {
+					startDate: startOfMonth(newDate),
+					endDate: endOfMonth(newDate),
+					viewMode: ViewMode.Month,
+				};
+			}
+			return {
+				startDate: startOfWeek(newDate, { weekStartsOn: 1 }),
+				endDate: endOfWeek(newDate, { weekStartsOn: 1 }),
+				viewMode: ViewMode.Week,
+			};
+		},
+		[viewMode],
+	);
+
+	// カレンダーが準備できたときに期間計算関数を外部に提供
+	useEffect(() => {
+		if (onCalendarReady) {
+			onCalendarReady(getDateRangeForSwipe);
+		}
+	}, [onCalendarReady, getDateRangeForSwipe]);
 	const weekDays = useMemo(() => {
 		const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
 		const end = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -54,65 +81,79 @@ export function WeekCalendar({
 	const handlePreviousWeek = useCallback(() => {
 		const previousWeek = subWeeks(selectedDate, 1);
 		onWeekChange(previousWeek);
-	}, [selectedDate, onWeekChange]);
+		// 週変更時にnoteDaysを更新
+		if (onDateRangeChange) {
+			const weekStart = startOfWeek(previousWeek, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(previousWeek, { weekStartsOn: 1 });
+			onDateRangeChange(weekStart, weekEnd);
+		}
+	}, [selectedDate, onWeekChange, onDateRangeChange]);
 
 	const handleNextWeek = useCallback(() => {
 		const nextWeek = addWeeks(selectedDate, 1);
 		onWeekChange(nextWeek);
-	}, [selectedDate, onWeekChange]);
+		// 週変更時にnoteDaysを更新
+		if (onDateRangeChange) {
+			const weekStart = startOfWeek(nextWeek, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(nextWeek, { weekStartsOn: 1 });
+			onDateRangeChange(weekStart, weekEnd);
+		}
+	}, [selectedDate, onWeekChange, onDateRangeChange]);
 
 	const handlePreviousMonth = useCallback(() => {
 		const previousMonth = subMonths(selectedDate, 1);
 		onWeekChange(previousMonth);
 		// 月変更時にnoteDaysを更新
-		if (onNoteDaysChange) {
+		if (onDateRangeChange) {
 			const monthStart = startOfMonth(previousMonth);
 			const monthEnd = endOfMonth(previousMonth);
-			onNoteDaysChange(monthStart, monthEnd);
+			onDateRangeChange(monthStart, monthEnd);
 		}
-	}, [selectedDate, onWeekChange, onNoteDaysChange]);
+	}, [selectedDate, onWeekChange, onDateRangeChange]);
 
 	const handleNextMonth = useCallback(() => {
 		const nextMonth = addMonths(selectedDate, 1);
 		onWeekChange(nextMonth);
 		// 月変更時にnoteDaysを更新
-		if (onNoteDaysChange) {
+		if (onDateRangeChange) {
 			const monthStart = startOfMonth(nextMonth);
 			const monthEnd = endOfMonth(nextMonth);
-			onNoteDaysChange(monthStart, monthEnd);
+			onDateRangeChange(monthStart, monthEnd);
 		}
-	}, [selectedDate, onWeekChange, onNoteDaysChange]);
+	}, [selectedDate, onWeekChange, onDateRangeChange]);
 
 	const handleTodayClick = useCallback(() => {
 		const today = new Date();
 		onWeekChange(today);
-		if (viewMode === ViewMode.Month) {
-			const monthStart = startOfMonth(today);
-			const monthEnd = endOfMonth(today);
-			onNoteDaysChange(monthStart, monthEnd);
-		} else {
-			const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-			const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
-			onNoteDaysChange(weekStart, weekEnd);
+		if (onDateRangeChange) {
+			if (viewMode === ViewMode.Month) {
+				const monthStart = startOfMonth(today);
+				const monthEnd = endOfMonth(today);
+				onDateRangeChange(monthStart, monthEnd);
+			} else {
+				const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+				const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+				onDateRangeChange(weekStart, weekEnd);
+			}
 		}
-	}, [onWeekChange, onNoteDaysChange, viewMode]);
+	}, [onWeekChange, onDateRangeChange, viewMode]);
 
 	const handleViewModeToggle = useCallback(() => {
 		const newViewMode = viewMode === ViewMode.Week ? ViewMode.Month : ViewMode.Week;
-		onViewModeChange(newViewMode);
+		setViewMode(newViewMode);
 
-		if (onNoteDaysChange) {
+		if (onDateRangeChange) {
 			if (newViewMode === ViewMode.Month) {
 				const monthStart = startOfMonth(selectedDate);
 				const monthEnd = endOfMonth(selectedDate);
-				onNoteDaysChange(monthStart, monthEnd);
+				onDateRangeChange(monthStart, monthEnd);
 			} else {
 				const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
 				const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
-				onNoteDaysChange(weekStart, weekEnd);
+				onDateRangeChange(weekStart, weekEnd);
 			}
 		}
-	}, [viewMode, selectedDate, onNoteDaysChange, onViewModeChange]);
+	}, [viewMode, selectedDate, onDateRangeChange]);
 
 	const isToday = useCallback((date: Date): boolean => {
 		const today = new Date();
