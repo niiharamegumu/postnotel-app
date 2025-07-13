@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
-import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -16,7 +16,7 @@ import { TagLink } from "~/components/common/TagLink";
 import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import ClientOnly from "~/components/common/ClientOnly";
-import { ViewMode } from "~/constants/viewMode";
+import type { ViewMode } from "~/constants/viewMode";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -80,10 +80,12 @@ export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
-	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
 	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
 	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
+	const [getCalendarDateRange, setGetCalendarDateRange] = useState<
+		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
+	>(null);
 
 	const handleDateSelect = useCallback(
 		(selected: Date) => {
@@ -94,11 +96,18 @@ export default function Index() {
 		[navigate],
 	);
 
-	const handleNoteDaysChange = useCallback(
+	const handleDateRangeChange = useCallback(
 		(startDate: Date, endDate: Date) => {
 			fetchNoteDays(startDate, endDate);
 		},
 		[fetchNoteDays],
+	);
+
+	const handleCalendarReady = useCallback(
+		(getDateRange: (newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) => {
+			setGetCalendarDateRange(() => getDateRange);
+		},
+		[],
 	);
 
 	const handleWeekChange = useCallback(
@@ -106,13 +115,8 @@ export default function Index() {
 			setSelectedDate(date);
 			setCurrentWeek(date);
 			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
-
-			// 週変更時にnoteDaysを更新
-			const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-			const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-			handleNoteDaysChange(weekStart, weekEnd);
 		},
-		[navigate, handleNoteDaysChange],
+		[navigate],
 	);
 
 	const handleEditNote = useCallback(
@@ -140,18 +144,13 @@ export default function Index() {
 			setCurrentWeek(newDate);
 			navigateToDate(newDate, navigate);
 
-			// swipe時にnoteDaysを更新（viewModeに応じて期間を変更）
-			if (viewMode === ViewMode.Month) {
-				const monthStart = startOfMonth(newDate);
-				const monthEnd = endOfMonth(newDate);
-				handleNoteDaysChange(monthStart, monthEnd);
-			} else {
-				const weekStart = startOfWeek(newDate, { weekStartsOn: 1 });
-				const weekEnd = endOfWeek(newDate, { weekStartsOn: 1 });
-				handleNoteDaysChange(weekStart, weekEnd);
+			// swipe時にnoteDaysを更新（WeekCalendarから期間計算を取得）
+			if (getCalendarDateRange) {
+				const { startDate, endDate } = getCalendarDateRange(newDate);
+				fetchNoteDays(startDate, endDate);
 			}
 		},
-		[selectedDate, navigate, handleNoteDaysChange, viewMode],
+		[selectedDate, navigate, getCalendarDateRange, fetchNoteDays],
 	);
 
 	useEffect(() => {
@@ -169,8 +168,8 @@ export default function Index() {
 						onDateSelect={handleDateSelect}
 						onWeekChange={handleWeekChange}
 						noteDays={currentNoteDays}
-						onNoteDaysChange={handleNoteDaysChange}
-						onViewModeChange={setViewMode}
+						onDateRangeChange={handleDateRangeChange}
+						onCalendarReady={handleCalendarReady}
 						className="p-0"
 					/>
 				</div>
