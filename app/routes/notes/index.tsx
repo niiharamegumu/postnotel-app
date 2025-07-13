@@ -1,7 +1,16 @@
 import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
-import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
+import {
+	format,
+	parseISO,
+	startOfWeek,
+	endOfWeek,
+	addDays,
+	subDays,
+	startOfMonth,
+	endOfMonth,
+} from "date-fns";
 import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
@@ -171,6 +180,7 @@ export default function Index() {
 						noteDays={currentNoteDays}
 						onNoteDaysChange={handleNoteDaysChange}
 						onViewModeChange={setViewMode}
+						viewMode={viewMode}
 						className="p-0"
 					/>
 				</div>

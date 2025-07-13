@@ -21,30 +21,30 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import { Calendar } from "~/components/ui/calendar";
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { ViewMode } from "~/constants/viewMode";
 
 interface WeekCalendarProps {
 	selectedDate: Date;
+	noteDays: string[];
+	viewMode: ViewMode;
 	onDateSelect: (date: Date) => void;
 	onWeekChange: (date: Date) => void;
-	noteDays: string[];
-	onNoteDaysChange?: (startDate: Date, endDate: Date) => void;
-	onViewModeChange?: React.Dispatch<React.SetStateAction<ViewMode>>;
+	onNoteDaysChange: (startDate: Date, endDate: Date) => void;
+	onViewModeChange: React.Dispatch<React.SetStateAction<ViewMode>>;
 	className?: string;
 }
 
 export function WeekCalendar({
 	selectedDate,
+	noteDays,
+	viewMode,
 	onDateSelect,
 	onWeekChange,
-	noteDays,
 	onNoteDaysChange,
 	onViewModeChange,
 	className,
 }: WeekCalendarProps) {
-	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
-	
 	const weekDays = useMemo(() => {
 		const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
 		const end = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -64,7 +64,6 @@ export function WeekCalendar({
 	const handlePreviousMonth = useCallback(() => {
 		const previousMonth = subMonths(selectedDate, 1);
 		onWeekChange(previousMonth);
-		
 		// 月変更時にnoteDaysを更新
 		if (onNoteDaysChange) {
 			const monthStart = startOfMonth(previousMonth);
@@ -76,7 +75,6 @@ export function WeekCalendar({
 	const handleNextMonth = useCallback(() => {
 		const nextMonth = addMonths(selectedDate, 1);
 		onWeekChange(nextMonth);
-		
 		// 月変更時にnoteDaysを更新
 		if (onNoteDaysChange) {
 			const monthStart = startOfMonth(nextMonth);
@@ -88,15 +86,20 @@ export function WeekCalendar({
 	const handleTodayClick = useCallback(() => {
 		const today = new Date();
 		onWeekChange(today);
-	}, [onWeekChange]);
+		if (viewMode === ViewMode.Month) {
+			const monthStart = startOfMonth(today);
+			const monthEnd = endOfMonth(today);
+			onNoteDaysChange(monthStart, monthEnd);
+		} else {
+			const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+			const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+			onNoteDaysChange(weekStart, weekEnd);
+		}
+	}, [onWeekChange, onNoteDaysChange, viewMode]);
 
 	const handleViewModeToggle = useCallback(() => {
 		const newViewMode = viewMode === ViewMode.Week ? ViewMode.Month : ViewMode.Week;
-		setViewMode(newViewMode);
-
-		if (onViewModeChange) {
-			onViewModeChange(newViewMode);
-		}
+		onViewModeChange(newViewMode);
 
 		if (onNoteDaysChange) {
 			if (newViewMode === ViewMode.Month) {
@@ -116,13 +119,19 @@ export function WeekCalendar({
 		return format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
 	}, []);
 
-	const isSelected = useCallback((date: Date): boolean => {
-		return format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
-	}, [selectedDate]);
+	const isSelected = useCallback(
+		(date: Date): boolean => {
+			return format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+		},
+		[selectedDate],
+	);
 
-	const hasNote = useCallback((date: Date): boolean => {
-		return noteDays.some((d) => d === format(date, "yyyy-MM-dd"));
-	}, [noteDays]);
+	const hasNote = useCallback(
+		(date: Date): boolean => {
+			return noteDays.some((d) => d === format(date, "yyyy-MM-dd"));
+		},
+		[noteDays],
+	);
 
 	return (
 		<div className={cn("p-0", className)}>
@@ -136,7 +145,11 @@ export function WeekCalendar({
 						<CalendarCheck size={20} />
 					</span>
 					<span onClick={handleViewModeToggle} className="cursor-pointer">
-						{viewMode === ViewMode.Week ? <CalendarArrowDown size={20} /> : <CalendarArrowUp size={20} />}
+						{viewMode === ViewMode.Week ? (
+							<CalendarArrowDown size={20} />
+						) : (
+							<CalendarArrowUp size={20} />
+						)}
 					</span>
 					<div className="flex gap-1">
 						<button
