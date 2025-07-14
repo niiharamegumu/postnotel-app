@@ -86,6 +86,13 @@ export default function Index() {
 		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
 	>(null);
 
+	const swipeThreshold = useMemo(() => {
+		if (typeof window !== "undefined") {
+			return window.innerWidth / 3;
+		}
+		return 150; // fallback
+	}, []);
+
 	const handleDateSelect = useCallback(
 		(selected: Date) => {
 			setSelectedDate(selected);
@@ -150,7 +157,6 @@ export default function Index() {
 		[selectedDate, navigate, getCalendarDateRange, fetchNoteDays],
 	);
 
-
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
 			<div className="max-w-2xl mx-auto space-y-6">
@@ -204,7 +210,6 @@ export default function Index() {
 					onPanEnd={useCallback(
 						(_event: PointerEvent, info: PanInfo) => {
 							const horizontalDistance = Math.abs(info.offset.x);
-							const swipeThreshold = window.innerWidth / 3;
 
 							// 水平スワイプかつ閾値を超えた場合のみ日付変更
 							if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
@@ -216,7 +221,7 @@ export default function Index() {
 							setIsSwipeActive(false);
 							setSwipeDirection(null);
 						},
-						[swipeDirection, handleSwipe],
+						[swipeDirection, handleSwipe, swipeThreshold],
 					)}
 					drag={false}
 					style={{
