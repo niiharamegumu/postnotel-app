@@ -82,7 +82,6 @@ export default function Index() {
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
-	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 	const [getCalendarDateRange, setGetCalendarDateRange] = useState<
 		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
 	>(null);
@@ -151,11 +150,6 @@ export default function Index() {
 		[selectedDate, navigate, getCalendarDateRange, fetchNoteDays],
 	);
 
-	useEffect(() => {
-		if (hookNoteDays.length > 0) {
-			setCurrentNoteDays(hookNoteDays);
-		}
-	}, [hookNoteDays]);
 
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
@@ -165,7 +159,7 @@ export default function Index() {
 						selectedDate={selectedDate}
 						onDateSelect={handleDateSelect}
 						onWeekChange={handleWeekChange}
-						noteDays={currentNoteDays}
+						noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
 						onDateRangeChange={handleDateRangeChange}
 						onCalendarReady={handleCalendarReady}
 						className="p-0"
