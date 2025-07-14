@@ -233,7 +233,11 @@ export default function Index() {
 					{useMemo(
 						() =>
 							isLoading ? (
-								<Skeleton className="h-10 w-1/2" />
+								<>
+									<Skeleton className="h-10 w-2/3" />
+									<Skeleton className="h-10 w-2/3" />
+									<Skeleton className="h-10 w-2/3" />
+								</>
 							) : (
 								<>
 									{notes && notes.notes.length > 0 ? (
@@ -243,7 +247,7 @@ export default function Index() {
 													key={note.noteId}
 													fallback={
 														<li>
-															<Skeleton className="h-10 w-1/2" />
+															<Skeleton className="h-10 w-2/3" />
 														</li>
 													}
 												>
@@ -280,7 +284,7 @@ export default function Index() {
 															)}
 															onClick={() => handleEditNote(note)}
 														>
-															<ClientOnly fallback={<Skeleton className="h-20 w-1/2" />}>
+															<ClientOnly fallback={<Skeleton className="h-20 w-2/3" />}>
 																<NoteContent note={note} />
 															</ClientOnly>
 														</div>
