@@ -233,11 +233,11 @@ export default function Index() {
 					{useMemo(
 						() =>
 							isLoading ? (
-								<>
+								<div className="space-y-4">
 									<Skeleton className="h-10 w-2/3" />
 									<Skeleton className="h-10 w-2/3" />
 									<Skeleton className="h-10 w-2/3" />
-								</>
+								</div>
 							) : (
 								<>
 									{notes && notes.notes.length > 0 ? (
