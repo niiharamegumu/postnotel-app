@@ -9,7 +9,7 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { UserInfo } from "~/types/user";
-import { noteContentTypeLabels } from "~/constants/noteContentType";
+import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion, type PanInfo } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
@@ -17,6 +17,7 @@ import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import ClientOnly from "~/components/common/ClientOnly";
 import type { ViewMode } from "~/constants/viewMode";
+import { cn } from "~/lib/utils";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -77,15 +78,20 @@ export default function Index() {
 	};
 
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
-	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
-	const [currentNoteDays, setCurrentNoteDays] = useState<string[]>(noteDays);
 	const [getCalendarDateRange, setGetCalendarDateRange] = useState<
 		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
 	>(null);
+
+	const swipeThreshold = useMemo(() => {
+		if (typeof window !== "undefined") {
+			return window.innerWidth / 3;
+		}
+		return 150; // fallback
+	}, []);
 
 	const handleDateSelect = useCallback(
 		(selected: Date) => {
@@ -113,7 +119,6 @@ export default function Index() {
 	const handleWeekChange = useCallback(
 		(date: Date) => {
 			setSelectedDate(date);
-			setCurrentWeek(date);
 			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
 		},
 		[navigate],
@@ -141,7 +146,6 @@ export default function Index() {
 			}
 
 			setSelectedDate(newDate);
-			setCurrentWeek(newDate);
 			navigateToDate(newDate, navigate);
 
 			// swipe時にnoteDaysを更新（WeekCalendarから期間計算を取得）
@@ -153,12 +157,6 @@ export default function Index() {
 		[selectedDate, navigate, getCalendarDateRange, fetchNoteDays],
 	);
 
-	useEffect(() => {
-		if (hookNoteDays.length > 0) {
-			setCurrentNoteDays(hookNoteDays);
-		}
-	}, [hookNoteDays]);
-
 	return (
 		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
 			<div className="max-w-2xl mx-auto space-y-6">
@@ -167,7 +165,7 @@ export default function Index() {
 						selectedDate={selectedDate}
 						onDateSelect={handleDateSelect}
 						onWeekChange={handleWeekChange}
-						noteDays={currentNoteDays}
+						noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
 						onDateRangeChange={handleDateRangeChange}
 						onCalendarReady={handleCalendarReady}
 						className="p-0"
@@ -212,7 +210,6 @@ export default function Index() {
 					onPanEnd={useCallback(
 						(_event: PointerEvent, info: PanInfo) => {
 							const horizontalDistance = Math.abs(info.offset.x);
-							const swipeThreshold = window.innerWidth / 3;
 
 							// 水平スワイプかつ閾値を超えた場合のみ日付変更
 							if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
@@ -224,7 +221,7 @@ export default function Index() {
 							setIsSwipeActive(false);
 							setSwipeDirection(null);
 						},
-						[swipeDirection, handleSwipe],
+						[swipeDirection, handleSwipe, swipeThreshold],
 					)}
 					drag={false}
 					style={{
@@ -235,7 +232,9 @@ export default function Index() {
 				>
 					{useMemo(
 						() =>
-							isLoading ? null : (
+							isLoading ? (
+								<Skeleton className="h-10 w-1/2" />
+							) : (
 								<>
 									{notes && notes.notes.length > 0 ? (
 										<ul className="space-y-4">
@@ -244,7 +243,7 @@ export default function Index() {
 													key={note.noteId}
 													fallback={
 														<li>
-															<Skeleton className="h-10 w-full" />
+															<Skeleton className="h-10 w-1/2" />
 														</li>
 													}
 												>
@@ -255,11 +254,12 @@ export default function Index() {
 																	{note.images.map((img, i) => (
 																		<div
 																			key={`${note.noteId}-img-${i}`}
-																			className={`rounded-xl p-2 cursor-pointer shrink-0 ${
+																			className={cn(
+																				"rounded-xl p-2 cursor-pointer shrink-0",
 																				note.accessLevel === AccessLevel.Private
 																					? "bg-secondary"
-																					: "bg-primary"
-																			}`}
+																					: "bg-primary",
+																			)}
 																			onClick={() => handleEditNote(note)}
 																		>
 																			<img
@@ -273,10 +273,14 @@ export default function Index() {
 															</div>
 														)}
 														<div
-															className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
+															className={cn(
+																"wrap-anywhere overflow-y-auto rounded-xl mb-1",
+																note.accessLevel === AccessLevel.Private && "cursor-pointer",
+																note.contentType === NoteContentType.WineByAi && "max-h-[500px]",
+															)}
 															onClick={() => handleEditNote(note)}
 														>
-															<ClientOnly fallback={<Skeleton className="h-20 w-full" />}>
+															<ClientOnly fallback={<Skeleton className="h-20 w-1/2" />}>
 																<NoteContent note={note} />
 															</ClientOnly>
 														</div>

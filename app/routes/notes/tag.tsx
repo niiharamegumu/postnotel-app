@@ -109,7 +109,7 @@ export default function TagNotesPage() {
 												key={note.noteId}
 												fallback={
 													<li>
-														<Skeleton className="h-10 w-full" />
+														<Skeleton className="h-10 w-1/2" />
 													</li>
 												}
 											>

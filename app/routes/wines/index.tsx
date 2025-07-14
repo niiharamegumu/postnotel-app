@@ -8,6 +8,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
 import { SquareArrowOutUpRight } from "lucide-react";
+import ClientOnly from "~/components/common/ClientOnly";
+import { cn } from "~/lib/utils";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const targetContentType = NoteContentType.WineByAi; // ワインノートを取得するためのコンテンツタイプ
@@ -39,7 +41,7 @@ export default function Index() {
 								key={note.noteId}
 								fallback={
 									<li>
-										<Skeleton className="h-10 w-full" />
+										<Skeleton className="h-10 w-1/2" />
 									</li>
 								}
 							>
@@ -56,11 +58,12 @@ export default function Index() {
 												{note.images.map((img, i) => (
 													<div
 														key={`${note.noteId}-img-${i}`}
-														className={`rounded-xl overflow-hidden p-2 shrink-0 ${
+														className={cn(
+															"rounded-xl overflow-hidden p-2 shrink-0",
 															note.accessLevel === AccessLevel.Private
 																? "bg-secondary"
-																: "bg-primary"
-														}`}
+																: "bg-primary",
+														)}
 													>
 														<img
 															src={img}
@@ -73,7 +76,9 @@ export default function Index() {
 										</div>
 									)}
 									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded-xl mb-1">
-										<NoteContent note={note} />
+										<ClientOnly fallback={<Skeleton className="h-20 w-1/2" />}>
+											<NoteContent note={note} />
+										</ClientOnly>
 									</div>
 								</li>
 							</Suspense>
