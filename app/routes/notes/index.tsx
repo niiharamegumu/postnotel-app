@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from "react";
+import { lazy, Suspense, useState, useMemo, useCallback } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
@@ -7,7 +7,7 @@ import type { Route } from "./+types";
 import { fetchDays, fetchNotes } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
-import { Skeleton } from "~/components/ui/skeleton";
+import { LoadingState } from "~/components/common/LoadingState";
 import type { UserInfo } from "~/types/user";
 import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion, type PanInfo } from "framer-motion";
@@ -158,174 +158,170 @@ export default function Index() {
 	);
 
 	return (
-		<Suspense fallback={<Skeleton className="h-screen w-full" />}>
-			<div className="max-w-2xl mx-auto space-y-6">
-				<div className="w-full">
-					<WeekCalendar
-						selectedDate={selectedDate}
-						onDateSelect={handleDateSelect}
-						onWeekChange={handleWeekChange}
-						noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
-						onDateRangeChange={handleDateRangeChange}
-						onCalendarReady={handleCalendarReady}
-						className="p-0"
-					/>
-				</div>
-				<motion.section
-					className="w-full min-h-screen md:min-h-[80vh]"
-					initial={{ x: 0, opacity: 1 }}
-					animate={{ x: 0, opacity: 1 }}
-					transition={{
-						type: "spring",
-						stiffness: 300,
-						damping: 30,
-					}}
-					onPanStart={() => {
-						setSwipeDirection(null);
+		<div className="max-w-2xl mx-auto space-y-6">
+			<div className="w-full">
+				<WeekCalendar
+					selectedDate={selectedDate}
+					onDateSelect={handleDateSelect}
+					onWeekChange={handleWeekChange}
+					noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
+					onDateRangeChange={handleDateRangeChange}
+					onCalendarReady={handleCalendarReady}
+					className="p-0"
+				/>
+			</div>
+			<motion.section
+				className="w-full min-h-screen md:min-h-[80vh]"
+				initial={{ x: 0, opacity: 1 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{
+					type: "spring",
+					stiffness: 300,
+					damping: 30,
+				}}
+				onPanStart={() => {
+					setSwipeDirection(null);
+					setIsSwipeActive(false);
+				}}
+				onPan={useCallback(
+					(event: PointerEvent, info: PanInfo) => {
+						const horizontalDistance = Math.abs(info.offset.x);
+						const verticalDistance = Math.abs(info.offset.y);
+
+						// スワイプ方向を決定（一度決まったら変更しない）
+						if (swipeDirection === null && (horizontalDistance > 20 || verticalDistance > 20)) {
+							if (horizontalDistance > verticalDistance * 1.2) {
+								setSwipeDirection("horizontal");
+								setIsSwipeActive(true);
+							} else {
+								setSwipeDirection("vertical");
+								setIsSwipeActive(false);
+							}
+						}
+
+						// 水平スワイプの場合のみpreventDefault
+						if (swipeDirection === "horizontal" && horizontalDistance > 30) {
+							event.preventDefault();
+						}
+					},
+					[swipeDirection],
+				)}
+				onPanEnd={useCallback(
+					(_event: PointerEvent, info: PanInfo) => {
+						const horizontalDistance = Math.abs(info.offset.x);
+
+						// 水平スワイプかつ閾値を超えた場合のみ日付変更
+						if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
+							const direction = info.offset.x > 0 ? "right" : "left";
+							handleSwipe(direction);
+						}
+
+						// 状態をリセット
 						setIsSwipeActive(false);
-					}}
-					onPan={useCallback(
-						(event: PointerEvent, info: PanInfo) => {
-							const horizontalDistance = Math.abs(info.offset.x);
-							const verticalDistance = Math.abs(info.offset.y);
-
-							// スワイプ方向を決定（一度決まったら変更しない）
-							if (swipeDirection === null && (horizontalDistance > 20 || verticalDistance > 20)) {
-								if (horizontalDistance > verticalDistance * 1.2) {
-									setSwipeDirection("horizontal");
-									setIsSwipeActive(true);
-								} else {
-									setSwipeDirection("vertical");
-									setIsSwipeActive(false);
-								}
-							}
-
-							// 水平スワイプの場合のみpreventDefault
-							if (swipeDirection === "horizontal" && horizontalDistance > 30) {
-								event.preventDefault();
-							}
-						},
-						[swipeDirection],
-					)}
-					onPanEnd={useCallback(
-						(_event: PointerEvent, info: PanInfo) => {
-							const horizontalDistance = Math.abs(info.offset.x);
-
-							// 水平スワイプかつ閾値を超えた場合のみ日付変更
-							if (swipeDirection === "horizontal" && horizontalDistance > swipeThreshold) {
-								const direction = info.offset.x > 0 ? "right" : "left";
-								handleSwipe(direction);
-							}
-
-							// 状態をリセット
-							setIsSwipeActive(false);
-							setSwipeDirection(null);
-						},
-						[swipeDirection, handleSwipe, swipeThreshold],
-					)}
-					drag={false}
-					style={{
-						filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
-						transition: "filter 0.2s ease",
-						touchAction: "pan-y pinch-zoom",
-					}}
-				>
-					{useMemo(
-						() =>
-							isLoading ? (
-								<div className="space-y-4">
-									<Skeleton className="h-10 w-2/3" />
-									<Skeleton className="h-10 w-2/3" />
-									<Skeleton className="h-10 w-2/3" />
-								</div>
-							) : (
-								<>
-									{notes && notes.notes.length > 0 ? (
-										<ul className="space-y-4">
-											{notes.notes.map((note) => (
-												<Suspense
-													key={note.noteId}
-													fallback={
-														<li>
-															<Skeleton className="h-10 w-2/3" />
-														</li>
-													}
-												>
-													<li className="flex flex-col items-start">
-														{note.images?.length > 0 && (
-															<div className="mb-2">
-																<div className="flex gap-2 flex-nowrap overflow-x-auto">
-																	{note.images.map((img, i) => (
-																		<div
-																			key={`${note.noteId}-img-${i}`}
-																			className={cn(
-																				"rounded-xl p-2 cursor-pointer shrink-0",
-																				note.accessLevel === AccessLevel.Private
-																					? "bg-secondary"
-																					: "bg-primary",
-																			)}
-																			onClick={() => handleEditNote(note)}
-																		>
-																			<img
-																				src={img}
-																				alt={`ノート添付 #${i + 1}`}
-																				className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
-																			/>
-																		</div>
-																	))}
-																</div>
+						setSwipeDirection(null);
+					},
+					[swipeDirection, handleSwipe, swipeThreshold],
+				)}
+				drag={false}
+				style={{
+					filter: isSwipeActive ? "brightness(0.95)" : "brightness(1)",
+					transition: "filter 0.2s ease",
+					touchAction: "pan-y pinch-zoom",
+				}}
+			>
+				{useMemo(
+					() =>
+						isLoading ? (
+							<div className="space-y-4">
+								<LoadingState variant="spinner" className="text-center" />
+							</div>
+						) : (
+							<>
+								{notes && notes.notes.length > 0 ? (
+									<ul className="space-y-4">
+										{notes.notes.map((note) => (
+											<Suspense
+												key={note.noteId}
+												fallback={
+													<li>
+														<LoadingState className="h-10 w-full" />
+													</li>
+												}
+											>
+												<li className="flex flex-col items-start">
+													{note.images?.length > 0 && (
+														<div className="mb-2">
+															<div className="flex gap-2 flex-nowrap overflow-x-auto">
+																{note.images.map((img, i) => (
+																	<div
+																		key={`${note.noteId}-img-${i}`}
+																		className={cn(
+																			"rounded-xl p-2 cursor-pointer shrink-0",
+																			note.accessLevel === AccessLevel.Private
+																				? "bg-secondary"
+																				: "bg-primary",
+																		)}
+																		onClick={() => handleEditNote(note)}
+																	>
+																		<img
+																			src={img}
+																			alt={`ノート添付 #${i + 1}`}
+																			className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
+																		/>
+																	</div>
+																))}
+															</div>
+														</div>
+													)}
+													<div
+														className={cn(
+															"wrap-anywhere overflow-y-auto rounded-xl mb-1",
+															note.accessLevel === AccessLevel.Private && "cursor-pointer",
+															note.contentType === NoteContentType.WineByAi && "max-h-[500px]",
+														)}
+														onClick={() => handleEditNote(note)}
+													>
+														<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
+															<NoteContent note={note} />
+														</ClientOnly>
+													</div>
+													<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
+														<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+														{note.accessLevel === AccessLevel.Private && (
+															<div>{accessLevelLabels[note.accessLevel]}</div>
+														)}
+														<div>{noteContentTypeLabels[note.contentType]}</div>
+														{note.tags && note.tags.tags.length > 0 && (
+															<div className="flex items-center gap-2">
+																{note.tags.tags.map((tag) => (
+																	<TagLink key={tag.id} id={tag.id} name={tag.name} />
+																))}
 															</div>
 														)}
-														<div
-															className={cn(
-																"wrap-anywhere overflow-y-auto rounded-xl mb-1",
-																note.accessLevel === AccessLevel.Private && "cursor-pointer",
-																note.contentType === NoteContentType.WineByAi && "max-h-[500px]",
-															)}
-															onClick={() => handleEditNote(note)}
-														>
-															<ClientOnly fallback={<Skeleton className="h-20 w-2/3" />}>
-																<NoteContent note={note} />
-															</ClientOnly>
-														</div>
-														<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
-															<div>{format(new Date(note.createdAt), "HH:mm")}</div>
-															{note.accessLevel === AccessLevel.Private && (
-																<div>{accessLevelLabels[note.accessLevel]}</div>
-															)}
-															<div>{noteContentTypeLabels[note.contentType]}</div>
-															{note.tags && note.tags.tags.length > 0 && (
-																<div className="flex items-center gap-2">
-																	{note.tags.tags.map((tag) => (
-																		<TagLink key={tag.id} id={tag.id} name={tag.name} />
-																	))}
-																</div>
-															)}
-														</div>
-													</li>
-												</Suspense>
-											))}
-										</ul>
-									) : (
-										<div className="flex items-center justify-center min-h-[60vh]">
-											<p className="text-primary text-center">ノートがありません。</p>
-										</div>
-									)}
-								</>
-							),
-						[isLoading, notes, handleEditNote],
-					)}
-				</motion.section>
-				{tags && tags.length > 0 && (
-					<div className="mt-4">
-						<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
-							{tags.map((tag) => (
-								<TagLink key={tag.id} id={tag.id} name={tag.name} />
-							))}
-						</div>
-					</div>
+													</div>
+												</li>
+											</Suspense>
+										))}
+									</ul>
+								) : (
+									<div className="flex items-center justify-center min-h-[60vh]">
+										<p className="text-primary text-center">ノートがありません。</p>
+									</div>
+								)}
+							</>
+						),
+					[isLoading, notes, handleEditNote],
 				)}
-			</div>
-		</Suspense>
+			</motion.section>
+			{tags && tags.length > 0 && (
+				<div className="mt-4">
+					<div className="flex justify-start flex-wrap gap-x-2 gap-y-1">
+						{tags.map((tag) => (
+							<TagLink key={tag.id} id={tag.id} name={tag.name} />
+						))}
+					</div>
+				</div>
+			)}
+		</div>
 	);
 }
