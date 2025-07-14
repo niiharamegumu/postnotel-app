@@ -232,7 +232,9 @@ export default function Index() {
 				>
 					{useMemo(
 						() =>
-							isLoading ? null : (
+							isLoading ? (
+								<Skeleton className="h-10 w-1/2" />
+							) : (
 								<>
 									{notes && notes.notes.length > 0 ? (
 										<ul className="space-y-4">
@@ -241,7 +243,7 @@ export default function Index() {
 													key={note.noteId}
 													fallback={
 														<li>
-															<Skeleton className="h-10 w-full" />
+															<Skeleton className="h-10 w-1/2" />
 														</li>
 													}
 												>
@@ -278,7 +280,7 @@ export default function Index() {
 															)}
 															onClick={() => handleEditNote(note)}
 														>
-															<ClientOnly fallback={<Skeleton className="h-20 w-full" />}>
+															<ClientOnly fallback={<Skeleton className="h-20 w-1/2" />}>
 																<NoteContent note={note} />
 															</ClientOnly>
 														</div>
