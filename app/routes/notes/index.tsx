@@ -9,7 +9,7 @@ import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { Skeleton } from "~/components/ui/skeleton";
 import type { UserInfo } from "~/types/user";
-import { noteContentTypeLabels } from "~/constants/noteContentType";
+import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
 import { motion, type PanInfo } from "framer-motion";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { TagLink } from "~/components/common/TagLink";
@@ -17,6 +17,7 @@ import { useTags } from "~/features/tags/hooks/useTags";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import ClientOnly from "~/components/common/ClientOnly";
 import type { ViewMode } from "~/constants/viewMode";
+import { cn } from "~/lib/utils";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -255,11 +256,12 @@ export default function Index() {
 																	{note.images.map((img, i) => (
 																		<div
 																			key={`${note.noteId}-img-${i}`}
-																			className={`rounded-xl p-2 cursor-pointer shrink-0 ${
+																			className={cn(
+																				"rounded-xl p-2 cursor-pointer shrink-0",
 																				note.accessLevel === AccessLevel.Private
 																					? "bg-secondary"
-																					: "bg-primary"
-																			}`}
+																					: "bg-primary",
+																			)}
 																			onClick={() => handleEditNote(note)}
 																		>
 																			<img
@@ -273,7 +275,11 @@ export default function Index() {
 															</div>
 														)}
 														<div
-															className={`${note.accessLevel === AccessLevel.Private ? "cursor-pointer" : ""} wrap-anywhere overflow-y-auto rounded-xl mb-1`}
+															className={cn(
+																"wrap-anywhere overflow-y-auto rounded-xl mb-1",
+																note.accessLevel === AccessLevel.Private && "cursor-pointer",
+																note.contentType === NoteContentType.WineByAi && "max-h-[500px]",
+															)}
 															onClick={() => handleEditNote(note)}
 														>
 															<ClientOnly fallback={<Skeleton className="h-20 w-full" />}>
