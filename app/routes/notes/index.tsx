@@ -78,7 +78,6 @@ export default function Index() {
 	};
 
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
-	const [currentWeek, setCurrentWeek] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 	const { tags } = useTags();
@@ -114,7 +113,6 @@ export default function Index() {
 	const handleWeekChange = useCallback(
 		(date: Date) => {
 			setSelectedDate(date);
-			setCurrentWeek(date);
 			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
 		},
 		[navigate],
@@ -142,7 +140,6 @@ export default function Index() {
 			}
 
 			setSelectedDate(newDate);
-			setCurrentWeek(newDate);
 			navigateToDate(newDate, navigate);
 
 			// swipe時にnoteDaysを更新（WeekCalendarから期間計算を取得）
