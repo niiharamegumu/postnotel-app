@@ -41,7 +41,7 @@ export default function Index() {
 								key={note.noteId}
 								fallback={
 									<li>
-										<Skeleton className="h-10 w-1/2" />
+										<Skeleton className="h-10 w-2/3" />
 									</li>
 								}
 							>
@@ -76,7 +76,7 @@ export default function Index() {
 										</div>
 									)}
 									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded-xl mb-1">
-										<ClientOnly fallback={<Skeleton className="h-20 w-1/2" />}>
+										<ClientOnly fallback={<Skeleton className="h-20 w-2/3" />}>
 											<NoteContent note={note} />
 										</ClientOnly>
 									</div>
