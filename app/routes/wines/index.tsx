@@ -4,7 +4,7 @@ import { lazy, Suspense } from "react";
 import { Link, useLoaderData } from "react-router";
 import type { NotesByDateResponse } from "~/features/notes/types/note";
 import { format } from "date-fns";
-import { Skeleton } from "~/components/ui/skeleton";
+import { LoadingState } from "~/components/common/LoadingState";
 import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
 import { SquareArrowOutUpRight } from "lucide-react";
@@ -41,7 +41,7 @@ export default function Index() {
 								key={note.noteId}
 								fallback={
 									<li>
-										<Skeleton className="h-10 w-2/3" />
+										<LoadingState className="h-10 w-full" />
 									</li>
 								}
 							>
@@ -76,7 +76,7 @@ export default function Index() {
 										</div>
 									)}
 									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded-xl mb-1">
-										<ClientOnly fallback={<Skeleton className="h-20 w-2/3" />}>
+										<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
 											<NoteContent note={note} />
 										</ClientOnly>
 									</div>
