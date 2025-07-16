@@ -285,7 +285,7 @@ export default function Index() {
 															<NoteContent note={note} />
 														</ClientOnly>
 													</div>
-													<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
+													<div className="text-xs text-muted-foreground ml-2 flex items-center gap-2">
 														<div>{format(new Date(note.createdAt), "HH:mm")}</div>
 														{note.accessLevel === AccessLevel.Private && (
 															<div>{accessLevelLabels[note.accessLevel]}</div>
