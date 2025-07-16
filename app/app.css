@@ -145,4 +145,8 @@ html {
   h3 {
     @apply text-xl;
   }
+
+  .bn-block-content[data-content-type=numberedListItem]:before {
+    @apply w-[1rem];
+  }
 }
