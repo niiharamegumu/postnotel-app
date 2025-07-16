@@ -1,10 +1,10 @@
 import { lazy, Suspense } from "react";
-import { useLoaderData, Link } from "react-router";
+import { useLoaderData, Link, redirect } from "react-router";
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
+import type { Note, NotesWithPaginationResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types/tag";
-import { fetchNotes } from "~/features/notes/api/get";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import { fetcher } from "~/lib/fetcher";
 import { endpoints } from "~/constants/endpoints";
 import type { Tag as TagType, TagsResponse } from "~/features/tags/types/tag";
@@ -13,13 +13,23 @@ import { noteContentTypeLabels } from "~/constants/noteContentType";
 import { LoadingState } from "~/components/common/LoadingState";
 import { Tag, SquareArrowOutUpRight } from "lucide-react";
 import { TagLink } from "~/components/common/TagLink";
+import { PaginationControls } from "~/components/common/PaginationControls";
+import { getPageFromSearchParams, calculateOffset, type PaginationInfo } from "~/lib/pagination";
+import { PAGINATION_LIMITS } from "~/constants/pagination";
+import { StatusCodes } from "http-status-codes";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
 	const { tagId } = params;
 
 	if (!tagId) {
-		throw new Response("タグIDが指定されていません", { status: 400 });
+		throw new Response("タグIDが指定されていません", { status: StatusCodes.BAD_REQUEST });
 	}
+
+	const url = new URL(request.url);
+	const searchParams = url.searchParams;
+	const page = getPageFromSearchParams(searchParams);
+	const limit = PAGINATION_LIMITS.TAGS_PAGE;
+	const offset = calculateOffset(page, limit);
 
 	// Get tag information
 	const tagResponse = await fetcher(context, endpoints.tags.list, {
@@ -32,13 +42,35 @@ export async function loader({ request, context, params }: Route.LoaderArgs) {
 	const tag = tagsData.tags.find((t) => t.id === tagId);
 
 	if (!tag) {
-		throw new Response("タグが見つかりません", { status: 404 });
+		throw new Response("タグが見つかりません", { status: StatusCodes.NOT_FOUND });
 	}
 
-	// Get notes for this tag
-	const notes = await fetchNotes(request, context, { tagIds: [tagId] });
+	// Get notes for this tag with pagination
+	const notesResult = await fetchNotesWithPagination(request, context, {
+		tagIds: [tagId],
+		limit,
+		offset,
+	});
 
-	return { notes, tag, tags: tagsData.tags };
+	if (!notesResult) {
+		throw new Response("ノートの取得に失敗しました", { status: StatusCodes.INTERNAL_SERVER_ERROR });
+	}
+
+	const { notes, paginationInfo } = notesResult;
+
+	// If page is invalid (beyond total pages), redirect to page 1
+	if (page > paginationInfo.totalPages && paginationInfo.totalPages > 0) {
+		const redirectUrl = new URL(request.url);
+		redirectUrl.searchParams.delete("page");
+		throw redirect(redirectUrl.toString());
+	}
+
+	return {
+		notes,
+		tag,
+		tags: tagsData.tags,
+		paginationInfo,
+	};
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -52,10 +84,11 @@ export function meta({ data }: Route.MetaArgs) {
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function TagNotesPage() {
-	const { notes, tag, tags } = useLoaderData<typeof loader>() as {
-		notes: NotesByDateResponse | null;
+	const { notes, tag, tags, paginationInfo } = useLoaderData<typeof loader>() as {
+		notes: NotesWithPaginationResponse | null;
 		tag: TagType;
 		tags: TagType[];
+		paginationInfo: PaginationInfo;
 	};
 
 	// Group notes by date
@@ -82,7 +115,7 @@ export default function TagNotesPage() {
 					<Tag size={26} color="#75b1ff" />
 					<h1 className="text-3xl font-bold text-primary">{tag.name}</h1>
 				</div>
-				<p className="text-sm text-muted-foreground">{notes?.notes.length || 0}件</p>
+				<p className="text-sm text-muted-foreground">{paginationInfo.totalItems || 0}件</p>
 			</div>
 			{tags && tags.length > 0 && (
 				<div className="flex justify-start flex-wrap gap-2">
@@ -138,7 +171,7 @@ export default function TagNotesPage() {
 												<div className="wrap-anywhere overflow-y-auto rounded-xl mb-1 max-w-full">
 													<NoteContent note={note} />
 												</div>
-												<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">
+												<div className="text-xs text-muted-foreground ml-2 flex gap-2 items-center">
 													<div>{format(new Date(note.createdAt), "HH:mm")}</div>
 													{note.accessLevel === AccessLevel.Private && (
 														<div>{accessLevelLabels[note.accessLevel]}</div>
@@ -165,6 +198,10 @@ export default function TagNotesPage() {
 					</div>
 				)}
 			</section>
+
+			{paginationInfo.totalPages > 1 && (
+				<PaginationControls pagination={paginationInfo} baseUrl={`/notes/tag/${tag.id}`} />
+			)}
 		</div>
 	);
 }
