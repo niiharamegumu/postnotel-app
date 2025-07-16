@@ -21,6 +21,18 @@ export type NotesByDateResponse = {
 	notesCount: number;
 };
 
+export type NotesWithPaginationResponse = {
+	notes: Note[];
+	pagination: {
+		total: number;
+		count: number;
+		offset: number;
+		limit: number;
+		hasNext: boolean;
+		hasPrevious: boolean;
+	};
+};
+
 export type NoteDaysResponse = {
 	noteDays: string[];
 };

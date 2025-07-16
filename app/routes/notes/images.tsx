@@ -1,18 +1,49 @@
 import { Suspense } from "react";
-import { useLoaderData, Link } from "react-router";
+import { useLoaderData, Link, redirect } from "react-router";
 import { format, parseISO } from "date-fns";
-import type { NotesByDateResponse } from "~/features/notes/types/note";
+import type { NotesWithPaginationResponse } from "~/features/notes/types/note";
 import type { Route } from "./+types/images";
-import { fetchNotes } from "~/features/notes/api/get";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import { LoadingState } from "~/components/common/LoadingState";
 import { NoteContentType } from "~/constants/noteContentType";
+import { PaginationControls } from "~/components/common/PaginationControls";
+import { getPageFromSearchParams, calculateOffset, type PaginationInfo } from "~/lib/pagination";
+import { PAGINATION_LIMITS } from "~/constants/pagination";
+import { StatusCodes } from "http-status-codes";
+import { TagLink } from "~/components/common/TagLink";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const notes = await fetchNotes(request, context, {
+	const url = new URL(request.url);
+	const searchParams = url.searchParams;
+	const page = getPageFromSearchParams(searchParams);
+	const limit = PAGINATION_LIMITS.IMAGES_PAGE;
+	const offset = calculateOffset(page, limit);
+
+	// Get image notes with pagination
+	const notesResult = await fetchNotesWithPagination(request, context, {
 		hasImages: true,
 		contentType: NoteContentType.Note,
+		limit,
+		offset,
 	});
-	return { notes };
+
+	if (!notesResult) {
+		throw new Response("ノートの取得に失敗しました", { status: StatusCodes.INTERNAL_SERVER_ERROR });
+	}
+
+	const { notes, paginationInfo } = notesResult;
+
+	// If page is invalid (beyond total pages), redirect to page 1
+	if (page > paginationInfo.totalPages && paginationInfo.totalPages > 0) {
+		const redirectUrl = new URL(request.url);
+		redirectUrl.searchParams.delete("page");
+		throw redirect(redirectUrl.toString());
+	}
+
+	return {
+		notes,
+		paginationInfo,
+	};
 }
 
 export function meta() {
@@ -20,47 +51,72 @@ export function meta() {
 }
 
 export default function ImagesPage() {
-	const { notes } = useLoaderData<typeof loader>() as {
-		notes: NotesByDateResponse | null;
+	const { notes, paginationInfo } = useLoaderData<typeof loader>() as {
+		notes: NotesWithPaginationResponse | null;
+		paginationInfo: PaginationInfo;
 	};
 
-	// Filter notes that have images and collect all images
+	// Filter notes that have images
 	const imageNotes = notes?.notes?.filter((note) => note.images && note.images.length > 0) || [];
-
-	// Create image entries with note reference
-	const imageEntries = imageNotes.flatMap(
-		(note) =>
-			note.images?.map((imageUrl: string) => ({
-				imageUrl,
-				noteId: note.noteId,
-				createdAt: note.createdAt,
-				dateKey: format(parseISO(note.createdAt), "yyyy-MM-dd"),
-			})) || [],
-	);
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-6">
 			<div className="w-full">
 				<h1 className="text-3xl font-bold text-primary mb-2">Images</h1>
-				<p className="text-sm text-muted-foreground">{imageEntries.length}件</p>
+				<p className="text-sm text-muted-foreground">{paginationInfo.totalItems || 0}件</p>
 			</div>
+
 			<section className="w-full min-h-screen">
-				{imageEntries.length > 0 ? (
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-1">
-						{imageEntries.map((entry, index) => (
-							<Link
-								key={`${entry.noteId}-${index}`}
-								to={`/notes?date=${entry.dateKey}`}
-								className="block aspect-square rounded hover:opacity-80 transition-opacity bg-primary p-1"
+				{imageNotes.length > 0 ? (
+					<div className="flex flex-col gap-6">
+						{imageNotes.map((note) => (
+							<Suspense
+								key={note.noteId}
+								fallback={
+									<div className="rounded-lg bg-card p-4">
+										<LoadingState className="w-full h-32 rounded" />
+									</div>
+								}
 							>
-								<img
-									src={entry.imageUrl}
-									alt=""
-									className="w-full h-full object-cover"
-									loading="lazy"
-									decoding="async"
-								/>
-							</Link>
+								<div className="rounded-lg bg-card p-4 hover:bg-accent transition-colors">
+									<Link
+										to={`/notes?date=${format(parseISO(note.createdAt), "yyyy-MM-dd")}`}
+										className="block space-y-3"
+									>
+										{/* Images */}
+										{note.images && note.images.length > 0 && (
+											<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+												{note.images.map((imageUrl, index) => (
+													<div
+														key={`${note.noteId}-img-${index}`}
+														className="aspect-square rounded-md overflow-hidden bg-primary/20 p-1"
+													>
+														<img
+															src={imageUrl}
+															alt={`ノート画像 ${index + 1}`}
+															className="w-full h-full object-cover rounded"
+															loading="lazy"
+															decoding="async"
+														/>
+													</div>
+												))}
+											</div>
+										)}
+
+										{/* Note metadata */}
+										<div className="flex items-center gap-2 text-xs text-muted-foreground">
+											<span>{format(parseISO(note.createdAt), "yyyy年M月d日 HH:mm")}</span>
+											{note.tags && note.tags.tags.length > 0 && (
+												<div className="flex gap-1">
+													{note.tags.tags.map((tag) => (
+														<TagLink key={tag.id} id={tag.id} name={tag.name} size={10} />
+													))}
+												</div>
+											)}
+										</div>
+									</Link>
+								</div>
+							</Suspense>
 						))}
 					</div>
 				) : (
@@ -69,6 +125,10 @@ export default function ImagesPage() {
 					</div>
 				)}
 			</section>
+
+			{paginationInfo.totalPages > 1 && (
+				<PaginationControls pagination={paginationInfo} baseUrl="/notes/images" />
+			)}
 		</div>
 	);
 }
