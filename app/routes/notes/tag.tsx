@@ -135,7 +135,7 @@ export default function TagNotesPage() {
 														</div>
 													</div>
 												)}
-												<div className="wrap-anywhere overflow-y-auto rounded-xl mb-1">
+												<div className="wrap-anywhere overflow-y-auto rounded-xl mb-1 max-w-full">
 													<NoteContent note={note} />
 												</div>
 												<div className="text-xs text-muted-foreground ml-2 flex items-start gap-2">

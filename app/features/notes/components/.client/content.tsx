@@ -57,7 +57,7 @@ export default function NoteContent({ note }: Props) {
 
 	return (
 		<div
-			className={`px-4 py-2 whitespace-pre-line ${
+			className={`px-4 py-2 whitespace-pre-line max-w-full ${
 				note.accessLevel === AccessLevel.Private
 					? "bg-secondary text-primary"
 					: "bg-primary text-secondary"
