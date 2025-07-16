@@ -68,7 +68,7 @@ export default function ImagesPage() {
 
 			<section className="w-full min-h-screen">
 				{imageNotes.length > 0 ? (
-					<div className="flex flex-col gap-6">
+					<div className="flex flex-col gap-2 md:gap-4">
 						{imageNotes.map((note) => (
 							<Suspense
 								key={note.noteId}
@@ -89,12 +89,12 @@ export default function ImagesPage() {
 												{note.images.map((imageUrl, index) => (
 													<div
 														key={`${note.noteId}-img-${index}`}
-														className="aspect-square rounded-md overflow-hidden bg-primary/20 p-1"
+														className="aspect-square overflow-hidden rounded"
 													>
 														<img
 															src={imageUrl}
 															alt={`ノート画像 ${index + 1}`}
-															className="w-full h-full object-cover rounded"
+															className="w-full h-full object-cover"
 															loading="lazy"
 															decoding="async"
 														/>
