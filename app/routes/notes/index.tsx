@@ -275,7 +275,7 @@ export default function Index() {
 													)}
 													<div
 														className={cn(
-															"wrap-anywhere overflow-y-auto rounded-xl mb-1",
+															"wrap-anywhere overflow-y-auto rounded-xl mb-1 max-w-full",
 															note.accessLevel === AccessLevel.Private && "cursor-pointer",
 															note.contentType === NoteContentType.WineByAi && "max-h-[500px]",
 														)}
