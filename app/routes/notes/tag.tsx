@@ -118,7 +118,7 @@ export default function TagNotesPage() {
 				<p className="text-sm text-muted-foreground">{paginationInfo.totalItems || 0}件</p>
 			</div>
 			{tags && tags.length > 0 && (
-				<div className="flex justify-start flex-wrap gap-2">
+				<div className="flex justify-start flex-wrap gap-x-3 gap-y-2">
 					{tags.map((tag) => (
 						<TagLink key={tag.id} id={tag.id} name={tag.name} />
 					))}
