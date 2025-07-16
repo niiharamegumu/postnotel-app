@@ -1,7 +1,7 @@
 # PostNotel API Documentation
 
 ## Overview
-PostNotel is a note-taking application with support for tagging, images, and different content types including AI-powered wine label recognition.
+PostNotel is a note-taking application with support for tagging, images, and different content types including AI-powered wine label recognition. The API provides efficient pagination for large datasets with comprehensive metadata including navigation flags and total counts.
 
 ## API Endpoints
 
@@ -41,7 +41,7 @@ PostNotel is a note-taking application with support for tagging, images, and dif
 
 ### Note Endpoints (`/v1/notes`)
 - **GET** `/v1/notes`
-  - **Purpose**: Get notes with optional filtering and pagination
+  - **Purpose**: Get paginated notes with optional filtering
   - **Authentication**: None required (but admin status affects visibility)
   - **Query Parameters**:
     - `date` (optional): Date in YYYY-MM-DD format
@@ -52,7 +52,36 @@ PostNotel is a note-taking application with support for tagging, images, and dif
     - `offset` (optional): Pagination offset (default: 0)
     - `limit` (optional): Pagination limit (default: 100, max: 100)
     - `hasImages` (optional): Filter notes with images (true/false)
-  - **Response**: Array of notes or 204 if no content
+  - **Response**: Notes with comprehensive pagination metadata
+    ```json
+    {
+      "notes": [
+        {
+          "noteId": "uuid",
+          "content": "string",
+          "accessLevel": "public|private",
+          "tags": {
+            "tags": [{"id": "uuid", "name": "string"}],
+            "count": 0
+          },
+          "images": ["string"],
+          "generationStatus": "done|pending|error",
+          "contentType": "note|post|winebyAI",
+          "createdAt": "2025-01-01 00:00:00",
+          "updatedAt": "2025-01-01 00:00:00"
+        }
+      ],
+      "pagination": {
+        "total": 100,
+        "count": 20,
+        "offset": 0,
+        "limit": 100,
+        "hasNext": false,
+        "hasPrevious": false
+      }
+    }
+    ```
+  - **Status Codes**: 200 (success), 204 (no content), 400 (bad request), 500 (server error)
 
 - **GET** `/v1/notes/days`
   - **Purpose**: Get note days within specified date range
@@ -292,6 +321,10 @@ erDiagram
 - **AI Integration**: Wine label recognition using AI services
 - **Session Management**: Cookie-based sessions with Google OAuth
 - **Validation**: Request validation using Ozzo validation library
+- **Pagination**: Efficient pagination with single-query data retrieval and comprehensive metadata
+  - **Default Limit**: 100 items per page (configurable via constants)
+  - **Metadata**: Total count, current page count, navigation flags (hasNext/hasPrevious)
+  - **Performance**: Optimized SQL queries with `COUNT() OVER()` window functions
 
 ## Migration History
 
