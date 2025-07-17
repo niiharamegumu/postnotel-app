@@ -2,34 +2,12 @@ import { fetcher } from "~/lib/fetcher";
 import type {
 	Note,
 	NoteDaysResponse,
-	NotesByDateResponse,
 	NotesWithPaginationResponse,
 } from "../types/note";
 import { endpoints, type GetNotesParams, type GetNoteDaysParams } from "~/constants/endpoints";
 import type { Route } from ".react-router/types/app/routes/notes/+types";
 import { StatusCodes } from "http-status-codes";
 import { convertApiPaginationToFrontend, type PaginationInfo } from "~/lib/pagination";
-
-export async function fetchNotes(
-	request: Route.ActionArgs["request"],
-	context: Route.ActionArgs["context"],
-	params?: GetNotesParams,
-): Promise<NotesByDateResponse | null> {
-	try {
-		const res = await fetcher(context, endpoints.notes.getNotes(params), {
-			headers: {
-				Cookie: request.headers.get("cookie") || "",
-			},
-		});
-
-		if (res.status === StatusCodes.NOT_FOUND) return null;
-
-		const notes: NotesByDateResponse = await res.json();
-		return notes;
-	} catch (e) {
-		return null;
-	}
-}
 
 export async function fetchNotesWithPagination(
 	request: Route.ActionArgs["request"],

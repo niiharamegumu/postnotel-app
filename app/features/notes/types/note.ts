@@ -16,11 +16,6 @@ export type Note = {
 	updatedAt: string;
 };
 
-export type NotesByDateResponse = {
-	notes: Note[];
-	notesCount: number;
-};
-
 export type NotesWithPaginationResponse = {
 	notes: Note[];
 	pagination: {

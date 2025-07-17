@@ -2,9 +2,9 @@ import { lazy, Suspense, useState, useMemo, useCallback } from "react";
 import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
 import { format, parseISO, startOfWeek, endOfWeek, addDays, subDays } from "date-fns";
-import type { Note, NotesByDateResponse } from "~/features/notes/types/note";
+import type { Note } from "~/features/notes/types/note";
 import type { Route } from "./+types";
-import { fetchDays, fetchNotes } from "~/features/notes/api/get";
+import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { formatInTimeZone } from "date-fns-tz";
 import { LoadingState } from "~/components/common/LoadingState";
@@ -25,7 +25,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const date = dateParam
 		? formatInTimeZone(new Date(dateParam), "Asia/Tokyo", "yyyy-MM-dd")
 		: formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-	const notes = await fetchNotes(request, context, { date: parseISO(date) });
+	const notesResult = await fetchNotesWithPagination(request, context, { date: parseISO(date) });
+	const notes = notesResult?.notes || [];
 
 	const selectedDate = parseISO(date);
 	const startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -72,7 +73,7 @@ export default function Index() {
 	const isLoading = navigation.state === "loading";
 
 	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
-		notes: NotesByDateResponse | null;
+		notes: Note[];
 		date: string;
 		noteDays: string[];
 	};
@@ -237,9 +238,9 @@ export default function Index() {
 							</div>
 						) : (
 							<>
-								{notes && notes.notes.length > 0 ? (
+								{notes && notes.length > 0 ? (
 									<ul className="space-y-4">
-										{notes.notes.map((note) => (
+										{notes.map((note) => (
 											<Suspense
 												key={note.noteId}
 												fallback={
