@@ -1,8 +1,8 @@
-import { fetchNotes } from "~/features/notes/api/get";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import type { Route } from "./+types";
 import { lazy, Suspense } from "react";
 import { Link, useLoaderData } from "react-router";
-import type { NotesByDateResponse } from "~/features/notes/types/note";
+import type { Note } from "~/features/notes/types/note";
 import { format } from "date-fns";
 import { LoadingState } from "~/components/common/LoadingState";
 import { AccessLevel } from "~/constants/accessLevel";
@@ -10,19 +10,29 @@ import { NoteContentType } from "~/constants/noteContentType";
 import { SquareArrowOutUpRight } from "lucide-react";
 import ClientOnly from "~/components/common/ClientOnly";
 import { cn } from "~/lib/utils";
+import type { PaginationInfo } from "~/lib/pagination";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const targetContentType = NoteContentType.WineByAi; // ワインノートを取得するためのコンテンツタイプ
-	// TODO： 将来的には10件程度でページネーションを実装する
-	const notes = await fetchNotes(request, context, { contentType: targetContentType });
-	return { notes };
+	const notesResult = await fetchNotesWithPagination(request, context, {
+		contentType: targetContentType,
+	});
+
+	if (!notesResult) {
+		return { notes: null, paginationInfo: null };
+	}
+
+	const { notes, paginationInfo } = notesResult;
+	return { notes, paginationInfo };
 }
 
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function Index() {
-	const { notes } = useLoaderData<typeof loader>() as {
-		notes: NotesByDateResponse | null;
+	// TODO： 将来的には10件程度でページネーションを実装する
+	const { notes, paginationInfo } = useLoaderData<typeof loader>() as {
+		notes: Note[] | null;
+		paginationInfo: PaginationInfo | null;
 	};
 
 	return (
@@ -34,9 +44,9 @@ export default function Index() {
 			</section>
 
 			<section>
-				{notes && notes.notes.length > 0 ? (
+				{notes && notes.length > 0 ? (
 					<ul className="space-y-8">
-						{notes.notes.map((note) => (
+						{notes.map((note) => (
 							<Suspense
 								key={note.noteId}
 								fallback={

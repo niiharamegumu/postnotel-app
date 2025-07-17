@@ -85,15 +85,15 @@ const NoteContent = lazy(() => import("~/features/notes/components/.client/conte
 
 export default function TagNotesPage() {
 	const { notes, tag, tags, paginationInfo } = useLoaderData<typeof loader>() as {
-		notes: NotesWithPaginationResponse | null;
+		notes: Note[] | null;
 		tag: TagType;
 		tags: TagType[];
 		paginationInfo: PaginationInfo;
 	};
 
 	// Group notes by date
-	const groupedNotes = notes?.notes
-		? notes.notes.reduce((acc: Record<string, Note[]>, note: Note) => {
+	const groupedNotes = notes && notes.length > 0
+		? notes.reduce((acc: Record<string, Note[]>, note: Note) => {
 				const dateKey = format(parseISO(note.createdAt), "yyyy-MM-dd");
 				if (!acc[dateKey]) {
 					acc[dateKey] = [];
