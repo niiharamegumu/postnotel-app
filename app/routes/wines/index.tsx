@@ -2,7 +2,7 @@ import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import type { Route } from "./+types";
 import { lazy, Suspense } from "react";
 import { Link, useLoaderData } from "react-router";
-import type { NotesWithPaginationResponse } from "~/features/notes/types/note";
+import type { Note } from "~/features/notes/types/note";
 import { format } from "date-fns";
 import { LoadingState } from "~/components/common/LoadingState";
 import { AccessLevel } from "~/constants/accessLevel";
@@ -31,7 +31,7 @@ const NoteContent = lazy(() => import("~/features/notes/components/.client/conte
 export default function Index() {
 	// TODO： 将来的には10件程度でページネーションを実装する
 	const { notes, paginationInfo } = useLoaderData<typeof loader>() as {
-		notes: NotesWithPaginationResponse | null;
+		notes: Note[] | null;
 		paginationInfo: PaginationInfo | null;
 	};
 
@@ -44,9 +44,9 @@ export default function Index() {
 			</section>
 
 			<section>
-				{notes && notes.notes.length > 0 ? (
+				{notes && notes.length > 0 ? (
 					<ul className="space-y-8">
-						{notes.notes.map((note) => (
+						{notes.map((note) => (
 							<Suspense
 								key={note.noteId}
 								fallback={

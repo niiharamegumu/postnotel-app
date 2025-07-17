@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { useLoaderData, Link, redirect } from "react-router";
 import { format, parseISO } from "date-fns";
-import type { NotesWithPaginationResponse } from "~/features/notes/types/note";
+import type { Note } from "~/features/notes/types/note";
 import type { Route } from "./+types/images";
 import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import { LoadingState } from "~/components/common/LoadingState";
@@ -52,12 +52,12 @@ export function meta() {
 
 export default function ImagesPage() {
 	const { notes, paginationInfo } = useLoaderData<typeof loader>() as {
-		notes: NotesWithPaginationResponse | null;
+		notes: Note[] | null;
 		paginationInfo: PaginationInfo;
 	};
 
 	// Filter notes that have images
-	const imageNotes = notes?.notes?.filter((note) => note.images && note.images.length > 0) || [];
+	const imageNotes = notes?.filter((note) => note.images && note.images.length > 0) || [];
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-6">
