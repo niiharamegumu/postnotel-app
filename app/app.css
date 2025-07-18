@@ -149,4 +149,7 @@ html {
   .bn-block-content[data-content-type=numberedListItem]:before {
     @apply w-[1rem];
   }
+  .bn-block-content[data-content-type=checkListItem] {
+    @apply flex gap-2 items-center;
+  }
 }
