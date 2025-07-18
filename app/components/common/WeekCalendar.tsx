@@ -293,9 +293,11 @@ export function WeekCalendar({
 						}}
 						modifiers={{
 							hasNote: (date) => hasNote(date),
+							todayWithNote: (date) => isToday(date) && hasNote(date),
 						}}
 						modifiersClassNames={{
 							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
+							todayWithNote: "[&>button]:!bg-green-300 [&>button]:!text-green-600 [&>button]:!border-2 [&>button]:!border-primary [&>button]:!rounded-full",
 						}}
 					/>
 				</div>
