@@ -1,0 +1,132 @@
+import { format, parseISO } from "date-fns";
+import { ja } from "date-fns/locale";
+import { SquareArrowOutUpRight } from "lucide-react";
+import { Suspense, lazy } from "react";
+import { Link } from "react-router";
+import { LoadingState } from "~/components/common/LoadingState";
+import { PaginationControls } from "~/components/common/PaginationControls";
+import { TagLink } from "~/components/common/TagLink";
+import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { noteContentTypeLabels } from "~/constants/noteContentType";
+import type { Note } from "~/features/notes/types/note";
+import type { Tag } from "~/features/tags/types/tag";
+import type { PaginationInfo } from "~/lib/pagination";
+
+const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
+
+type SearchResultsProps = {
+	notes: Note[];
+	selectedTags: Tag[];
+	paginationInfo: PaginationInfo | null;
+};
+
+function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
+	return notes.reduce((acc: Record<string, Note[]>, note: Note) => {
+		const dateKey = format(parseISO(note.createdAt), "yyyy-MM-dd");
+		if (!acc[dateKey]) {
+			acc[dateKey] = [];
+		}
+		acc[dateKey].push(note);
+		return acc;
+	}, {});
+}
+
+export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
+	if (selectedTags.length === 0) {
+		return (
+			<div className="text-center py-12">
+				<p className="text-muted-foreground">タグを選択してノートを検索してください</p>
+			</div>
+		);
+	}
+
+	if (notes.length === 0) {
+		return (
+			<div className="text-center py-12">
+				<p className="text-muted-foreground">該当するノートはありません</p>
+			</div>
+		);
+	}
+
+	const groupedNotes = groupNotesByDate(notes);
+	const sortedDates = Object.keys(groupedNotes).sort(
+		(a, b) => new Date(b).getTime() - new Date(a).getTime(),
+	);
+
+	return (
+		<div className="space-y-6">
+			<div className="text-sm text-muted-foreground">{paginationInfo?.totalItems || 0}件</div>
+
+			<div className="space-y-6">
+				{sortedDates.map((dateKey) => (
+					<div key={dateKey} className="space-y-4">
+						<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+							{format(parseISO(dateKey), "yyyy年M月d日（E）", { locale: ja })}
+							<Link to={`/notes?date=${dateKey}`}>
+								<SquareArrowOutUpRight />
+							</Link>
+						</h2>
+						<ul className="space-y-4">
+							{groupedNotes[dateKey].map((note: Note) => (
+								<Suspense
+									key={note.noteId}
+									fallback={
+										<li>
+											<LoadingState className="h-10 w-full" />
+										</li>
+									}
+								>
+									<li className="flex flex-col items-start">
+										{note.images?.length > 0 && (
+											<div className="mb-2">
+												<div className="flex gap-2 flex-nowrap overflow-x-auto">
+													{note.images.map((img, i) => (
+														<div
+															key={`${note.noteId}-img-${i}`}
+															className={`rounded-xl p-2 shrink-0 ${
+																note.accessLevel === AccessLevel.Private
+																	? "bg-secondary"
+																	: "bg-primary"
+															}`}
+														>
+															<img
+																src={img}
+																alt={`ノート添付 #${i + 1}`}
+																className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
+															/>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
+										<div className="wrap-anywhere overflow-y-auto rounded-xl mb-1 max-w-full">
+											<NoteContent note={note} />
+										</div>
+										<div className="text-xs text-muted-foreground ml-2 flex gap-2 items-center">
+											<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+											{note.accessLevel === AccessLevel.Private && (
+												<div>{accessLevelLabels[note.accessLevel]}</div>
+											)}
+											<div>{noteContentTypeLabels[note.contentType]}</div>
+											{note.tags && note.tags.tags.length > 0 && (
+												<div className="flex items-center gap-2">
+													{note.tags.tags.map((noteTag) => (
+														<TagLink key={noteTag.id} id={noteTag.id} name={noteTag.name} />
+													))}
+												</div>
+											)}
+										</div>
+									</li>
+								</Suspense>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+
+			{paginationInfo && paginationInfo.totalPages > 1 && (
+				<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
+			)}
+		</div>
+	);
+}

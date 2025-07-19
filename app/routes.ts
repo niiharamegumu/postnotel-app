@@ -1,6 +1,6 @@
 import { type RouteConfig, layout, prefix, route } from "@react-router/dev/routes";
 
-export default [
+const routes: RouteConfig = [
 	layout("layout/base.tsx", [
 		route("/", "routes/top.tsx"),
 
@@ -48,4 +48,6 @@ export default [
 		]),
 	]),
 	// ====== End of BFF API endpoints =====
-] satisfies RouteConfig;
+];
+
+export default routes;
