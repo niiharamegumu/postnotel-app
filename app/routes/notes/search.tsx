@@ -17,7 +17,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const searchParams = url.searchParams;
 	const tagIdsParam = searchParams.get("tagIds");
 	const page = getPageFromSearchParams(searchParams);
-	const limit = PAGINATION_LIMITS.TAGS_PAGE;
+	const limit = PAGINATION_LIMITS.SEARCH_PAGE;
 	const offset = calculateOffset(page, limit);
 
 	const tagIds = tagIdsParam ? tagIdsParam.split(",").filter(Boolean) : [];
@@ -46,7 +46,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		throw redirect(newUrl.toString());
 	}
 
-	// Fetch notes if tags are selected
+	// Fetch notes - either filtered by tags or all notes
 	let notesResult = null;
 	if (validTagIds.length > 0) {
 		notesResult = await fetchNotesWithPagination(request, context, {
@@ -55,6 +55,10 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			offset,
 		});
 	}
+	notesResult = await fetchNotesWithPagination(request, context, {
+		limit,
+		offset,
+	});
 
 	// If page is invalid (beyond total pages), redirect to page 1
 	if (

@@ -32,18 +32,10 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 }
 
 export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
-	if (selectedTags.length === 0) {
-		return (
-			<div className="text-center py-12">
-				<p className="text-muted-foreground">タグを選択してノートを検索してください</p>
-			</div>
-		);
-	}
-
 	if (notes.length === 0) {
 		return (
 			<div className="text-center py-12">
-				<p className="text-muted-foreground">該当するノートはありません</p>
+				<p className="text-muted-foreground">ノートはありません</p>
 			</div>
 		);
 	}
