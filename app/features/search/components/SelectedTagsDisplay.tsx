@@ -32,7 +32,7 @@ export function SelectedTagsDisplay({ selectedTags }: SelectedTagsDisplayProps) 
 	}
 
 	return (
-		<div className="space-y-3">
+		<div className="space-y-3 border-b-1 border-primary/50 py-4">
 			<div className="flex items-center justify-between">
 				<h3 className="text-sm font-medium text-muted-foreground">Selected Tags</h3>
 				{selectedTags.length > 0 && (

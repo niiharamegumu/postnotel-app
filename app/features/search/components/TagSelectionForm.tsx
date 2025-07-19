@@ -43,7 +43,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 	);
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 border-b-1 border-primary/50 py-4">
 			<div className="space-y-2">
 				<button
 					type="button"
@@ -51,9 +51,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 					className="flex items-center justify-between w-full text-left group"
 				>
 					<div>
-						<h3 className="text-lg font-medium group-hover:text-primary transition-colors">
-							Select Tags
-						</h3>
+						<h3 className="text-lg font-medium group-hover:text-primary transition-colors">Tags</h3>
 					</div>
 					{isExpanded ? (
 						<ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />

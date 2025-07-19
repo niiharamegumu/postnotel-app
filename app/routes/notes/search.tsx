@@ -11,6 +11,7 @@ import type { Tag as TagType, TagsResponse } from "~/features/tags/types/tag";
 import { fetcher } from "~/lib/fetcher";
 import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
 import type { Route } from "./+types/search";
+import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -108,6 +109,8 @@ export default function SearchPage() {
 			<SearchHeader selectedTags={selectedTags} />
 
 			<TagSelectionForm availableTags={availableTags} selectedTags={selectedTags} />
+
+			<SelectedTagsDisplay selectedTags={selectedTags} />
 
 			{isLoading ? (
 				<div className="space-y-4">
