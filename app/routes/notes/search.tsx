@@ -1,9 +1,9 @@
-import { StatusCodes } from "http-status-codes";
-import { redirect, useLoaderData } from "react-router";
+import { redirect, useLoaderData, useNavigation } from "react-router";
+import { LoadingState } from "~/components/common/LoadingState";
 import { endpoints } from "~/constants/endpoints";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
 import { fetchNotesWithPagination } from "~/features/notes/api/get";
-import type { Note, NotesWithPaginationResponse } from "~/features/notes/types/note";
+import type { Note } from "~/features/notes/types/note";
 import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
 import { TagSelectionForm } from "~/features/search/components/TagSelectionForm";
@@ -93,6 +93,9 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function SearchPage() {
+	const navigation = useNavigation();
+	const isLoading = navigation.state === "loading";
+
 	const { notes, selectedTags, availableTags, paginationInfo } = useLoaderData<typeof loader>() as {
 		notes: Note[];
 		selectedTags: TagType[];
@@ -106,7 +109,13 @@ export default function SearchPage() {
 
 			<TagSelectionForm availableTags={availableTags} selectedTags={selectedTags} />
 
-			<SearchResults notes={notes} selectedTags={selectedTags} paginationInfo={paginationInfo} />
+			{isLoading ? (
+				<div className="space-y-4">
+					<LoadingState variant="spinner" className="text-center" />
+				</div>
+			) : (
+				<SearchResults notes={notes} selectedTags={selectedTags} paginationInfo={paginationInfo} />
+			)}
 		</div>
 	);
 }
