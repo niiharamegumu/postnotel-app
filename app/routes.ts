@@ -5,6 +5,7 @@ export default [
 		route("/", "routes/top.tsx"),
 
 		...prefix("notes", [
+			route("/search", "routes/notes/search.tsx"),
 			route("/tag/:tagId", "routes/notes/tag.tsx"),
 			route("/images", "routes/notes/images.tsx"),
 		]),
