@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
 import { SquareArrowOutUpRight } from "lucide-react";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useMemo } from "react";
 import { Link } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { PaginationControls } from "~/components/common/PaginationControls";
@@ -32,18 +32,34 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 }
 
 export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
+	// メッセージをメモ化
+	const emptyMessage = useMemo(() => {
+		return selectedTags.length > 0
+			? "選択されたタグの組み合わせに該当するノートはありません"
+			: "ノートがありません";
+	}, [selectedTags.length]);
+
+	// 日付グループ化とソートをメモ化
+	const { groupedNotes, sortedDates } = useMemo(() => {
+		if (notes.length === 0) {
+			return { groupedNotes: {}, sortedDates: [] };
+		}
+
+		const grouped = groupNotesByDate(notes);
+		const sorted = Object.keys(grouped).sort(
+			(a, b) => new Date(b).getTime() - new Date(a).getTime(),
+		);
+
+		return { groupedNotes: grouped, sortedDates: sorted };
+	}, [notes]);
+
 	if (notes.length === 0) {
 		return (
 			<div className="text-center py-12">
-				<p className="text-muted-foreground">ノートはありません</p>
+				<p className="text-muted-foreground">{emptyMessage}</p>
 			</div>
 		);
 	}
-
-	const groupedNotes = groupNotesByDate(notes);
-	const sortedDates = Object.keys(groupedNotes).sort(
-		(a, b) => new Date(b).getTime() - new Date(a).getTime(),
-	);
 
 	return (
 		<div className="space-y-6">

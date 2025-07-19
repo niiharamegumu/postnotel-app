@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
@@ -37,8 +37,9 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 	);
 
 	// 選択可能なタグは、まだ選択されていないタグのみ
-	const selectableTags = availableTags.filter(
-		(tag) => !selectedTags.some((selected) => selected.id === tag.id),
+	const selectableTags = useMemo(
+		() => availableTags.filter((tag) => !selectedTags.some((selected) => selected.id === tag.id)),
+		[availableTags, selectedTags],
 	);
 
 	return (
