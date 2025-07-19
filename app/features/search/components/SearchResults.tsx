@@ -4,7 +4,6 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
 import { Link } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
-import { PaginationControls } from "~/components/common/PaginationControls";
 import { TagLink } from "~/components/common/TagLink";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
@@ -131,10 +130,6 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 					</div>
 				))}
 			</div>
-
-			{paginationInfo && paginationInfo.totalPages > 1 && (
-				<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
-			)}
 		</div>
 	);
 }

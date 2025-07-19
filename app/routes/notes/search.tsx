@@ -12,6 +12,7 @@ import { fetcher } from "~/lib/fetcher";
 import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
 import type { Route } from "./+types/search";
 import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
+import { PaginationControls } from "~/components/common/PaginationControls";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -107,17 +108,26 @@ export default function SearchPage() {
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-6">
 			<SearchHeader selectedTags={selectedTags} />
-
 			<TagSelectionForm availableTags={availableTags} selectedTags={selectedTags} />
-
 			<SelectedTagsDisplay selectedTags={selectedTags} />
-
 			{isLoading ? (
 				<div className="space-y-4">
 					<LoadingState variant="spinner" className="text-center" />
 				</div>
 			) : (
-				<SearchResults notes={notes} selectedTags={selectedTags} paginationInfo={paginationInfo} />
+				<>
+					{paginationInfo && paginationInfo.totalPages > 1 && (
+						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
+					)}
+					<SearchResults
+						notes={notes}
+						selectedTags={selectedTags}
+						paginationInfo={paginationInfo}
+					/>
+					{paginationInfo && paginationInfo.totalPages > 1 && (
+						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
+					)}
+				</>
 			)}
 		</div>
 	);

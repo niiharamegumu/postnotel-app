@@ -43,7 +43,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 	);
 
 	return (
-		<div className="space-y-4 border-b-1 border-primary/50 py-4">
+		<div className="space-y-4">
 			<div className="space-y-2">
 				<button
 					type="button"
