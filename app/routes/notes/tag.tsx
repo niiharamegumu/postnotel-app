@@ -1,22 +1,22 @@
-import { lazy, Suspense } from "react";
-import { useLoaderData, Link, redirect } from "react-router";
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { Note, NotesWithPaginationResponse } from "~/features/notes/types/note";
-import type { Route } from "./+types/tag";
-import { fetchNotesWithPagination } from "~/features/notes/api/get";
-import { fetcher } from "~/lib/fetcher";
-import { endpoints } from "~/constants/endpoints";
-import type { Tag as TagType, TagsResponse } from "~/features/tags/types/tag";
-import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
-import { noteContentTypeLabels } from "~/constants/noteContentType";
-import { LoadingState } from "~/components/common/LoadingState";
-import { Tag, SquareArrowOutUpRight } from "lucide-react";
-import { TagLink } from "~/components/common/TagLink";
-import { PaginationControls } from "~/components/common/PaginationControls";
-import { getPageFromSearchParams, calculateOffset, type PaginationInfo } from "~/lib/pagination";
-import { PAGINATION_LIMITS } from "~/constants/pagination";
 import { StatusCodes } from "http-status-codes";
+import { SquareArrowOutUpRight, Tag } from "lucide-react";
+import { Suspense, lazy } from "react";
+import { Link, redirect, useLoaderData, useNavigation } from "react-router";
+import { LoadingState } from "~/components/common/LoadingState";
+import { PaginationControls } from "~/components/common/PaginationControls";
+import { TagLink } from "~/components/common/TagLink";
+import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { endpoints } from "~/constants/endpoints";
+import { noteContentTypeLabels } from "~/constants/noteContentType";
+import { PAGINATION_LIMITS } from "~/constants/pagination";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
+import type { Note } from "~/features/notes/types/note";
+import type { Tag as TagType, TagsResponse } from "~/features/tags/types/tag";
+import { fetcher } from "~/lib/fetcher";
+import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
+import type { Route } from "./+types/tag";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
 	const { tagId } = params;
@@ -84,6 +84,9 @@ export function meta({ data }: Route.MetaArgs) {
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
 export default function TagNotesPage() {
+	const navigation = useNavigation();
+	const isLoading = navigation.state === "loading";
+
 	const { notes, tag, tags, paginationInfo } = useLoaderData<typeof loader>() as {
 		notes: Note[] | null;
 		tag: TagType;
@@ -92,16 +95,17 @@ export default function TagNotesPage() {
 	};
 
 	// Group notes by date
-	const groupedNotes = notes && notes.length > 0
-		? notes.reduce((acc: Record<string, Note[]>, note: Note) => {
-				const dateKey = format(parseISO(note.createdAt), "yyyy-MM-dd");
-				if (!acc[dateKey]) {
-					acc[dateKey] = [];
-				}
-				acc[dateKey].push(note);
-				return acc;
-			}, {})
-		: {};
+	const groupedNotes =
+		notes && notes.length > 0
+			? notes.reduce((acc: Record<string, Note[]>, note: Note) => {
+					const dateKey = format(parseISO(note.createdAt), "yyyy-MM-dd");
+					if (!acc[dateKey]) {
+						acc[dateKey] = [];
+					}
+					acc[dateKey].push(note);
+					return acc;
+				}, {})
+			: {};
 
 	// Sort dates in descending order
 	const sortedDates = Object.keys(groupedNotes).sort(
@@ -125,7 +129,11 @@ export default function TagNotesPage() {
 				</div>
 			)}
 			<section className="w-full min-h-screen">
-				{sortedDates.length > 0 ? (
+				{isLoading ? (
+					<div className="space-y-4">
+						<LoadingState variant="spinner" className="text-center" />
+					</div>
+				) : sortedDates.length > 0 ? (
 					<div className="space-y-6">
 						{sortedDates.map((dateKey) => (
 							<div key={dateKey} className="space-y-4">

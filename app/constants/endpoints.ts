@@ -37,7 +37,11 @@ export const endpoints = {
 
 				if (date) queryParams.push(`date=${format(date, "yyyy-MM-dd")}`);
 				if (q) queryParams.push(`q=${encodeURIComponent(q)}`);
-				if (tagIds && tagIds.length > 0) queryParams.push(`tagIds=${tagIds.join(",")}`);
+				if (tagIds && tagIds.length > 0) {
+					for (const tagId of tagIds) {
+						queryParams.push(`tagIds=${tagId}`);
+					}
+				}
 				if (accessLevel) queryParams.push(`accessLevel=${accessLevel}`);
 				if (contentType) queryParams.push(`contentType=${contentType}`);
 				if (limit !== undefined) queryParams.push(`limit=${limit}`);
