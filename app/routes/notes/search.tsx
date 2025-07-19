@@ -49,16 +49,19 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	// Fetch notes - either filtered by tags or all notes
 	let notesResult = null;
 	if (validTagIds.length > 0) {
+		// Fetch notes filtered by selected tags
 		notesResult = await fetchNotesWithPagination(request, context, {
 			tagIds: validTagIds,
 			limit,
 			offset,
 		});
+	} else {
+		// Fetch all notes when no tags are selected
+		notesResult = await fetchNotesWithPagination(request, context, {
+			limit,
+			offset,
+		});
 	}
-	notesResult = await fetchNotesWithPagination(request, context, {
-		limit,
-		offset,
-	});
 
 	// If page is invalid (beyond total pages), redirect to page 1
 	if (
