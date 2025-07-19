@@ -2,7 +2,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { TagSelector } from "~/features/tags/components/TagSelector";
-import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { updateSearchParams } from "../utils/searchUrlUtils";
 
@@ -14,7 +13,6 @@ type TagSelectionFormProps = {
 export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFormProps) {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
-	const { createTag } = useTags();
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	const handleTagAdd = useCallback(
@@ -68,7 +66,6 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 						selectedTags={[]} // タグ選択フォームでは空配列、選択済みタグは別コンポーネントで表示
 						onTagSelect={handleTagAdd}
 						onTagRemove={handleTagRemove}
-						onCreateTag={createTag}
 					/>
 				</div>
 			)}
