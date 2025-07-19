@@ -1,6 +1,6 @@
-import { Link } from "react-router";
 import { Tag } from "lucide-react";
 import { memo } from "react";
+import { Link } from "react-router";
 
 type TagLinkProps = {
 	id: string;
@@ -17,7 +17,7 @@ export const TagLink = memo(function TagLink({
 	color = "#75b1ff",
 	href,
 }: TagLinkProps) {
-	const linkHref = href || `/notes/tag/${id}`;
+	const linkHref = href || `/notes/search?tagIds=${id}`;
 
 	return (
 		<Link to={linkHref} className="flex gap-1 items-center hover:underline rounded">
