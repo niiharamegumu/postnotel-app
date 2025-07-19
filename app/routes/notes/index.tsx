@@ -314,15 +314,6 @@ export default function Index() {
 					[isLoading, notes, handleEditNote],
 				)}
 			</motion.section>
-			{tags && tags.length > 0 && (
-				<div className="mt-4">
-					<div className="flex justify-start flex-wrap gap-x-3 gap-y-2">
-						{tags.map((tag) => (
-							<TagLink key={tag.id} id={tag.id} name={tag.name} />
-						))}
-					</div>
-				</div>
-			)}
 		</div>
 	);
 }

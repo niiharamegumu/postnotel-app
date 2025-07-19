@@ -1,5 +1,5 @@
 import { Check, Plus } from "lucide-react";
-import { useState, useMemo, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
 	Command,
 	CommandEmpty,
@@ -17,7 +17,7 @@ type TagSelectorProps = {
 	selectedTags: Tag[];
 	onTagSelect: (tag: Tag) => void;
 	onTagRemove: (tagId: string) => void;
-	onCreateTag: (name: string) => Promise<Tag | null>;
+	onCreateTag?: (name: string) => Promise<Tag | null>;
 	className?: string;
 };
 
@@ -30,34 +30,40 @@ export function TagSelector({
 	className,
 }: TagSelectorProps) {
 	const [inputValue, setInputValue] = useState("");
-	
-	const filteredTags = useMemo(() => 
-		availableTags.filter((tag) =>
-			tag.name.toLowerCase().includes(inputValue.toLowerCase()),
-		)
-	, [availableTags, inputValue]);
-	
-	const isTagSelected = useCallback((tagId: string) => 
-		selectedTags.some((tag) => tag.id === tagId)
-	, [selectedTags]);
 
-	const canCreateNewTag = useMemo(() =>
-		inputValue.trim() !== "" && // 空でないこと
-		!availableTags.some((tag) => tag.name.toLowerCase() === inputValue.toLowerCase()) && // 既存のタグと重複しないこと
-		tagNameSchema.safeParse(inputValue).success // スキーマに合致すること
-	, [inputValue, availableTags]);
+	const filteredTags = useMemo(
+		() => availableTags.filter((tag) => tag.name.toLowerCase().includes(inputValue.toLowerCase())),
+		[availableTags, inputValue],
+	);
 
-	const handleTagSelect = useCallback((tag: Tag) => {
-		if (isTagSelected(tag.id)) {
-			onTagRemove(tag.id);
-		} else {
-			onTagSelect(tag);
-		}
-		setInputValue("");
-	}, [isTagSelected, onTagRemove, onTagSelect]);
+	const isTagSelected = useCallback(
+		(tagId: string) => selectedTags.some((tag) => tag.id === tagId),
+		[selectedTags],
+	);
+
+	const canCreateNewTag = useMemo(
+		() =>
+			onCreateTag && // onCreateTag関数が提供されていること
+			inputValue.trim() !== "" && // 空でないこと
+			!availableTags.some((tag) => tag.name.toLowerCase() === inputValue.toLowerCase()) && // 既存のタグと重複しないこと
+			tagNameSchema.safeParse(inputValue).success, // スキーマに合致すること
+		[onCreateTag, inputValue, availableTags],
+	);
+
+	const handleTagSelect = useCallback(
+		(tag: Tag) => {
+			if (isTagSelected(tag.id)) {
+				onTagRemove(tag.id);
+			} else {
+				onTagSelect(tag);
+			}
+			setInputValue("");
+		},
+		[isTagSelected, onTagRemove, onTagSelect],
+	);
 
 	const handleCreateTag = useCallback(async () => {
-		if (!canCreateNewTag) return;
+		if (!canCreateNewTag || !onCreateTag) return;
 
 		const newTag = await onCreateTag(inputValue.trim());
 		if (newTag) {
