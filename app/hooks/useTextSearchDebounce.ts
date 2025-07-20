@@ -13,9 +13,10 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 
 	const debouncedSearch = useCallback(
 		debounce((searchQuery: string) => {
-			if (searchQuery.trim() !== lastQueryRef.current.trim()) {
-				lastQueryRef.current = searchQuery.trim();
-				onSearch(searchQuery.trim());
+			const trimmedQuery = searchQuery.trim();
+			if (trimmedQuery !== lastQueryRef.current) {
+				lastQueryRef.current = trimmedQuery;
+				onSearch(trimmedQuery);
 			}
 		}, delay),
 		[],

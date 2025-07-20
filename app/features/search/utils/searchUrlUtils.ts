@@ -45,22 +45,6 @@ export const validateSearchQuery = (query: string | undefined): string | null =>
 	return trimmedQuery;
 };
 
-export const updateSearchUrl = (currentUrl: string, updates: Partial<SearchParams>): string => {
-	const url = new URL(currentUrl);
-	const currentParams = parseSearchParams(url.searchParams);
-
-	const newParams: SearchParams = {
-		...currentParams,
-		...updates,
-	};
-
-	if (updates.tagIds !== undefined || updates.q !== undefined) {
-		newParams.page = 1;
-	}
-
-	return buildSearchUrl(newParams, url.pathname);
-};
-
 export function updateSearchParams(
 	currentSearchParams: URLSearchParams,
 	tagIds: string[],

@@ -1,10 +1,9 @@
 import { Search } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { useTextSearchDebounce } from "~/hooks/useTextSearchDebounce";
 import { cn } from "~/lib/utils";
-import { updateSearchUrl } from "../utils/searchUrlUtils";
 
 type TextSearchInputProps = {
 	className?: string;
@@ -14,18 +13,30 @@ type TextSearchInputProps = {
 
 export function TextSearchInput({
 	className,
-	placeholder = "ノートを検索...",
+	placeholder = "Search...",
 	isLoading = false,
 }: TextSearchInputProps) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [searchParams] = useSearchParams();
+	const lastUrlQuery = useRef<string>("");
 
 	const handleSearch = useCallback(
 		(query: string) => {
-			const currentUrl = `${location.pathname}${location.search}`;
-			const newUrl = updateSearchUrl(currentUrl, { q: query });
-			navigate(newUrl);
+			const newSearchParams = new URLSearchParams(location.search);
+
+			if (query.trim()) {
+				newSearchParams.set("q", query.trim());
+			} else {
+				newSearchParams.delete("q");
+			}
+
+			// Reset page when search changes
+			newSearchParams.delete("page");
+
+			const queryString = newSearchParams.toString();
+			const newPath = queryString ? `${location.pathname}?${queryString}` : location.pathname;
+			navigate(newPath);
 		},
 		[navigate, location.pathname, location.search],
 	);
@@ -42,13 +53,14 @@ export function TextSearchInput({
 		onSearch: handleSearch,
 	});
 
-	// Initialize query from URL params
+	// Initialize from URL and sync when URL changes from other sources (not from this component)
 	useEffect(() => {
-		const qParam = searchParams.get("q");
-		if (qParam && qParam !== query) {
-			setQuery(qParam);
+		const urlQuery = searchParams.get("q") || "";
+		if (urlQuery !== lastUrlQuery.current) {
+			lastUrlQuery.current = urlQuery;
+			setQuery(urlQuery);
 		}
-	}, [searchParams, query, setQuery]);
+	}, [searchParams, setQuery]);
 
 	const handleInputChangeEvent = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
