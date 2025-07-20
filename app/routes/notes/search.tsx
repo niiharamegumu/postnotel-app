@@ -8,7 +8,6 @@ import type { Note } from "~/features/notes/types/note";
 import { SearchForm } from "~/features/search/components/SearchForm";
 import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
-import { SearchQueryDisplay } from "~/features/search/components/SearchQueryDisplay";
 import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
 import {
 	buildSearchUrl,
@@ -157,12 +156,6 @@ export default function SearchPage() {
 			<SearchHeader />
 			<SearchForm availableTags={availableTags} selectedTags={selectedTags} />
 			<SelectedTagsDisplay selectedTags={selectedTags} />
-			<SearchQueryDisplay
-				selectedTags={selectedTags}
-				searchQuery={searchQuery}
-				paginationInfo={paginationInfo}
-				isLoading={isLoading}
-			/>
 
 			{isLoading ? (
 				<div className="space-y-4">
