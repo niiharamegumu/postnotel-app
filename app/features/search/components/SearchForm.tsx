@@ -21,9 +21,6 @@ export function SearchForm({ availableTags, selectedTags }: SearchFormProps) {
 			<div className="space-y-2">
 				<h3 className="text-lg font-medium">検索</h3>
 				<TextSearchInput isLoading={isLoading} className="w-full" />
-				{currentQuery && (
-					<p className="text-sm text-muted-foreground">「{currentQuery}」で検索中</p>
-				)}
 			</div>
 
 			{/* タグ検索 */}
