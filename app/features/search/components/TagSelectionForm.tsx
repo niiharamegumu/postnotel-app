@@ -1,5 +1,4 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import type { Tag } from "~/features/tags/types/tag";
@@ -13,7 +12,6 @@ type TagSelectionFormProps = {
 export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFormProps) {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
-	const [isExpanded, setIsExpanded] = useState(false);
 
 	const handleTagAdd = useCallback(
 		(tag: Tag) => {
@@ -41,34 +39,12 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 	);
 
 	return (
-		<div className="space-y-4">
-			<div className="space-y-2">
-				<button
-					type="button"
-					onClick={() => setIsExpanded(!isExpanded)}
-					className="flex items-center justify-between w-full text-left group"
-				>
-					<div>
-						<h3 className="text-lg font-medium group-hover:text-primary transition-colors">Tags</h3>
-					</div>
-					{isExpanded ? (
-						<ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-					) : (
-						<ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-					)}
-				</button>
-			</div>
-
-			{isExpanded && (
-				<div className="mt-4">
-					<TagSelector
-						availableTags={selectableTags}
-						selectedTags={[]} // タグ選択フォームでは空配列、選択済みタグは別コンポーネントで表示
-						onTagSelect={handleTagAdd}
-						onTagRemove={handleTagRemove}
-					/>
-				</div>
-			)}
-		</div>
+		<TagSelector
+			availableTags={selectableTags}
+			selectedTags={[]} // タグ選択フォームでは空配列、選択済みタグは別コンポーネントで表示
+			onTagSelect={handleTagAdd}
+			onTagRemove={handleTagRemove}
+			maxHeight="15svh"
+		/>
 	);
 }

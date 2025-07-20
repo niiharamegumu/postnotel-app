@@ -2,7 +2,7 @@ import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
@@ -31,12 +31,22 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 }
 
 export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
+	const [searchParams] = useSearchParams();
+	const searchQuery = searchParams.get("q") || "";
+
 	// メッセージをメモ化
 	const emptyMessage = useMemo(() => {
-		return selectedTags.length > 0
-			? "選択されたタグの組み合わせに該当するノートはありません"
-			: "ノートがありません";
-	}, [selectedTags.length]);
+		if (selectedTags.length > 0 && searchQuery) {
+			return "選択されたタグと検索キーワードの組み合わせに該当するノートはありません";
+		}
+		if (selectedTags.length > 0) {
+			return "選択されたタグの組み合わせに該当するノートはありません";
+		}
+		if (searchQuery) {
+			return "検索キーワードに該当するノートはありません";
+		}
+		return "ノートがありません";
+	}, [selectedTags.length, searchQuery]);
 
 	// 日付グループ化とソートをメモ化
 	const { groupedNotes, sortedDates } = useMemo(() => {
@@ -61,8 +71,8 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 	}
 
 	return (
-		<div className="space-y-6">
-			<div className="text-sm text-muted-foreground">{paginationInfo?.totalItems || 0}件</div>
+		<div>
+			<div className="text-sm text-muted-foreground mb-2">{paginationInfo?.totalItems || 0}件</div>
 
 			<div className="space-y-6">
 				{sortedDates.map((dateKey) => (
@@ -107,7 +117,7 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 											</div>
 										)}
 										<div className="wrap-anywhere overflow-y-auto rounded-xl mb-1 max-w-full">
-											<NoteContent note={note} />
+											<NoteContent note={note} searchQuery={searchQuery} />
 										</div>
 										<div className="text-xs text-muted-foreground ml-2 flex gap-2 items-center">
 											<div>{format(new Date(note.createdAt), "HH:mm")}</div>

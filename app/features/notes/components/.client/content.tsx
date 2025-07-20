@@ -1,14 +1,16 @@
 import { useCreateBlockNote } from "@blocknote/react";
-import { useEffect, useState } from "react";
-import type { Note } from "../../types/note";
 import parse, { type HTMLReactParserOptions, type Element, type Text } from "html-react-parser";
+import { useEffect, useState } from "react";
 import { AccessLevel } from "~/constants/accessLevel";
+import { highlightText } from "~/lib/textHighlight";
+import type { Note } from "../../types/note";
 
 type Props = {
 	note: Note;
+	searchQuery?: string;
 };
 
-export default function NoteContent({ note }: Props) {
+export default function NoteContent({ note, searchQuery }: Props) {
 	const [html, setHtml] = useState<string>("");
 	const editor = useCreateBlockNote();
 
@@ -27,14 +29,44 @@ export default function NoteContent({ note }: Props) {
 		processMarkdown();
 	}, [note.content, editor]);
 
+	const applyHighlight = (text: string): React.ReactNode[] => {
+		if (!searchQuery?.trim()) {
+			return [text];
+		}
+
+		const matches = highlightText(text, searchQuery);
+		return matches.map((match, index) =>
+			match.isMatch ? (
+				<mark
+					key={`${text}-${index}-${match.text}`}
+					className="bg-yellow-200 text-accent rounded px-0.5 font-semibold"
+				>
+					{match.text}
+				</mark>
+			) : (
+				<span key={`${text}-${index}-${match.text}`}>{match.text}</span>
+			),
+		);
+	};
+
 	const options: HTMLReactParserOptions = {
 		replace: (domNode) => {
+			if (domNode.type === "text") {
+				const textNode = domNode as Text;
+				return <>{applyHighlight(textNode.data)}</>;
+			}
+
 			if (domNode.type === "tag" && domNode.name === "a") {
 				const element = domNode as Element;
 				const href = element.attribs?.href;
 				const children = element.children;
 
 				if (href) {
+					const textContent =
+						children
+							?.map((child) => (child.type === "text" ? (child as Text).data : ""))
+							.join("") || href;
+
 					return (
 						<a
 							href={href}
@@ -43,11 +75,7 @@ export default function NoteContent({ note }: Props) {
 							onClick={(e) => e.stopPropagation()}
 							className="text-blue-500 underline hover:text-blue-700"
 						>
-							{parse(
-								children
-									?.map((child) => (child.type === "text" ? (child as Text).data : ""))
-									.join("") || href,
-							)}
+							{applyHighlight(textContent)}
 						</a>
 					);
 				}

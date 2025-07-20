@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import { Tag } from "lucide-react";
 import { useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -33,36 +33,31 @@ export function SelectedTagsDisplay({ selectedTags }: SelectedTagsDisplayProps) 
 
 	return (
 		<div className="space-y-3 p-4 bg-card rounded-md">
-			<div className="flex items-center justify-between">
-				<h3 className="text-sm font-medium text-muted-foreground">Selected Tags</h3>
+			<div className="flex items-center">
+				<div className="flex flex-wrap gap-2 flex-1">
+					{selectedTags.map((tag) => (
+						<div
+							key={tag.id}
+							className="inline-flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium"
+						>
+							<Tag size={12} />
+							<span>{tag.name}</span>
+							<button
+								type="button"
+								onClick={() => handleTagRemove(tag.id)}
+								className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+								aria-label={`${tag.name}タグを削除`}
+							>
+								<X size={12} />
+							</button>
+						</div>
+					))}
+				</div>
 				{selectedTags.length > 0 && (
-					<button
-						type="button"
-						onClick={handleClearAll}
-						className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-					>
-						Clear
+					<button type="button" onClick={handleClearAll} aria-label="すべてのタグをクリア">
+						<Trash size={18} />
 					</button>
 				)}
-			</div>
-			<div className="flex flex-wrap gap-2">
-				{selectedTags.map((tag) => (
-					<div
-						key={tag.id}
-						className="inline-flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium"
-					>
-						<Tag size={12} />
-						<span>{tag.name}</span>
-						<button
-							type="button"
-							onClick={() => handleTagRemove(tag.id)}
-							className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
-							aria-label={`${tag.name}タグを削除`}
-						>
-							<X size={12} />
-						</button>
-					</div>
-				))}
 			</div>
 		</div>
 	);

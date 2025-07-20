@@ -38,7 +38,7 @@ export function PaginationControls({ pagination, baseUrl, className }: Paginatio
 	}
 
 	return (
-		<Pagination className={cn("mt-8", className)}>
+		<Pagination className={className}>
 			<PaginationContent>
 				<PaginationItem>
 					{hasPrevious ? (
