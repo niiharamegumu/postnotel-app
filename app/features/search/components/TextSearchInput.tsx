@@ -13,7 +13,7 @@ type TextSearchInputProps = {
 
 export function TextSearchInput({
 	className,
-	placeholder = "Search...",
+	placeholder = "テキスト検索",
 	isLoading = false,
 }: TextSearchInputProps) {
 	const navigate = useNavigate();

@@ -19,6 +19,8 @@ type TagSelectorProps = {
 	onTagRemove: (tagId: string) => void;
 	onCreateTag?: (name: string) => Promise<Tag | null>;
 	className?: string;
+	maxHeight?: string;
+	placeholder?: string;
 };
 
 export function TagSelector({
@@ -28,6 +30,8 @@ export function TagSelector({
 	onTagRemove,
 	onCreateTag,
 	className,
+	maxHeight,
+	placeholder = "タグ検索",
 }: TagSelectorProps) {
 	const [inputValue, setInputValue] = useState("");
 
@@ -76,7 +80,7 @@ export function TagSelector({
 		<div className={cn("w-full space-y-2", className)}>
 			<Command className="border rounded-lg">
 				<CommandInput
-					placeholder="タグを検索..."
+					placeholder={placeholder}
 					value={inputValue}
 					onValueChange={setInputValue}
 					className="text-base"
@@ -85,7 +89,7 @@ export function TagSelector({
 					spellCheck="false"
 					autoCapitalize="none"
 				/>
-				<CommandList>
+				<CommandList className="overflow-y-auto" style={{ maxHeight }}>
 					<CommandEmpty>
 						{inputValue.trim() === "" ? (
 							"タグを入力してください"

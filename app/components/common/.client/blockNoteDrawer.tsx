@@ -251,6 +251,7 @@ export default function BlockNoteDrawer({
 										}
 										onTagRemove={onTagRemove}
 										onCreateTag={createTag}
+										placeholder="タグを検索または作成"
 									/>
 								</div>
 								<DrawerFooter className="px-0 py-2">

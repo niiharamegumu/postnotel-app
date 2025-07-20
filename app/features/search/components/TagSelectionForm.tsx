@@ -44,6 +44,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 			selectedTags={[]} // タグ選択フォームでは空配列、選択済みタグは別コンポーネントで表示
 			onTagSelect={handleTagAdd}
 			onTagRemove={handleTagRemove}
+			maxHeight="15svh"
 		/>
 	);
 }
