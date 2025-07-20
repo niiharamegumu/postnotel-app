@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import {
 	Pagination,
 	PaginationContent,
@@ -9,7 +9,6 @@ import {
 	PaginationPrevious,
 } from "~/components/ui/pagination";
 import { type PaginationInfo, generatePageNumbers } from "~/lib/pagination";
-import { cn } from "~/lib/utils";
 
 interface PaginationControlsProps {
 	pagination: PaginationInfo;
@@ -19,15 +18,19 @@ interface PaginationControlsProps {
 
 export function PaginationControls({ pagination, baseUrl, className }: PaginationControlsProps) {
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const { currentPage, totalPages, hasNext, hasPrevious } = pagination;
 
 	const buildUrl = (page: number): string => {
-		const url = new URL(baseUrl, window.location.origin);
+		const searchParams = new URLSearchParams(location.search);
 		if (page > 1) {
-			url.searchParams.set("page", page.toString());
+			searchParams.set("page", page.toString());
+		} else {
+			searchParams.delete("page");
 		}
-		return url.pathname + url.search;
+		const queryString = searchParams.toString();
+		return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 	};
 
 	const pageNumbers = generatePageNumbers(currentPage, totalPages);
