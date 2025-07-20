@@ -20,22 +20,14 @@ export function SearchForm({ availableTags, selectedTags }: SearchFormProps) {
 			{/* テキスト検索 */}
 			<div className="space-y-2">
 				<h3 className="text-lg font-medium">検索</h3>
-				<TextSearchInput 
-					isLoading={isLoading}
-					className="w-full"
-				/>
+				<TextSearchInput isLoading={isLoading} className="w-full" />
 				{currentQuery && (
-					<p className="text-sm text-muted-foreground">
-						「{currentQuery}」で検索中
-					</p>
+					<p className="text-sm text-muted-foreground">「{currentQuery}」で検索中</p>
 				)}
 			</div>
 
 			{/* タグ検索 */}
-			<TagSelectionForm 
-				availableTags={availableTags} 
-				selectedTags={selectedTags} 
-			/>
+			<TagSelectionForm availableTags={availableTags} selectedTags={selectedTags} />
 		</div>
 	);
 }
