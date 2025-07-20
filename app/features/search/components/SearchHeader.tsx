@@ -1,11 +1,6 @@
 import { Search } from "lucide-react";
-import type { Tag } from "~/features/tags/types/tag";
 
-type SearchHeaderProps = {
-	selectedTags: Tag[];
-};
-
-export function SearchHeader({ selectedTags }: SearchHeaderProps) {
+export function SearchHeader() {
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center gap-2">
