@@ -76,7 +76,7 @@ export function TagSelector({
 		<div className={cn("w-full space-y-2", className)}>
 			<Command className="border rounded-lg">
 				<CommandInput
-					placeholder="タグを検索または作成..."
+					placeholder="タグを検索..."
 					value={inputValue}
 					onValueChange={setInputValue}
 					className="text-base"
@@ -95,23 +95,22 @@ export function TagSelector({
 					</CommandEmpty>
 
 					{filteredTags.length > 0 && (
-						<CommandGroup heading="既存のタグ">
-							{filteredTags.map((tag) => (
-								<CommandItem
-									key={tag.id}
-									value={`tag-${tag.id}`}
-									onSelect={() => handleTagSelect(tag)}
-									className="cursor-pointer"
-								>
-									<Check
+						<CommandGroup>
+							<div className="grid grid-cols-2 sm:grid-cols-6 gap-2 p-2">
+								{filteredTags.map((tag) => (
+									<CommandItem
+										key={tag.id}
+										value={`tag-${tag.id}`}
+										onSelect={() => handleTagSelect(tag)}
 										className={cn(
-											"mr-2 h-4 w-4",
-											isTagSelected(tag.id) ? "opacity-100" : "opacity-0",
+											"cursor-pointer flex items-center justify-center p-2 h-auto text-center relative",
+											isTagSelected(tag.id) ? "bg-primary text-primary-foreground" : "",
 										)}
-									/>
-									{tag.name}
-								</CommandItem>
-							))}
+									>
+										<span className="truncate text-xs px-1">{tag.name}</span>
+									</CommandItem>
+								))}
+							</div>
 						</CommandGroup>
 					)}
 

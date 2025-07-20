@@ -141,26 +141,21 @@ export default function SearchPage() {
 	const navigation = useNavigation();
 	const isLoading = navigation.state === "loading";
 
-	const { notes, selectedTags, availableTags, paginationInfo, searchQuery } = useLoaderData<
-		typeof loader
-	>() as {
+	const { notes, selectedTags, availableTags, paginationInfo } = useLoaderData<typeof loader>() as {
 		notes: Note[];
 		selectedTags: TagType[];
 		availableTags: TagType[];
 		paginationInfo: PaginationInfo | null;
-		searchQuery: string;
 	};
 
 	return (
-		<div className="max-w-2xl mx-auto py-8 space-y-6">
+		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<SearchHeader />
 			<SearchForm availableTags={availableTags} selectedTags={selectedTags} />
 			<SelectedTagsDisplay selectedTags={selectedTags} />
 
 			{isLoading ? (
-				<div className="space-y-4">
-					<LoadingState variant="spinner" className="text-center" />
-				</div>
+				<LoadingState variant="spinner" className="text-center" />
 			) : (
 				<>
 					{paginationInfo && paginationInfo.totalPages > 1 && (

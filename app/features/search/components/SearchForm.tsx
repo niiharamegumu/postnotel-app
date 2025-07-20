@@ -13,7 +13,7 @@ export function SearchForm({ availableTags, selectedTags }: SearchFormProps) {
 	const isLoading = navigation.state === "loading";
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4">
 			{/* テキスト検索 */}
 			<TextSearchInput isLoading={isLoading} className="w-full" />
 

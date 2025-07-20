@@ -71,8 +71,8 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 	}
 
 	return (
-		<div className="space-y-6">
-			<div className="text-sm text-muted-foreground">{paginationInfo?.totalItems || 0}件</div>
+		<div>
+			<div className="text-sm text-muted-foreground mb-2">{paginationInfo?.totalItems || 0}件</div>
 
 			<div className="space-y-6">
 				{sortedDates.map((dateKey) => (
