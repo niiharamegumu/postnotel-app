@@ -100,18 +100,18 @@ export function TagSelector({
 
 					{filteredTags.length > 0 && (
 						<CommandGroup>
-							<div className="grid grid-cols-3 sm:grid-cols-6 gap-2 p-2 @container">
+							<div className="grid grid-cols-3 sm:grid-cols-6 gap-2 p-1">
 								{filteredTags.map((tag) => (
 									<CommandItem
 										key={tag.id}
 										value={`tag-${tag.id}`}
 										onSelect={() => handleTagSelect(tag)}
 										className={cn(
-											"cursor-pointer flex items-center justify-center p-2 h-auto text-center relative",
+											"cursor-pointer flex items-center justify-center text-center",
 											isTagSelected(tag.id) ? "bg-primary text-primary-foreground" : "",
 										)}
 									>
-										<span className="truncate px-1 text-[min(3cqw,14px)]">{tag.name}</span>
+										<span className="text-xs leading-tight break-all">{tag.name}</span>
 									</CommandItem>
 								))}
 							</div>
