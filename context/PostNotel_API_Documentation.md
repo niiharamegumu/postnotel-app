@@ -44,7 +44,9 @@ PostNotel is a note-taking application with support for tagging, images, and dif
   - **Purpose**: Get paginated notes with optional filtering
   - **Authentication**: None required (but admin status affects visibility)
   - **Query Parameters**:
-    - `date` (optional): Date in YYYY-MM-DD format
+    - `date` (optional): Date in YYYY-MM-DD format (exact match)
+    - `startDate` (optional): Start date in YYYY-MM-DD format (range filter)
+    - `endDate` (optional): End date in YYYY-MM-DD format (range filter)
     - `accessLevel` (optional): Access level filter
     - `contentType` (optional): Content type filter (note, post, winebyAI)
     - `q` (optional): Search query

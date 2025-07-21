@@ -4,6 +4,8 @@ import type { NoteContentType } from "./noteContentType";
 
 export type GetNotesParams = {
 	date?: Date;
+	startDate?: Date;
+	endDate?: Date;
 	q?: string;
 	tagIds?: string[];
 	accessLevel?: AccessLevel;
@@ -33,9 +35,11 @@ export const endpoints = {
 			const queryParams: string[] = [];
 
 			if (params) {
-				const { date, q, tagIds, accessLevel, contentType, limit, offset, hasImages } = params;
+				const { date, startDate, endDate, q, tagIds, accessLevel, contentType, limit, offset, hasImages } = params;
 
 				if (date) queryParams.push(`date=${format(date, "yyyy-MM-dd")}`);
+				if (startDate) queryParams.push(`startDate=${format(startDate, "yyyy-MM-dd")}`);
+				if (endDate) queryParams.push(`endDate=${format(endDate, "yyyy-MM-dd")}`);
 				if (q) queryParams.push(`q=${encodeURIComponent(q)}`);
 				if (tagIds && tagIds.length > 0) {
 					for (const tagId of tagIds) {
