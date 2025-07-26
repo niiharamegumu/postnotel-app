@@ -22,6 +22,9 @@ This project uses Biome for code formatting and linting:
 - In TypeScript, Variables must always have an explicitly defined type.
 - In TypeScript, Explicitly specify types for function parameters and return values.
 
+## React Guidelines
+- Minimize the use of useState and useEffect; implement using other methods when possible.
+
 ## Architecture Overview
 
 This is a **React Router v7** application deployed on **Cloudflare Workers** with the following architecture:
