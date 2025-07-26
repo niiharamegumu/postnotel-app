@@ -1,16 +1,16 @@
-import { Suspense } from "react";
-import { useLoaderData, Link, redirect } from "react-router";
 import { format, parseISO } from "date-fns";
-import type { Note } from "~/features/notes/types/note";
-import type { Route } from "./+types/images";
-import { fetchNotesWithPagination } from "~/features/notes/api/get";
-import { LoadingState } from "~/components/common/LoadingState";
-import { NoteContentType } from "~/constants/noteContentType";
-import { PaginationControls } from "~/components/common/PaginationControls";
-import { getPageFromSearchParams, calculateOffset, type PaginationInfo } from "~/lib/pagination";
-import { PAGINATION_LIMITS } from "~/constants/pagination";
 import { StatusCodes } from "http-status-codes";
+import { Suspense } from "react";
+import { Link, redirect, useLoaderData } from "react-router";
+import { LoadingState } from "~/components/common/LoadingState";
+import { PaginationControls } from "~/components/common/PaginationControls";
 import { TagLink } from "~/components/common/TagLink";
+import { NoteContentType } from "~/constants/noteContentType";
+import { PAGINATION_LIMITS } from "~/constants/pagination";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
+import type { Note } from "~/features/notes/types/note";
+import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
+import type { Route } from "./+types/images";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);

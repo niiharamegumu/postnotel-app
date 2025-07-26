@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { Bot, ImagePlus, X } from "lucide-react";
 import { Suspense, useState } from "react";
 import { Outlet, useOutletContext } from "react-router";
@@ -10,10 +11,9 @@ import {
 	DrawerFooter,
 	DrawerTrigger,
 } from "~/components/ui/drawer";
-import { motion, AnimatePresence } from "framer-motion";
-import type { UserInfo } from "~/types/user";
-import { useImageUpload } from "~/hooks/useImageUpload";
 import { useWineRecognition } from "~/features/wines/hooks/useWineRecognition";
+import { useImageUpload } from "~/hooks/useImageUpload";
+import type { UserInfo } from "~/types/user";
 
 export default function Wines() {
 	const userInfo = useOutletContext<UserInfo | null>();

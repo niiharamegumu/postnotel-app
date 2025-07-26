@@ -1,16 +1,16 @@
-import { fetchNotesWithPagination } from "~/features/notes/api/get";
-import type { Route } from "./+types";
-import { lazy, Suspense } from "react";
-import { Link, useLoaderData } from "react-router";
-import type { Note } from "~/features/notes/types/note";
 import { format } from "date-fns";
+import { SquareArrowOutUpRight } from "lucide-react";
+import { Suspense, lazy } from "react";
+import { Link, useLoaderData } from "react-router";
+import ClientOnly from "~/components/common/ClientOnly";
 import { LoadingState } from "~/components/common/LoadingState";
 import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
-import { SquareArrowOutUpRight } from "lucide-react";
-import ClientOnly from "~/components/common/ClientOnly";
-import { cn } from "~/lib/utils";
+import { fetchNotesWithPagination } from "~/features/notes/api/get";
+import type { Note } from "~/features/notes/types/note";
 import type { PaginationInfo } from "~/lib/pagination";
+import { cn } from "~/lib/utils";
+import type { Route } from "./+types";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const targetContentType = NoteContentType.WineByAi; // ワインノートを取得するためのコンテンツタイプ

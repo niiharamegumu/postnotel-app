@@ -1,10 +1,10 @@
 import {
-	isRouteErrorResponse,
 	Links,
 	Meta,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	isRouteErrorResponse,
 	useLoaderData,
 } from "react-router";
 
@@ -12,10 +12,10 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 import type { Route } from "./+types/root";
 import "./app.css";
-import { fetcher } from "./lib/fetcher";
-import { endpoints } from "./constants/endpoints";
-import type { UserInfo } from "./types/user";
 import { Toaster } from "./components/ui/sonner";
+import { endpoints } from "./constants/endpoints";
+import { fetcher } from "./lib/fetcher";
+import type { UserInfo } from "./types/user";
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },

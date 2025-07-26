@@ -1,10 +1,10 @@
-import LoginForm from "~/features/auth/components/loginForm";
-import { fetcher } from "~/lib/fetcher";
-import { redirect } from "react-router";
-import type { Route } from "./+types/login";
-import { endpoints } from "~/constants/endpoints";
-import type { LoginResponse } from "~/features/auth/types/response";
 import { StatusCodes } from "http-status-codes";
+import { redirect } from "react-router";
+import { endpoints } from "~/constants/endpoints";
+import LoginForm from "~/features/auth/components/loginForm";
+import type { LoginResponse } from "~/features/auth/types/response";
+import { fetcher } from "~/lib/fetcher";
+import type { Route } from "./+types/login";
 
 export async function action({ request, context }: Route.ActionArgs) {
 	try {

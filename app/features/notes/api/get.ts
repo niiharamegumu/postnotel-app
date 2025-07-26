@@ -1,13 +1,9 @@
-import { fetcher } from "~/lib/fetcher";
-import type {
-	Note,
-	NoteDaysResponse,
-	NotesWithPaginationResponse,
-} from "../types/note";
-import { endpoints, type GetNotesParams, type GetNoteDaysParams } from "~/constants/endpoints";
-import type { Route } from ".react-router/types/app/routes/notes/+types";
 import { StatusCodes } from "http-status-codes";
-import { convertApiPaginationToFrontend, type PaginationInfo } from "~/lib/pagination";
+import { type GetNoteDaysParams, type GetNotesParams, endpoints } from "~/constants/endpoints";
+import { fetcher } from "~/lib/fetcher";
+import { type PaginationInfo, convertApiPaginationToFrontend } from "~/lib/pagination";
+import type { Note, NoteDaysResponse, NotesWithPaginationResponse } from "../types/note";
+import type { Route } from ".react-router/types/app/routes/notes/+types";
 
 export async function fetchNotesWithPagination(
 	request: Route.ActionArgs["request"],

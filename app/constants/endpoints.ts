@@ -35,7 +35,18 @@ export const endpoints = {
 			const queryParams: string[] = [];
 
 			if (params) {
-				const { date, startDate, endDate, q, tagIds, accessLevel, contentType, limit, offset, hasImages } = params;
+				const {
+					date,
+					startDate,
+					endDate,
+					q,
+					tagIds,
+					accessLevel,
+					contentType,
+					limit,
+					offset,
+					hasImages,
+				} = params;
 
 				if (date) queryParams.push(`date=${format(date, "yyyy-MM-dd")}`);
 				if (startDate) queryParams.push(`startDate=${format(startDate, "yyyy-MM-dd")}`);

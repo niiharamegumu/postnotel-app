@@ -1,12 +1,12 @@
 /* Custom Block Note */
 .bn-editor h1 {
-  @apply text-3xl;
+	@apply text-3xl;
 }
 
 .bn-editor h2 {
-  @apply text-2xl;
+	@apply text-2xl;
 }
 
 .bn-editor h3 {
-  @apply text-xl;
+	@apply text-xl;
 }

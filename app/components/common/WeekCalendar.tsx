@@ -1,18 +1,16 @@
 import {
-	format,
-	startOfWeek,
-	endOfWeek,
-	eachDayOfInterval,
-	addWeeks,
-	subWeeks,
 	addMonths,
-	subMonths,
-	startOfMonth,
+	addWeeks,
+	eachDayOfInterval,
 	endOfMonth,
+	endOfWeek,
+	format,
+	startOfMonth,
+	startOfWeek,
+	subMonths,
+	subWeeks,
 } from "date-fns";
 import { ja } from "date-fns/locale";
-import { cn } from "~/lib/utils";
-import { buttonVariants } from "~/components/ui/button";
 import {
 	CalendarArrowDown,
 	CalendarArrowUp,
@@ -20,9 +18,11 @@ import {
 	ChevronLeft,
 	ChevronRight,
 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { buttonVariants } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { useState, useMemo, useCallback, useEffect } from "react";
 import { ViewMode } from "~/constants/viewMode";
+import { cn } from "~/lib/utils";
 
 interface WeekCalendarProps {
 	selectedDate: Date;
@@ -297,7 +297,8 @@ export function WeekCalendar({
 						}}
 						modifiersClassNames={{
 							hasNote: "[&>button]:bg-green-300 [&>button]:text-green-600 [&>button]:rounded-full",
-							todayWithNote: "[&>button]:!bg-green-300 [&>button]:!text-green-600 [&>button]:!border-2 [&>button]:!border-primary [&>button]:!rounded-full",
+							todayWithNote:
+								"[&>button]:!bg-green-300 [&>button]:!text-green-600 [&>button]:!border-2 [&>button]:!border-primary [&>button]:!rounded-full",
 						}}
 					/>
 				</div>

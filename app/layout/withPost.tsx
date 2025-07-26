@@ -1,13 +1,13 @@
 import { Plus } from "lucide-react";
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 import { Outlet, useOutletContext, useSearchParams } from "react-router";
+import ClientOnly from "~/components/common/ClientOnly";
 import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
 import { ActionType } from "~/features/notes/constants/actionType";
+import { useNotes } from "~/features/notes/hooks/useNotes";
 import type { Note, NoteApiRequest } from "~/features/notes/types/note";
 import type { UserInfo } from "~/types/user";
-import { useNotes } from "~/features/notes/hooks/useNotes";
-import ClientOnly from "~/components/common/ClientOnly";
 
 const BlockNoteDrawer = lazy(() => import("~/components/common/.client/blockNoteDrawer"));
 
