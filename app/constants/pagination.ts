@@ -1,5 +1,5 @@
 export const PAGINATION_LIMITS = {
-	SEARCH_PAGE: 100,
+	SEARCH_PAGE: 50,
 	IMAGES_PAGE: 50,
 	DEFAULT: 100,
 } as const;
