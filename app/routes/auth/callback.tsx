@@ -1,7 +1,7 @@
-import { redirect, useFetcher } from "react-router";
 import { useEffect } from "react";
-import { fetcher } from "~/lib/fetcher";
+import { redirect, useFetcher } from "react-router";
 import { endpoints } from "~/constants/endpoints";
+import { fetcher } from "~/lib/fetcher";
 import type { Route } from "./+types/callback";
 
 export async function action({ request, context }: Route.ActionArgs) {

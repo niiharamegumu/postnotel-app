@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { fetcher } from "~/lib/fetcher";
 import { endpoints } from "~/constants/endpoints";
 import type { Tag, TagsResponse } from "~/features/tags/types/tag";
+import { fetcher } from "~/lib/fetcher";
 
 export async function loader({ request, context }: LoaderFunctionArgs): Promise<Tag[]> {
 	try {

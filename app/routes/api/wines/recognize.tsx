@@ -1,8 +1,8 @@
+import { StatusCodes } from "http-status-codes";
 import type { ActionFunctionArgs } from "react-router";
 import type { AccessLevel } from "~/constants/accessLevel";
 import { endpoints } from "~/constants/endpoints";
 import { fetcher } from "~/lib/fetcher";
-import { StatusCodes } from "http-status-codes";
 
 type Body = {
 	accessLevel: AccessLevel;

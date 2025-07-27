@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
+import { memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import type { Tag } from "../types/tag";
-import { memo, useCallback } from "react";
 
 interface TagBadgeProps {
 	tag: Tag;

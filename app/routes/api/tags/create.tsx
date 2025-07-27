@@ -1,7 +1,7 @@
 import type { ActionFunctionArgs } from "react-router";
-import { fetcher } from "~/lib/fetcher";
 import { endpoints } from "~/constants/endpoints";
 import type { CreateTagRequest, Tag } from "~/features/tags/types/tag";
+import { fetcher } from "~/lib/fetcher";
 
 export async function action({ request, context }: ActionFunctionArgs) {
 	if (request.method !== "POST") {

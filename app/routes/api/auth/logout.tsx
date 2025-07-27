@@ -1,8 +1,8 @@
-import { fetcher } from "~/lib/fetcher";
+import { StatusCodes } from "http-status-codes";
 import { redirect } from "react-router";
 import type { LoaderFunctionArgs } from "react-router";
 import { endpoints } from "~/constants/endpoints";
-import { StatusCodes } from "http-status-codes";
+import { fetcher } from "~/lib/fetcher";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
 	try {

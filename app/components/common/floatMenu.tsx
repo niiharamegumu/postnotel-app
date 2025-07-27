@@ -1,4 +1,10 @@
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
+import type { UserInfo } from "~/types/user";
+import { Avatar, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -7,12 +13,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import type { UserInfo } from "~/types/user";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { Link } from "react-router";
-import { Button } from "../ui/button";
-import { Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
 	userInfo: UserInfo | null;

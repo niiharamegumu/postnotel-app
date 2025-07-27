@@ -15,6 +15,6 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const endDate = parseISO(endDateParam);
 
 	const noteDays = await fetchDays(request, context, { startDate, endDate });
-	
+
 	return Response.json({ noteDays });
 }

@@ -13,42 +13,42 @@ export const usePreventBackNavigation = () => {
 
 		const handleTouchStart = (event: TouchEvent) => {
 			if (event.touches.length > 1) return;
-			
+
 			const touch = event.touches[0];
 			const startX = touch.clientX;
 			const startY = touch.clientY;
-			
+
 			const handleTouchMove = (moveEvent: TouchEvent) => {
 				if (moveEvent.touches.length > 1) return;
-				
+
 				const moveTouch = moveEvent.touches[0];
 				const deltaX = moveTouch.clientX - startX;
 				const deltaY = moveTouch.clientY - startY;
-				
+
 				// 水平スワイプの場合のみページバックを防ぐ
 				if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
 					moveEvent.preventDefault();
 				}
 			};
-			
+
 			const handleTouchEnd = () => {
-				document.removeEventListener('touchmove', handleTouchMove);
-				document.removeEventListener('touchend', handleTouchEnd);
+				document.removeEventListener("touchmove", handleTouchMove);
+				document.removeEventListener("touchend", handleTouchEnd);
 			};
-			
-			document.addEventListener('touchmove', handleTouchMove, { passive: false });
-			document.addEventListener('touchend', handleTouchEnd);
+
+			document.addEventListener("touchmove", handleTouchMove, { passive: false });
+			document.addEventListener("touchend", handleTouchEnd);
 		};
 
 		// popstateイベントを監視してページバックを防ぐ
-		window.addEventListener('popstate', handlePopState);
-		
+		window.addEventListener("popstate", handlePopState);
+
 		// touchイベントでページバックを防ぐ
-		document.addEventListener('touchstart', handleTouchStart, { passive: false });
+		document.addEventListener("touchstart", handleTouchStart, { passive: false });
 
 		return () => {
-			window.removeEventListener('popstate', handlePopState);
-			document.removeEventListener('touchstart', handleTouchStart);
+			window.removeEventListener("popstate", handlePopState);
+			document.removeEventListener("touchstart", handleTouchStart);
 		};
 	}, []);
 };
