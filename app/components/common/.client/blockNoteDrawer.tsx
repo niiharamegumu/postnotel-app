@@ -1,5 +1,12 @@
+import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { ApiResponseError } from "~/api/error/apiResponseError";
+import { Button } from "~/components/ui/button";
 import {
 	Drawer,
 	DrawerClose,
@@ -7,22 +14,17 @@ import {
 	DrawerFooter,
 	DrawerTrigger,
 } from "~/components/ui/drawer";
-import { Button } from "~/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
-import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { AccessLevel } from "~/constants/accessLevel";
-import { toast } from "sonner";
-import type { Note, NoteApiRequest } from "~/features/notes/types/note";
-import { ApiResponseError } from "~/api/error/apiResponseError";
 import { ActionType } from "~/features/notes/constants/actionType";
-import { useImageUpload } from "~/hooks/useImageUpload";
+import { useNoteDraft } from "~/features/notes/hooks/useNoteDraft";
+import { useNotes } from "~/features/notes/hooks/useNotes";
+import type { Note, NoteApiRequest } from "~/features/notes/types/note";
+import type { NoteDraft } from "~/features/notes/types/noteDraft";
+import { TagBadge } from "~/features/tags/components/TagBadge";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
-import { TagBadge } from "~/features/tags/components/TagBadge";
-import { useNotes } from "~/features/notes/hooks/useNotes";
+import { useImageUpload } from "~/hooks/useImageUpload";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -45,6 +47,7 @@ export default function BlockNoteDrawer({
 	targetDate,
 	note,
 }: BlockNoteDrawerProps) {
+	console.log("BlockNoteDrawer rendered");
 	const { deleteNote } = useNotes();
 	const [isPrivate, setIsPrivate] = useState(true);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -60,13 +63,47 @@ export default function BlockNoteDrawer({
 	const { tags, createTag } = useTags();
 
 	// BlockNoteの初期化
-	const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
-	const schema = BlockNoteSchema.create({
-		blockSpecs: {
-			...customBlockSpecs,
-		},
-	});
+	const schema = useMemo(() => {
+		const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
+		return BlockNoteSchema.create({
+			blockSpecs: {
+				...customBlockSpecs,
+			},
+		});
+	}, []);
 	const editor = useCreateBlockNote({ schema });
+
+	const onDraftRestore = useCallback(
+		(draft: NoteDraft) => {
+			if (editor && draft.content) {
+				editor.tryParseMarkdownToBlocks(draft.content).then((blocks) => {
+					editor.replaceBlocks(editor.document, blocks);
+				});
+			}
+		},
+		[editor],
+	);
+
+	const noteDraft = useNoteDraft({
+		targetDate,
+		onDraftRestore,
+	});
+
+	const handleEditorChange = useCallback(async () => {
+		if (noteDrawerType !== ActionType.Create) return;
+
+		try {
+			const markdown = await editor.blocksToMarkdownLossy(editor.document);
+			const draftData = {
+				content: markdown || "",
+			};
+
+			noteDraft.saveDraft(draftData);
+		} catch (error) {
+			console.warn("Failed to save draft:", error);
+		}
+	}, [editor, noteDrawerType, noteDraft]);
+
 	useEffect(() => {
 		const initializeEditor = async () => {
 			if (note?.content && noteDrawerType === ActionType.Edit && editor) {
@@ -121,6 +158,8 @@ export default function BlockNoteDrawer({
 				images: imagesFileNames,
 				tagIds: selectedTags.map((tag) => tag.id),
 			});
+			// 正常保存時に下書きデータを削除
+			noteDraft.clearDraft();
 		} catch (e) {
 			if (e instanceof ApiResponseError) {
 				toast.error(e.message);
@@ -140,6 +179,8 @@ export default function BlockNoteDrawer({
 
 		try {
 			await deleteNote(note.noteId, targetDate);
+			// 削除成功時に下書きデータも削除
+			noteDraft.clearDraft();
 			resetDrawer();
 		} catch (error) {
 			console.error("Failed to delete note:", error);
@@ -204,7 +245,11 @@ export default function BlockNoteDrawer({
 						))}
 					</div>
 				)}
-				<BlockNoteView editor={editor} className="overflow-y-auto" />
+				<BlockNoteView
+					editor={editor}
+					className="overflow-y-auto"
+					onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
+				/>
 				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
