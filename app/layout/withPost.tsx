@@ -21,26 +21,33 @@ export default function WithPost() {
 	const [targetNote, setTargetNote] = useState<Note | null>(null);
 
 	const date = searchParams.get("date");
-	const targetDate = date ? new Date(date) : new Date();
+	const targetDate = useMemo(() => (date ? new Date(date) : new Date()), [date]);
 
-	const handleCreateNote = async (params: NoteApiRequest): Promise<void> => {
-		await createNote(params, targetDate);
-	};
+	const handleCreateNote = useCallback(
+		async (params: NoteApiRequest): Promise<void> => {
+			await createNote(params, targetDate);
+		},
+		[createNote, targetDate],
+	);
 
-	const handleEditNote = async (params: NoteApiRequest): Promise<void> => {
-		if (!targetNote) return;
-		await updateNote(targetNote.noteId, params, targetDate);
-	};
+	const handleEditNote = useCallback(
+		async (params: NoteApiRequest): Promise<void> => {
+			if (!targetNote) return;
+			await updateNote(targetNote.noteId, params, targetDate);
+		},
+		[updateNote, targetNote, targetDate],
+	);
 
-	let noteDrawerHandler = handleCreateNote;
-	switch (noteDrawerType) {
-		case ActionType.Create:
-			noteDrawerHandler = handleCreateNote;
-			break;
-		case ActionType.Edit:
-			noteDrawerHandler = handleEditNote;
-			break;
-	}
+	const noteDrawerHandler = useMemo(() => {
+		switch (noteDrawerType) {
+			case ActionType.Create:
+				return handleCreateNote;
+			case ActionType.Edit:
+				return handleEditNote;
+			default:
+				return handleCreateNote;
+		}
+	}, [noteDrawerType, handleCreateNote, handleEditNote]);
 
 	const onClickEditNote = useCallback(
 		(note: Note) => {

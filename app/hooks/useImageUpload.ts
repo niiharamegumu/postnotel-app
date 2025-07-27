@@ -1,5 +1,5 @@
 import imageCompression from "browser-image-compression";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { imageCompressionOptions } from "~/constants/imageFile";
 import type { UploadUrlResponse } from "~/features/image/types/image";
@@ -8,7 +8,7 @@ export const useImageUpload = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
-	const handleSingleImageUpload = async (file: File): Promise<string | null> => {
+	const handleSingleImageUpload = useCallback(async (file: File): Promise<string | null> => {
 		try {
 			const fileNameParts = file.name.split(".");
 			const ext =
@@ -48,9 +48,9 @@ export const useImageUpload = () => {
 			toast.error("画像のアップロードに失敗しました");
 			return null;
 		}
-	};
+	}, []);
 
-	const handleImageUpload = async (files: File[]) => {
+	const handleImageUpload = useCallback(async (files: File[]) => {
 		let successCount = 0;
 
 		for (const file of files) {
@@ -61,9 +61,9 @@ export const useImageUpload = () => {
 		if (successCount > 0) {
 			toast.success(`${successCount}枚の画像をアップロードしました`);
 		}
-	};
+	}, [handleSingleImageUpload]);
 
-	const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
 		if (!files || files.length === 0) return;
 
@@ -90,18 +90,18 @@ export const useImageUpload = () => {
 		if (fileInputRef.current) {
 			fileInputRef.current.value = "";
 		}
-	};
+	}, [handleImageUpload]);
 
-	const removeImage = (index: number) => {
+	const removeImage = useCallback((index: number) => {
 		setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-	};
+	}, []);
 
-	const resetImages = () => {
+	const resetImages = useCallback(() => {
 		setUploadedImages([]);
 		if (fileInputRef.current) {
 			fileInputRef.current.value = "";
 		}
-	};
+	}, []);
 
 	return {
 		fileInputRef,
