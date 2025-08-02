@@ -7,9 +7,16 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
+		"include": ["./app/**/*"],
 		"ignore": [
-			"!./app/*"
-		]
+			"build/**",
+			"dist/**", 
+			".react-router/**",
+			"node_modules/**",
+			"*.config.*",
+			"public/**"
+		],
+		"maxSize": 10485760
 	},
 	"formatter": {
 		"enabled": true,
