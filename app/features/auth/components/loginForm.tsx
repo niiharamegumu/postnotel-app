@@ -1,9 +1,9 @@
-import { Form, useNavigation } from "react-router";
+import { Form } from "react-router";
+import { useNavigation } from "~/hooks/useNavigation";
 import GoogleLoginButton from "./googleLoginButton";
 
 export default function LoginForm() {
-	const navigation = useNavigation();
-	const isSubmitting = navigation.state === "submitting";
+	const { isSubmitting } = useNavigation();
 
 	return (
 		<div className="h-screen flex justify-center items-center">

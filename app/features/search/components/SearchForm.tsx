@@ -1,5 +1,5 @@
-import { useNavigation } from "react-router";
 import type { Tag } from "~/features/tags/types/tag";
+import { useNavigation } from "~/hooks/useNavigation";
 import { TagSelectionForm } from "./TagSelectionForm";
 import { TextSearchInput } from "./TextSearchInput";
 
@@ -9,8 +9,7 @@ type SearchFormProps = {
 };
 
 export function SearchForm({ availableTags, selectedTags }: SearchFormProps) {
-	const navigation = useNavigation();
-	const isLoading = navigation.state === "loading";
+	const { isLoading } = useNavigation();
 
 	return (
 		<div className="space-y-4">

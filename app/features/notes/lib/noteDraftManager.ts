@@ -83,10 +83,7 @@ export function validateDraft(draft: unknown): draft is NoteDraft {
 
 	const d = draft as Record<string, unknown>;
 
-	return (
-		typeof d.content === "string" &&
-		typeof d.timestamp === "number"
-	);
+	return typeof d.content === "string" && typeof d.timestamp === "number";
 }
 
 export function isLocalStorageAvailable(): boolean {

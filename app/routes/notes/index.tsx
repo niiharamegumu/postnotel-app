@@ -2,7 +2,7 @@ import { addDays, endOfWeek, format, parseISO, startOfWeek, subDays } from "date
 import { formatInTimeZone } from "date-fns-tz";
 import { type PanInfo, motion } from "framer-motion";
 import { Suspense, lazy, useCallback, useMemo, useState } from "react";
-import { useLoaderData, useNavigate, useNavigation, useOutletContext } from "react-router";
+import { useLoaderData, useNavigate, useOutletContext } from "react-router";
 import ClientOnly from "~/components/common/ClientOnly";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
@@ -14,6 +14,7 @@ import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import type { Note } from "~/features/notes/types/note";
 import { useTags } from "~/features/tags/hooks/useTags";
+import { useNavigation } from "~/hooks/useNavigation";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
@@ -69,8 +70,7 @@ export default function Index() {
 	}>();
 	usePreventBackNavigation();
 	const navigate = useNavigate();
-	const navigation = useNavigation();
-	const isLoading = navigation.state === "loading";
+	const { isLoading } = useNavigation();
 
 	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
 		notes: Note[];

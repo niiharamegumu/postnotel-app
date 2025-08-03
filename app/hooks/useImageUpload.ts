@@ -50,47 +50,53 @@ export const useImageUpload = () => {
 		}
 	}, []);
 
-	const handleImageUpload = useCallback(async (files: File[]) => {
-		let successCount = 0;
+	const handleImageUpload = useCallback(
+		async (files: File[]) => {
+			let successCount = 0;
 
-		for (const file of files) {
-			const result = await handleSingleImageUpload(file);
-			if (result) successCount++;
-		}
-
-		if (successCount > 0) {
-			toast.success(`${successCount}枚の画像をアップロードしました`);
-		}
-	}, [handleSingleImageUpload]);
-
-	const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
-		if (!files || files.length === 0) return;
-
-		const validFiles: File[] = [];
-
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			if (!file.type.startsWith("image/")) {
-				toast.error("画像ファイルではありません");
-				continue;
+			for (const file of files) {
+				const result = await handleSingleImageUpload(file);
+				if (result) successCount++;
 			}
-			if (file.type === "image/heic" || file.type === "image/heif") {
-				toast.error("HEIC/HEIF形式の画像には対応していません");
-				continue;
+
+			if (successCount > 0) {
+				toast.success(`${successCount}枚の画像をアップロードしました`);
 			}
-			const compressedFile = await imageCompression(file, imageCompressionOptions);
-			validFiles.push(compressedFile);
-		}
+		},
+		[handleSingleImageUpload],
+	);
 
-		if (validFiles.length > 0) {
-			handleImageUpload(validFiles);
-		}
+	const handleFileChange = useCallback(
+		async (event: React.ChangeEvent<HTMLInputElement>) => {
+			const files = event.target.files;
+			if (!files || files.length === 0) return;
 
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
-	}, [handleImageUpload]);
+			const validFiles: File[] = [];
+
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				if (!file.type.startsWith("image/")) {
+					toast.error("画像ファイルではありません");
+					continue;
+				}
+				if (file.type === "image/heic" || file.type === "image/heif") {
+					toast.error("HEIC/HEIF形式の画像には対応していません");
+					continue;
+				}
+				const compressedFile = await imageCompression(file, imageCompressionOptions);
+				validFiles.push(compressedFile);
+			}
+
+			if (validFiles.length > 0) {
+				handleImageUpload(validFiles);
+			}
+
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
+		},
+		[handleImageUpload],
+	);
 
 	const removeImage = useCallback((index: number) => {
 		setUploadedImages((prev) => prev.filter((_, i) => i !== index));
