@@ -3,12 +3,14 @@ import { ja } from "date-fns/locale";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
+import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
 import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import type { Note } from "~/features/notes/types/note";
 import type { Tag } from "~/features/tags/types/tag";
+import { useImageZoom } from "~/hooks/useImageZoom";
 import type { PaginationInfo } from "~/lib/pagination";
 
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
@@ -33,6 +35,7 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
 	const [searchParams] = useSearchParams();
 	const searchQuery = searchParams.get("q") || "";
+	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
 	// メッセージをメモ化
 	const emptyMessage = useMemo(() => {
@@ -109,7 +112,8 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 															<img
 																src={img}
 																alt={`ノート添付 #${i + 1}`}
-																className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
+																className="w-auto h-auto max-h-[200px] object-cover rounded-xl cursor-pointer"
+																onClick={() => openZoom(img, `ノート添付 #${i + 1}`)}
 															/>
 														</div>
 													))}
@@ -140,6 +144,7 @@ export function SearchResults({ notes, selectedTags, paginationInfo }: SearchRes
 					</div>
 				))}
 			</div>
+			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
 		</div>
 	);
 }

@@ -3,11 +3,13 @@ import { SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy } from "react";
 import { Link, useLoaderData } from "react-router";
 import ClientOnly from "~/components/common/ClientOnly";
+import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
 import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import type { Note } from "~/features/notes/types/note";
+import { useImageZoom } from "~/hooks/useImageZoom";
 import type { PaginationInfo } from "~/lib/pagination";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types";
@@ -34,6 +36,7 @@ export default function Index() {
 		notes: Note[] | null;
 		paginationInfo: PaginationInfo | null;
 	};
+	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-10">
@@ -69,11 +72,12 @@ export default function Index() {
 													<div
 														key={`${note.noteId}-img-${i}`}
 														className={cn(
-															"rounded-xl overflow-hidden p-2 shrink-0",
+															"rounded-xl overflow-hidden p-2 shrink-0 cursor-pointer",
 															note.accessLevel === AccessLevel.Private
 																? "bg-secondary"
 																: "bg-primary",
 														)}
+														onClick={() => openZoom(img, `ワイン画像 #${i + 1}`)}
 													>
 														<img
 															src={img}
@@ -98,6 +102,7 @@ export default function Index() {
 					<p className="text-primary text-center mt-10">ワインノートがありません。</p>
 				)}
 			</section>
+			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
 		</div>
 	);
 }
