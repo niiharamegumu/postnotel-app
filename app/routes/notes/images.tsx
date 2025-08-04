@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 import { StatusCodes } from "http-status-codes";
 import { Suspense } from "react";
 import { Link, redirect, useLoaderData } from "react-router";
+import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { PaginationControls } from "~/components/common/PaginationControls";
 import { TagLink } from "~/components/common/TagLink";
@@ -9,6 +10,7 @@ import { NoteContentType } from "~/constants/noteContentType";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
 import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import type { Note } from "~/features/notes/types/note";
+import { useImageZoom } from "~/hooks/useImageZoom";
 import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
 import type { Route } from "./+types/images";
 
@@ -58,6 +60,7 @@ export default function ImagesPage() {
 
 	// Filter notes that have images
 	const imageNotes = notes?.filter((note) => note.images && note.images.length > 0) || [];
+	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-6">
@@ -89,7 +92,12 @@ export default function ImagesPage() {
 												{note.images.map((imageUrl, index) => (
 													<div
 														key={`${note.noteId}-img-${index}`}
-														className="aspect-square overflow-hidden rounded"
+														className="aspect-square overflow-hidden rounded cursor-pointer"
+														onClick={(event) => {
+															event.preventDefault();
+															event.stopPropagation();
+															openZoom(imageUrl, `ノート画像 ${index + 1}`);
+														}}
 													>
 														<img
 															src={imageUrl}
@@ -129,6 +137,7 @@ export default function ImagesPage() {
 			{paginationInfo.totalPages > 1 && (
 				<PaginationControls pagination={paginationInfo} baseUrl="/notes/images" />
 			)}
+			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
 		</div>
 	);
 }

@@ -4,6 +4,7 @@ import { type PanInfo, motion } from "framer-motion";
 import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 import { useLoaderData, useNavigate, useOutletContext } from "react-router";
 import ClientOnly from "~/components/common/ClientOnly";
+import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
@@ -14,6 +15,7 @@ import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import type { Note } from "~/features/notes/types/note";
 import { useTags } from "~/features/tags/hooks/useTags";
+import { useImageZoom } from "~/hooks/useImageZoom";
 import { useNavigation } from "~/hooks/useNavigation";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
@@ -86,6 +88,7 @@ export default function Index() {
 	const [getCalendarDateRange, setGetCalendarDateRange] = useState<
 		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
 	>(null);
+	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
 	const swipeThreshold = useMemo(() => {
 		if (typeof window !== "undefined") {
@@ -262,7 +265,10 @@ export default function Index() {
 																				? "bg-secondary"
 																				: "bg-primary",
 																		)}
-																		onClick={() => handleEditNote(note)}
+																		onClick={(event) => {
+																		event.stopPropagation();
+																		openZoom(img, `ノート添付 #${i + 1}`);
+																	}}
 																	>
 																		<img
 																			src={img}
@@ -311,9 +317,10 @@ export default function Index() {
 								)}
 							</>
 						),
-					[isLoading, notes, handleEditNote],
+					[isLoading, notes, handleEditNote, openZoom],
 				)}
 			</motion.section>
+			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
 		</div>
 	);
 }

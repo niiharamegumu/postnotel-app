@@ -3,6 +3,7 @@ import { Bot, ImagePlus, X } from "lucide-react";
 import { Suspense, useState } from "react";
 import { Outlet, useOutletContext } from "react-router";
 import FloatMenu from "~/components/common/floatMenu";
+import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { Button } from "~/components/ui/button";
 import {
 	Drawer,
@@ -13,6 +14,7 @@ import {
 } from "~/components/ui/drawer";
 import { useWineRecognition } from "~/features/wines/hooks/useWineRecognition";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { useImageZoom } from "~/hooks/useImageZoom";
 import type { UserInfo } from "~/types/user";
 
 export default function Wines() {
@@ -22,6 +24,7 @@ export default function Wines() {
 	const { recognizeWine, loading } = useWineRecognition();
 
 	const [open, setOpen] = useState(false);
+	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
 	const requestAI = async (): Promise<void> => {
 		try {
@@ -77,7 +80,8 @@ export default function Wines() {
 														<img
 															src={imageUrl}
 															alt={`Uploaded ${index + 1}`}
-															className="max-w-[50vw] max-h-[40vh] object-cover rounded md:max-h-[30vh]"
+															className="max-w-[50vw] max-h-[40vh] object-cover rounded md:max-h-[30vh] cursor-pointer"
+															onClick={() => openZoom(imageUrl, `Uploaded ${index + 1}`)}
 														/>
 														<button
 															type="button"
@@ -130,6 +134,7 @@ export default function Wines() {
 					)}
 				</div>
 			</main>
+			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
 		</div>
 	);
 }
