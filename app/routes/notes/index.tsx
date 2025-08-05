@@ -266,9 +266,9 @@ export default function Index() {
 																				: "bg-primary",
 																		)}
 																		onClick={(event) => {
-																		event.stopPropagation();
-																		openZoom(img, `ノート添付 #${i + 1}`);
-																	}}
+																			event.stopPropagation();
+																			openZoom(img, `ノート添付 #${i + 1}`);
+																		}}
 																	>
 																		<img
 																			src={img}

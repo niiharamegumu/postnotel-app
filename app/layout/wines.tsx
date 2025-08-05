@@ -2,8 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bot, ImagePlus, X } from "lucide-react";
 import { Suspense, useState } from "react";
 import { Outlet, useOutletContext } from "react-router";
-import FloatMenu from "~/components/common/floatMenu";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
+import FloatMenu from "~/components/common/floatMenu";
 import { Button } from "~/components/ui/button";
 import {
 	Drawer,

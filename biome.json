@@ -10,7 +10,7 @@
 		"include": ["./app/**/*"],
 		"ignore": [
 			"build/**",
-			"dist/**", 
+			"dist/**",
 			".react-router/**",
 			"node_modules/**",
 			"*.config.*",
