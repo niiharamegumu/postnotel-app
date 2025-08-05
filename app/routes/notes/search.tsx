@@ -12,6 +12,7 @@ import type { Tag as TagType } from "~/features/tags/types/tag";
 import { useNavigation } from "~/hooks/useNavigation";
 import type { PaginationInfo } from "~/lib/pagination";
 import type { Route } from "./+types/search";
+import type { NoteContentType } from "~/constants/noteContentType";
 
 export async function loader({ request, context }: Route.LoaderArgs): Promise<SearchLoaderData> {
 	return await useSearchLoader(request, context);
@@ -23,17 +24,24 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function SearchPage() {
 	const { isLoading } = useNavigation();
-	const { notes, selectedTags, availableTags, paginationInfo } = useLoaderData<typeof loader>() as {
+	const { notes, selectedTags, availableTags, selectedContentType, paginationInfo } = useLoaderData<
+		typeof loader
+	>() as {
 		notes: Note[];
 		selectedTags: TagType[];
 		availableTags: TagType[];
+		selectedContentType: NoteContentType | null;
 		paginationInfo: PaginationInfo | null;
 	};
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<SearchHeader />
-			<SearchForm availableTags={availableTags} selectedTags={selectedTags} />
+			<SearchForm
+				availableTags={availableTags}
+				selectedTags={selectedTags}
+				selectedContentType={selectedContentType || undefined}
+			/>
 			<SelectedTagsDisplay selectedTags={selectedTags} />
 
 			{isLoading ? (

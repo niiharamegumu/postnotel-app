@@ -1,4 +1,5 @@
 import type { AppLoadContext } from "react-router";
+import type { NoteContentType } from "~/constants/noteContentType";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
 import type { Note } from "~/features/notes/types/note";
 import type { Tag } from "~/features/tags/types/tag";
@@ -12,6 +13,7 @@ export type SearchLoaderData = {
 	notes: Note[];
 	selectedTags: Tag[];
 	availableTags: Tag[];
+	selectedContentType: NoteContentType | null;
 	paginationInfo: PaginationInfo | null;
 	searchQuery: string;
 };
@@ -29,14 +31,15 @@ export async function useSearchLoader(
 	const limit: number = PAGINATION_LIMITS.SEARCH_PAGE;
 	const offset: number = calculateOffset(page, limit);
 
-	// Process tag IDs
+	// Process tag IDs and content type
 	const tagIds: string[] = searchParams.tagIds || [];
+	const contentType: NoteContentType | undefined = searchParams.contentType;
 
 	// Get all available tags
 	const availableTags: Tag[] = await fetchAvailableTags(request, context);
 
 	// Validate search parameters
-	const validation = validateSearchParams(searchParams.q, tagIds, availableTags);
+	const validation = validateSearchParams(searchParams.q, tagIds, contentType, availableTags);
 
 	// Handle redirect if parameters were cleaned
 	handleSearchRedirect(validation, url);
@@ -46,6 +49,7 @@ export async function useSearchLoader(
 		limit,
 		offset,
 		tagIds: validation.validTagIds,
+		contentType: validation.validContentType || undefined,
 		q: validation.validSearchQuery || undefined,
 	});
 
@@ -58,6 +62,7 @@ export async function useSearchLoader(
 		notes: notesResult?.notes || [],
 		selectedTags: availableTags.filter((tag) => validation.validTagIds.includes(tag.id)),
 		availableTags,
+		selectedContentType: validation.validContentType,
 		paginationInfo: notesResult?.paginationInfo || null,
 		searchQuery: validation.validSearchQuery || "",
 	};
