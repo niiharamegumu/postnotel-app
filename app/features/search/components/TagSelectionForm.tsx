@@ -17,7 +17,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 		(tag: Tag) => {
 			const currentTagIds = selectedTags.map((t) => t.id);
 			const newTagIds = [...currentTagIds, tag.id];
-			const newSearchParams = updateSearchParams(searchParams, newTagIds);
+			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
 			navigate(`/notes/search?${newSearchParams.toString()}`);
 		},
 		[selectedTags, searchParams, navigate],
@@ -26,7 +26,7 @@ export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFo
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
 			const newTagIds = selectedTags.filter((tag) => tag.id !== tagIdToRemove).map((tag) => tag.id);
-			const newSearchParams = updateSearchParams(searchParams, newTagIds);
+			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
 			navigate(`/notes/search?${newSearchParams.toString()}`);
 		},
 		[selectedTags, searchParams, navigate],

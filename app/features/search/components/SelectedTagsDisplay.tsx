@@ -16,14 +16,14 @@ export function SelectedTagsDisplay({ selectedTags }: SelectedTagsDisplayProps) 
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
 			const newTagIds = selectedTags.filter((tag) => tag.id !== tagIdToRemove).map((tag) => tag.id);
-			const newSearchParams = updateSearchParams(searchParams, newTagIds);
+			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
 			navigate(`/notes/search?${newSearchParams.toString()}`);
 		},
 		[selectedTags, searchParams, navigate],
 	);
 
 	const handleClearAll = useCallback(() => {
-		const newSearchParams = updateSearchParams(searchParams, []);
+		const newSearchParams = updateSearchParams(searchParams, { tagIds: [] });
 		navigate(`/notes/search?${newSearchParams.toString()}`);
 	}, [searchParams, navigate]);
 
