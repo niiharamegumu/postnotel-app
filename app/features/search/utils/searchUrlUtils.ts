@@ -48,7 +48,7 @@ export function updateSearchParams(
 	currentSearchParams: URLSearchParams,
 	updates: {
 		tagIds?: string[];
-		contentType?: NoteContentType | null;
+		contentType?: NoteContentType | "all";
 	},
 ): URLSearchParams {
 	const newSearchParams = new URLSearchParams(currentSearchParams);
@@ -64,13 +64,14 @@ export function updateSearchParams(
 
 	// contentType の更新
 	if (updates.contentType !== undefined) {
-		if (updates.contentType) {
-			newSearchParams.set("contentType", updates.contentType);
-		} else {
+		if (updates.contentType === "all") {
 			newSearchParams.delete("contentType");
+		} else {
+			newSearchParams.set("contentType", updates.contentType);
 		}
 	}
 
 	newSearchParams.delete("page"); // ページをリセット
+
 	return newSearchParams;
 }
