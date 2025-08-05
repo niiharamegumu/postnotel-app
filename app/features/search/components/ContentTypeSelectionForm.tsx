@@ -20,7 +20,7 @@ export function ContentTypeSelectionForm({ selectedContentType }: ContentTypeSel
 
 	const handleContentTypeChange = useCallback(
 		(value: string) => {
-			const contentType = value === "all" ? undefined : (value as NoteContentType);
+			const contentType = value === "all" ? value : (value as NoteContentType);
 			const newSearchParams = updateSearchParams(searchParams, { contentType });
 			navigate(`/notes/search?${newSearchParams.toString()}`);
 		},
