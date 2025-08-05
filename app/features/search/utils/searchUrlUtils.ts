@@ -1,17 +1,22 @@
+import type { NoteContentType } from "~/constants/noteContentType";
+
 export type SearchParams = {
 	tagIds?: string[];
 	q?: string;
+	contentType?: NoteContentType;
 	page?: number;
 };
 
 export const parseSearchParams = (searchParams: URLSearchParams): SearchParams => {
 	const tagIdsParam = searchParams.get("tagIds");
 	const qParam = searchParams.get("q");
+	const contentTypeParam = searchParams.get("contentType");
 	const pageParam = searchParams.get("page");
 
 	return {
 		tagIds: tagIdsParam ? tagIdsParam.split(",").filter(Boolean) : undefined,
 		q: qParam?.trim() || undefined,
+		contentType: (contentTypeParam as NoteContentType) || undefined,
 		page: pageParam ? Number.parseInt(pageParam, 10) : undefined,
 	};
 };
@@ -27,6 +32,10 @@ export const buildSearchUrl = (params: SearchParams, baseUrl: string): string =>
 		searchParams.set("q", params.q.trim());
 	}
 
+	if (params.contentType) {
+		searchParams.set("contentType", params.contentType);
+	}
+
 	if (params.page && params.page > 1) {
 		searchParams.set("page", params.page.toString());
 	}
@@ -35,26 +44,33 @@ export const buildSearchUrl = (params: SearchParams, baseUrl: string): string =>
 	return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 };
 
-export const validateSearchQuery = (query: string | undefined): string | null => {
-	if (!query) return null;
-
-	const trimmedQuery = query.trim();
-	if (trimmedQuery.length === 0) return null;
-	if (trimmedQuery.length > 100) return trimmedQuery.slice(0, 100);
-
-	return trimmedQuery;
-};
-
 export function updateSearchParams(
 	currentSearchParams: URLSearchParams,
-	tagIds: string[],
+	updates: {
+		tagIds?: string[];
+		contentType?: NoteContentType | null;
+	},
 ): URLSearchParams {
 	const newSearchParams = new URLSearchParams(currentSearchParams);
-	if (tagIds.length > 0) {
-		newSearchParams.set("tagIds", tagIds.join(","));
-	} else {
-		newSearchParams.delete("tagIds");
+
+	// tagIds の更新
+	if (updates.tagIds !== undefined) {
+		if (updates.tagIds.length > 0) {
+			newSearchParams.set("tagIds", updates.tagIds.join(","));
+		} else {
+			newSearchParams.delete("tagIds");
+		}
 	}
+
+	// contentType の更新
+	if (updates.contentType !== undefined) {
+		if (updates.contentType) {
+			newSearchParams.set("contentType", updates.contentType);
+		} else {
+			newSearchParams.delete("contentType");
+		}
+	}
+
 	newSearchParams.delete("page"); // ページをリセット
 	return newSearchParams;
 }
