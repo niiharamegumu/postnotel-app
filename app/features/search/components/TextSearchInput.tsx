@@ -1,9 +1,10 @@
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { useTextSearchDebounce } from "~/hooks/useTextSearchDebounce";
 import { cn } from "~/lib/utils";
+import { updateSearchParams } from "../utils/searchUrlUtils";
 
 type TextSearchInputProps = {
 	className?: string;
@@ -17,28 +18,15 @@ export function TextSearchInput({
 	isLoading = false,
 }: TextSearchInputProps) {
 	const navigate = useNavigate();
-	const location = useLocation();
 	const [searchParams] = useSearchParams();
 	const lastUrlQuery = useRef<string>("");
 
 	const handleSearch = useCallback(
 		(query: string) => {
-			const newSearchParams = new URLSearchParams(location.search);
-
-			if (query.trim()) {
-				newSearchParams.set("q", query.trim());
-			} else {
-				newSearchParams.delete("q");
-			}
-
-			// Reset page when search changes
-			newSearchParams.delete("page");
-
-			const queryString = newSearchParams.toString();
-			const newPath = queryString ? `${location.pathname}?${queryString}` : location.pathname;
-			navigate(newPath);
+			const newSearchParams = updateSearchParams(searchParams, { q: query });
+			navigate(`/notes/search?${newSearchParams.toString()}`);
 		},
-		[navigate, location.pathname, location.search],
+		[navigate, searchParams],
 	);
 
 	const {

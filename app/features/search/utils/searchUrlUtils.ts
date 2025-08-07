@@ -49,6 +49,7 @@ export function updateSearchParams(
 	updates: {
 		tagIds?: string[];
 		contentType?: NoteContentType | "all";
+		q?: string;
 	},
 ): URLSearchParams {
 	const newSearchParams = new URLSearchParams(currentSearchParams);
@@ -68,6 +69,15 @@ export function updateSearchParams(
 			newSearchParams.delete("contentType");
 		} else {
 			newSearchParams.set("contentType", updates.contentType);
+		}
+	}
+
+	// q の更新
+	if (updates.q !== undefined) {
+		if (updates.q.trim()) {
+			newSearchParams.set("q", updates.q.trim());
+		} else {
+			newSearchParams.delete("q");
 		}
 	}
 
