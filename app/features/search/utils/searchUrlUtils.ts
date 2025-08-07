@@ -7,6 +7,12 @@ export type SearchParams = {
 	page?: number;
 };
 
+export type SearchParamsUpdates = {
+	tagIds?: string[];
+	contentType?: NoteContentType | "all";
+	q?: string;
+};
+
 export const parseSearchParams = (searchParams: URLSearchParams): SearchParams => {
 	const tagIdsParam = searchParams.get("tagIds");
 	const qParam = searchParams.get("q");
@@ -46,11 +52,7 @@ export const buildSearchUrl = (params: SearchParams, baseUrl: string): string =>
 
 export function updateSearchParams(
 	currentSearchParams: URLSearchParams,
-	updates: {
-		tagIds?: string[];
-		contentType?: NoteContentType | "all";
-		q?: string;
-	},
+	updates: SearchParamsUpdates,
 ): URLSearchParams {
 	const newSearchParams = new URLSearchParams(currentSearchParams);
 

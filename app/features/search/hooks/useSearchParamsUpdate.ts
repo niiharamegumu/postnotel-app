@@ -1,13 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router";
-import type { NoteContentType } from "~/constants/noteContentType";
-import { updateSearchParams } from "../utils/searchUrlUtils";
-
-type SearchParamsUpdates = {
-	tagIds?: string[];
-	contentType?: NoteContentType | "all";
-	q?: string;
-};
+import { updateSearchParams, type SearchParamsUpdates } from "../utils/searchUrlUtils";
 
 export function useSearchParamsUpdate() {
 	const navigate = useNavigate();
