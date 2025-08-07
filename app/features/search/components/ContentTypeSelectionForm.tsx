@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router";
 import {
 	Select,
 	SelectContent,
@@ -8,23 +7,21 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
-import { updateSearchParams } from "../utils/searchUrlUtils";
+import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
 
 type ContentTypeSelectionFormProps = {
 	selectedContentType?: NoteContentType;
 };
 
 export function ContentTypeSelectionForm({ selectedContentType }: ContentTypeSelectionFormProps) {
-	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
+	const updateSearchParams = useSearchParamsUpdate();
 
 	const handleContentTypeChange = useCallback(
 		(value: string) => {
 			const contentType = value === "all" ? value : (value as NoteContentType);
-			const newSearchParams = updateSearchParams(searchParams, { contentType });
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			updateSearchParams({ contentType });
 		},
-		[searchParams, navigate],
+		[updateSearchParams],
 	);
 
 	const contentTypeOptions = [
