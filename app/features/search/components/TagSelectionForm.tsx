@@ -1,8 +1,7 @@
 import { useCallback, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import type { Tag } from "~/features/tags/types/tag";
-import { updateSearchParams } from "../utils/searchUrlUtils";
+import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
 
 type TagSelectionFormProps = {
 	availableTags: Tag[];
@@ -10,26 +9,23 @@ type TagSelectionFormProps = {
 };
 
 export function TagSelectionForm({ availableTags, selectedTags }: TagSelectionFormProps) {
-	const navigate = useNavigate();
-	const [searchParams] = useSearchParams();
+	const updateSearchParams = useSearchParamsUpdate();
 
 	const handleTagAdd = useCallback(
 		(tag: Tag) => {
 			const currentTagIds = selectedTags.map((t) => t.id);
 			const newTagIds = [...currentTagIds, tag.id];
-			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			updateSearchParams({ tagIds: newTagIds });
 		},
-		[selectedTags, searchParams, navigate],
+		[selectedTags, updateSearchParams],
 	);
 
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
 			const newTagIds = selectedTags.filter((tag) => tag.id !== tagIdToRemove).map((tag) => tag.id);
-			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			updateSearchParams({ tagIds: newTagIds });
 		},
-		[selectedTags, searchParams, navigate],
+		[selectedTags, updateSearchParams],
 	);
 
 	// 選択可能なタグは、まだ選択されていないタグのみ

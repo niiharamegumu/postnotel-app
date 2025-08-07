@@ -1,10 +1,10 @@
 import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { useTextSearchDebounce } from "~/hooks/useTextSearchDebounce";
 import { cn } from "~/lib/utils";
-import { updateSearchParams } from "../utils/searchUrlUtils";
+import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
 
 type TextSearchInputProps = {
 	className?: string;
@@ -17,16 +17,15 @@ export function TextSearchInput({
 	placeholder = "テキスト検索",
 	isLoading = false,
 }: TextSearchInputProps) {
-	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 	const lastUrlQuery = useRef<string>("");
+	const updateSearchParams = useSearchParamsUpdate();
 
 	const handleSearch = useCallback(
 		(query: string) => {
-			const newSearchParams = updateSearchParams(searchParams, { q: query });
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			updateSearchParams({ q: query });
 		},
-		[navigate, searchParams],
+		[updateSearchParams],
 	);
 
 	const {
