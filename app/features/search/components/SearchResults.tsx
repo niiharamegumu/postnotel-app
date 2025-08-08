@@ -17,7 +17,7 @@ const NoteContent = lazy(() => import("~/features/notes/components/.client/conte
 
 type SearchResultsProps = {
 	notes: Note[];
-	selectedTags: Tag[];
+	availableTags: Tag[];
 	paginationInfo: PaginationInfo | null;
 };
 
@@ -32,13 +32,20 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 	}, {});
 }
 
-export function SearchResults({ notes, selectedTags, paginationInfo }: SearchResultsProps) {
+export function SearchResults({ notes, availableTags, paginationInfo }: SearchResultsProps) {
 	const [searchParams] = useSearchParams();
-	const searchQuery = searchParams.get("q") || "";
+	const searchQuery: string = searchParams.get("q") || "";
 	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
 
+	// URLパラメータからselectedTagsを計算
+	const selectedTagIds: string[] = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
+	const selectedTags: Tag[] = useMemo(
+		() => availableTags.filter((tag) => selectedTagIds.includes(tag.id)),
+		[availableTags, selectedTagIds],
+	);
+
 	// メッセージをメモ化
-	const emptyMessage = useMemo(() => {
+	const emptyMessage: string = useMemo(() => {
 		if (selectedTags.length > 0 && searchQuery) {
 			return "選択されたタグと検索キーワードの組み合わせに該当するノートはありません";
 		}
