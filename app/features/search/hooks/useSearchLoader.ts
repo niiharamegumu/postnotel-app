@@ -11,10 +11,10 @@ import { validateSearchParams } from "../utils/searchValidation";
 
 export type SearchLoaderData = {
 	notes: Note[];
-	selectedTags: Tag[];
 	availableTags: Tag[];
-	selectedContentType: NoteContentType | null;
 	paginationInfo: PaginationInfo | null;
+	// Meta情報用
+	selectedTags: Tag[];
 	searchQuery: string;
 };
 
@@ -60,10 +60,10 @@ export async function useSearchLoader(
 
 	return {
 		notes: notesResult?.notes || [],
-		selectedTags: availableTags.filter((tag) => validation.validTagIds.includes(tag.id)),
 		availableTags,
-		selectedContentType: validation.validContentType,
 		paginationInfo: notesResult?.paginationInfo || null,
+		// Meta情報用のデータ
+		selectedTags: availableTags.filter((tag) => validation.validTagIds.includes(tag.id)),
 		searchQuery: validation.validSearchQuery || "",
 	};
 }

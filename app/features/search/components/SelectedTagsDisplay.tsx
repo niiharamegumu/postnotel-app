@@ -1,31 +1,36 @@
 import { Trash, X } from "lucide-react";
 import { Tag } from "lucide-react";
-import { useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router";
 import type { Tag as TagType } from "~/features/tags/types/tag";
-import { updateSearchParams } from "../utils/searchUrlUtils";
+import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
 
 type SelectedTagsDisplayProps = {
-	selectedTags: TagType[];
+	availableTags: TagType[];
 };
 
-export function SelectedTagsDisplay({ selectedTags }: SelectedTagsDisplayProps) {
-	const navigate = useNavigate();
+export function SelectedTagsDisplay({ availableTags }: SelectedTagsDisplayProps) {
 	const [searchParams] = useSearchParams();
+	const updateSearchParams = useSearchParamsUpdate();
+
+	// URLパラメータからselectedTagsを計算
+	const selectedTagIds: string[] = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
+	const selectedTags: TagType[] = useMemo(
+		() => availableTags.filter((tag) => selectedTagIds.includes(tag.id)),
+		[availableTags, selectedTagIds],
+	);
 
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
-			const newTagIds = selectedTags.filter((tag) => tag.id !== tagIdToRemove).map((tag) => tag.id);
-			const newSearchParams = updateSearchParams(searchParams, { tagIds: newTagIds });
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			const newTagIds: string[] = selectedTagIds.filter((id) => id !== tagIdToRemove);
+			updateSearchParams({ tagIds: newTagIds });
 		},
-		[selectedTags, searchParams, navigate],
+		[selectedTagIds, updateSearchParams],
 	);
 
 	const handleClearAll = useCallback(() => {
-		const newSearchParams = updateSearchParams(searchParams, { tagIds: [] });
-		navigate(`/notes/search?${newSearchParams.toString()}`);
-	}, [searchParams, navigate]);
+		updateSearchParams({ tagIds: [] });
+	}, [updateSearchParams]);
 
 	if (selectedTags.length === 0) {
 		return null;

@@ -1,18 +1,14 @@
 import { useLoaderData } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { PaginationControls } from "~/components/common/PaginationControls";
-import type { Note } from "~/features/notes/types/note";
 import { SearchForm } from "~/features/search/components/SearchForm";
 import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
 import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
 import { type SearchLoaderData, useSearchLoader } from "~/features/search/hooks/useSearchLoader";
 import { useSearchMeta } from "~/features/search/hooks/useSearchMeta";
-import type { Tag as TagType } from "~/features/tags/types/tag";
 import { useNavigation } from "~/hooks/useNavigation";
-import type { PaginationInfo } from "~/lib/pagination";
 import type { Route } from "./+types/search";
-import type { NoteContentType } from "~/constants/noteContentType";
 
 export async function loader({ request, context }: Route.LoaderArgs): Promise<SearchLoaderData> {
 	return await useSearchLoader(request, context);
@@ -24,25 +20,13 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function SearchPage() {
 	const { isLoading } = useNavigation();
-	const { notes, selectedTags, availableTags, selectedContentType, paginationInfo } = useLoaderData<
-		typeof loader
-	>() as {
-		notes: Note[];
-		selectedTags: TagType[];
-		availableTags: TagType[];
-		selectedContentType: NoteContentType | null;
-		paginationInfo: PaginationInfo | null;
-	};
+	const { notes, availableTags, paginationInfo } = useLoaderData<typeof loader>();
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<SearchHeader />
-			<SearchForm
-				availableTags={availableTags}
-				selectedTags={selectedTags}
-				selectedContentType={selectedContentType || undefined}
-			/>
-			<SelectedTagsDisplay selectedTags={selectedTags} />
+			<SearchForm availableTags={availableTags} />
+			<SelectedTagsDisplay availableTags={availableTags} />
 
 			{isLoading ? (
 				<LoadingState variant="spinner" className="text-center" />
@@ -53,7 +37,7 @@ export default function SearchPage() {
 					)}
 					<SearchResults
 						notes={notes}
-						selectedTags={selectedTags}
+						availableTags={availableTags}
 						paginationInfo={paginationInfo}
 					/>
 					{paginationInfo && paginationInfo.totalPages > 1 && (

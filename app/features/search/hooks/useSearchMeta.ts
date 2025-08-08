@@ -1,4 +1,5 @@
 import type { Tag } from "~/features/tags/types/tag";
+import type { SearchLoaderData } from "./useSearchLoader";
 
 export type MetaDescriptor = {
 	title?: string;
@@ -6,12 +7,7 @@ export type MetaDescriptor = {
 	content?: string;
 };
 
-export type SearchMetaData = {
-	selectedTags?: Tag[];
-	searchQuery?: string;
-};
-
-export function useSearchMeta(data: SearchMetaData): MetaDescriptor[] {
+export function useSearchMeta(data: SearchLoaderData): MetaDescriptor[] {
 	const selectedTags: Tag[] = data?.selectedTags || [];
 	const searchQuery: string = data?.searchQuery || "";
 
