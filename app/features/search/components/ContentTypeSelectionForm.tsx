@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useSearchParams } from "react-router";
 import {
 	Select,
 	SelectContent,
@@ -9,12 +10,10 @@ import {
 import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
 import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
 
-type ContentTypeSelectionFormProps = {
-	selectedContentType?: NoteContentType;
-};
-
-export function ContentTypeSelectionForm({ selectedContentType }: ContentTypeSelectionFormProps) {
+export function ContentTypeSelectionForm() {
+	const [searchParams] = useSearchParams();
 	const updateSearchParams = useSearchParamsUpdate();
+	const selectedContentType = searchParams.get("contentType") as NoteContentType | null;
 
 	const handleContentTypeChange = useCallback(
 		(value: string) => {

@@ -1,4 +1,3 @@
-import type { NoteContentType } from "~/constants/noteContentType";
 import type { Tag } from "~/features/tags/types/tag";
 import { useNavigation } from "~/hooks/useNavigation";
 import { ContentTypeSelectionForm } from "./ContentTypeSelectionForm";
@@ -7,11 +6,9 @@ import { TextSearchInput } from "./TextSearchInput";
 
 type SearchFormProps = {
 	availableTags: Tag[];
-	selectedTags: Tag[];
-	selectedContentType?: NoteContentType;
 };
 
-export function SearchForm({ availableTags, selectedTags, selectedContentType }: SearchFormProps) {
+export function SearchForm({ availableTags }: SearchFormProps) {
 	const { isLoading } = useNavigation();
 
 	return (
@@ -21,11 +18,11 @@ export function SearchForm({ availableTags, selectedTags, selectedContentType }:
 				<TextSearchInput isLoading={isLoading} className="w-full" />
 
 				{/* コンテンツタイプ検索 */}
-				<ContentTypeSelectionForm selectedContentType={selectedContentType} />
+				<ContentTypeSelectionForm />
 			</div>
 
 			{/* タグ検索 */}
-			<TagSelectionForm availableTags={availableTags} selectedTags={selectedTags} />
+			<TagSelectionForm availableTags={availableTags} />
 		</div>
 	);
 }
