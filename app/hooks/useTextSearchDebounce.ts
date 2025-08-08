@@ -10,6 +10,7 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 	const [isComposing, setIsComposing] = useState<boolean>(false);
 	const lastQueryRef = useRef<string>("");
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: onSearch needs to be in deps to ensure latest function reference
 	const debouncedSearch = useCallback(
 		debounce((searchQuery: string) => {
 			const trimmedQuery = searchQuery.trim();
@@ -18,7 +19,7 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 				onSearch(trimmedQuery);
 			}
 		}, delay),
-		[],
+		[onSearch],
 	);
 
 	const handleInputChange = useCallback(
