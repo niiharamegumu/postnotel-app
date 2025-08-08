@@ -1,19 +1,19 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
 import { updateSearchParams, type SearchParamsUpdates } from "../utils/searchUrlUtils";
 
 export function useSearchParamsUpdate() {
-	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const updateSearchParamsAndNavigate = useCallback(
 		(updates: SearchParamsUpdates) => {
-			// window.location.searchを使用して確実に最新のURLパラメータを取得
-			// これによりReact Routerの更新タイミングに依存せず、常に正確な値を取得可能
-			const currentSearchParams = new URLSearchParams(window.location.search);
-			const newSearchParams = updateSearchParams(currentSearchParams, updates);
-			navigate(`/notes/search?${newSearchParams.toString()}`);
+			const current = new URLSearchParams(searchParams);
+			console.log("現在の検索パラメータ:", current.toString());
+			const next = updateSearchParams(current, updates);
+			console.log("更新後の検索パラメータ:", next.toString());
+			setSearchParams(next);
 		},
-		[navigate],
+		[searchParams, setSearchParams],
 	);
 
 	return updateSearchParamsAndNavigate;

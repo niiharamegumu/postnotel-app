@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { useTextSearchDebounce } from "~/hooks/useTextSearchDebounce";
@@ -18,8 +18,9 @@ export function TextSearchInput({
 	isLoading = false,
 }: TextSearchInputProps) {
 	const [searchParams] = useSearchParams();
-	const lastUrlQuery = useRef<string>("");
 	const updateSearchParams = useSearchParamsUpdate();
+	const urlQuery = searchParams.get("q") || "";
+	const [inputValue, setInputValue] = useState<string>(urlQuery);
 
 	const handleSearch = useCallback(
 		(query: string) => {
@@ -28,37 +29,30 @@ export function TextSearchInput({
 		[updateSearchParams],
 	);
 
-	const {
-		query,
-		setQuery,
-		isComposing,
-		handleInputChange,
-		handleCompositionStart,
-		handleCompositionEnd,
-	} = useTextSearchDebounce({
-		delay: 300,
-		onSearch: handleSearch,
-	});
+	const { isComposing, handleInputChange, handleCompositionStart, handleCompositionEnd } =
+		useTextSearchDebounce({
+			delay: 300,
+			onSearch: handleSearch,
+		});
 
-	// Initialize from URL and sync when URL changes from other sources (not from this component)
 	useEffect(() => {
-		const urlQuery = searchParams.get("q") || "";
-		if (urlQuery !== lastUrlQuery.current) {
-			lastUrlQuery.current = urlQuery;
-			setQuery(urlQuery);
-		}
-	}, [searchParams, setQuery]);
+		setInputValue(urlQuery);
+	}, [urlQuery]);
 
 	const handleInputChangeEvent = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			handleInputChange(event.target.value);
+			const value = event.target.value;
+			setInputValue(value);
+			handleInputChange(value);
 		},
 		[handleInputChange],
 	);
 
 	const handleCompositionEndEvent = useCallback(
 		(event: React.CompositionEvent<HTMLInputElement>) => {
-			handleCompositionEnd(event.currentTarget.value);
+			const value = event.currentTarget.value;
+			setInputValue(value);
+			handleCompositionEnd(value);
 		},
 		[handleCompositionEnd],
 	);
@@ -69,7 +63,7 @@ export function TextSearchInput({
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 				<input
 					type="text"
-					value={query}
+					value={inputValue}
 					onChange={handleInputChangeEvent}
 					onCompositionStart={handleCompositionStart}
 					onCompositionEnd={handleCompositionEndEvent}

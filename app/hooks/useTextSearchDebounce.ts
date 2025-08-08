@@ -8,7 +8,6 @@ type UseTextSearchDebounceOptions = {
 
 export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounceOptions) => {
 	const [isComposing, setIsComposing] = useState<boolean>(false);
-	const [query, setQuery] = useState<string>("");
 	const lastQueryRef = useRef<string>("");
 
 	const debouncedSearch = useCallback(
@@ -24,7 +23,6 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 
 	const handleInputChange = useCallback(
 		(value: string) => {
-			setQuery(value);
 			if (!isComposing) {
 				debouncedSearch(value);
 			}
@@ -39,7 +37,6 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 	const handleCompositionEnd = useCallback(
 		(value: string) => {
 			setIsComposing(false);
-			setQuery(value);
 			debouncedSearch(value);
 		},
 		[debouncedSearch],
@@ -52,8 +49,6 @@ export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounce
 	}, [debouncedSearch]);
 
 	return {
-		query,
-		setQuery,
 		isComposing,
 		handleInputChange,
 		handleCompositionStart,
