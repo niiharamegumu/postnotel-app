@@ -41,12 +41,9 @@ export default function Index() {
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-10">
 			<section>
-				<h1 className="text-3xl font-bold">
+				<h1 className="text-3xl font-bold mb-2">
 					Wines <span className="text-muted-foreground text-sm">By AI</span>
 				</h1>
-			</section>
-
-			<section>
 				{notes && notes.length > 0 ? (
 					<ul className="space-y-8">
 						{notes.map((note) => (

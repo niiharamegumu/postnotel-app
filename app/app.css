@@ -136,16 +136,17 @@ html {
 	body {
 		@apply bg-background text-foreground;
 	}
-	h1 {
+	/* Custom BlockNote Style */
+	.bn-block-content h1 {
 		@apply text-2xl my-3 md:my-4;
 	}
-	h2 {
+	.bn-block-content h2 {
 		@apply text-xl my-1 md:my-3;
 	}
-	h3 {
+	.bn-block-content h3 {
 		@apply text-lg font-normal;
 	}
-	p {
+	.bn-block-content p {
 		@apply text-sm md:text-base;
 	}
 
