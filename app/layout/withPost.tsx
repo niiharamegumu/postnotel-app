@@ -69,7 +69,7 @@ export default function WithPost() {
 
 	return (
 		<div className="flex flex-col min-h-screen">
-			<main className="max-w-full pt-6 pb-25 px-6">
+			<main className="max-w-full pt-6 pb-25 px-4">
 				<Outlet context={contextValue} />
 				<div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center gap-2">
 					<FloatMenu userInfo={userInfo} />
