@@ -25,6 +25,7 @@ import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { useMobileDevice } from "~/hooks/useMobileDevice";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -47,7 +48,6 @@ export default function BlockNoteDrawer({
 	targetDate,
 	note,
 }: BlockNoteDrawerProps) {
-	console.log("BlockNoteDrawer rendered");
 	const { deleteNote } = useNotes();
 	const [isPrivate, setIsPrivate] = useState(true);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -61,6 +61,7 @@ export default function BlockNoteDrawer({
 		resetImages,
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
+	const { isMobileDevice } = useMobileDevice();
 
 	// BlockNoteの初期化
 	const schema = useMemo(() => {
@@ -72,6 +73,35 @@ export default function BlockNoteDrawer({
 		});
 	}, []);
 	const editor = useCreateBlockNote({ schema });
+
+	// SP用のタップハンドラー
+	const handleContainerClick = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			if (!isMobileDevice || !editor) return;
+
+			// クリックされた要素がBlockNoteの編集可能エリア内でない場合のみ処理
+			const target = event.target as HTMLElement;
+			const isClickOnEditor = target.closest(".bn-editor") || target.closest("[contenteditable]");
+
+			if (!isClickOnEditor) {
+				try {
+					// エディターにフォーカスを当てる
+					editor.focus();
+
+					// エディターが空の場合、カーソルが当たるようにする
+					const blocks = editor.document;
+					if (blocks.length > 0) {
+						// 最初のブロックの開始位置にカーソルを設定
+						const firstBlock = blocks[0];
+						editor.setTextCursorPosition(firstBlock, "start");
+					}
+				} catch (error) {
+					console.warn("Failed to focus editor:", error);
+				}
+			}
+		},
+		[editor, isMobileDevice],
+	);
 
 	const onDraftRestore = useCallback(
 		(draft: NoteDraft) => {
@@ -245,11 +275,16 @@ export default function BlockNoteDrawer({
 						))}
 					</div>
 				)}
-				<BlockNoteView
-					editor={editor}
-					className="overflow-y-auto"
-					onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
-				/>
+				<div
+					onClick={handleContainerClick}
+					className="overflow-y-auto min-h-[200px] touch-manipulation"
+				>
+					<BlockNoteView
+						editor={editor}
+						className="h-full"
+						onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
+					/>
+				</div>
 				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
