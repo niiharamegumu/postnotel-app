@@ -25,7 +25,6 @@ import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
-import { useMobileDevice } from "~/hooks/useMobileDevice";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -61,7 +60,6 @@ export default function BlockNoteDrawer({
 		resetImages,
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
-	const { isMobileDevice } = useMobileDevice();
 
 	// BlockNoteの初期化
 	const schema = useMemo(() => {
@@ -74,44 +72,48 @@ export default function BlockNoteDrawer({
 	}, []);
 	const editor = useCreateBlockNote({ schema });
 
-	// SP用のタップハンドラー
-	const handleContainerClick = useCallback(
-		(event: React.MouseEvent<HTMLDivElement>) => {
-			if (!isMobileDevice || !editor) return;
+	// カーソル位置制御の共通関数
+	const setCursorPosition = useCallback(
+		(placement: "start" | "end") => {
+			if (!editor) return;
 
-			// クリックされた要素がBlockNoteの編集可能エリア内でない場合のみ処理
-			const target = event.target as HTMLElement;
-			const isClickOnEditor = target.closest(".bn-editor") || target.closest("[contenteditable]");
+			try {
+				const blocks = editor.document;
+				if (blocks.length === 0) return;
 
-			if (!isClickOnEditor) {
-				try {
-					// エディターにフォーカスを当てる
-					editor.focus();
-
-					// エディターが空の場合、カーソルが当たるようにする
-					const blocks = editor.document;
-					if (blocks.length > 0) {
-						// 最初のブロックの開始位置にカーソルを設定
-						const firstBlock = blocks[0];
-						editor.setTextCursorPosition(firstBlock, "start");
-					}
-				} catch (error) {
-					console.warn("Failed to focus editor:", error);
+				if (placement === "start") {
+					// 最初のブロックの開始位置にカーソルを設定
+					const firstBlock = blocks[0];
+					editor.setTextCursorPosition(firstBlock, "start");
+				} else {
+					// 最後のブロックの末尾位置にカーソルを設定
+					const lastBlock = blocks[blocks.length - 1];
+					editor.setTextCursorPosition(lastBlock, "end");
 				}
+				editor.focus();
+			} catch (error) {
+				console.warn("Failed to set cursor position:", error);
 			}
 		},
-		[editor, isMobileDevice],
+		[editor],
 	);
+
+	// ActionTypeに応じたカーソル位置を取得
+	const getCursorPlacement = useCallback((actionType: ActionType): "start" | "end" => {
+		return actionType === ActionType.Create ? "start" : "end";
+	}, []);
 
 	const onDraftRestore = useCallback(
 		(draft: NoteDraft) => {
 			if (editor && draft.content) {
 				editor.tryParseMarkdownToBlocks(draft.content).then((blocks) => {
 					editor.replaceBlocks(editor.document, blocks);
+					// ドラフト復元時は作成時なので先頭にカーソルを設定
+					setTimeout(() => setCursorPosition("start"), 100);
 				});
 			}
 		},
-		[editor],
+		[editor, setCursorPosition],
 	);
 
 	const noteDraft = useNoteDraft({
@@ -148,16 +150,31 @@ export default function BlockNoteDrawer({
 					if (note.tags?.tags) {
 						setSelectedTags(note.tags.tags);
 					}
+
+					// ActionTypeに応じたカーソル位置を設定
+					const placement = getCursorPlacement(noteDrawerType);
+					setTimeout(() => setCursorPosition(placement), 100);
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
+			} else if (noteDrawerType === ActionType.Create && editor && open) {
+				// 作成時はすぐに先頭にカーソルを設定
+				setTimeout(() => setCursorPosition("start"), 100);
 			}
 		};
 
 		if (open) {
 			initializeEditor();
 		}
-	}, [note, editor, noteDrawerType, open, setUploadedImages]);
+	}, [
+		note,
+		editor,
+		noteDrawerType,
+		open,
+		setUploadedImages,
+		getCursorPlacement,
+		setCursorPosition,
+	]);
 
 	const resetDrawer = () => {
 		setOpen(false);
@@ -275,16 +292,11 @@ export default function BlockNoteDrawer({
 						))}
 					</div>
 				)}
-				<div
-					onClick={handleContainerClick}
-					className="overflow-y-auto min-h-[200px] touch-manipulation"
-				>
-					<BlockNoteView
-						editor={editor}
-						className="h-full"
-						onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
-					/>
-				</div>
+				<BlockNoteView
+					editor={editor}
+					className="overflow-y-auto"
+					onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
+				/>
 				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">

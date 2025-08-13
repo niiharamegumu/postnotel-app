@@ -14,7 +14,6 @@ import type { ViewMode } from "~/constants/viewMode";
 import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import type { Note } from "~/features/notes/types/note";
-import { useTags } from "~/features/tags/hooks/useTags";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import { useNavigation } from "~/hooks/useNavigation";
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
@@ -83,7 +82,6 @@ export default function Index() {
 	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
-	const { tags } = useTags();
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
 	const [getCalendarDateRange, setGetCalendarDateRange] = useState<
 		((newDate: Date) => { startDate: Date; endDate: Date; viewMode: ViewMode }) | null
