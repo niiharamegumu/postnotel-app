@@ -1,6 +1,6 @@
 /* Custom Block Note */
 .bn-editor {
-	@apply pl-2 md:pl-4;
+	@apply px-2 md:px-4;
 }
 .bn-editor h1 {
 	@apply text-xl md:text-2xl;
