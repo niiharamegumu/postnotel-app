@@ -149,7 +149,9 @@ html {
 	.bn-block-content p {
 		@apply text-sm md:text-base;
 	}
-
+	.bn-block-content p.zero-space {
+		@apply leading-1;
+	}
 	.bn-block-content[data-content-type="numberedListItem"]:before {
 		@apply w-[1rem];
 	}

@@ -49,6 +49,17 @@ export default function NoteContent({ note, searchQuery }: Props) {
 		);
 	};
 
+	const getTextContent = (children: Element["children"]): string =>
+		children?.map((child) => (child.type === "text" ? (child as Text).data : "")).join("") || "";
+
+	const renderChildren = (children: Element["children"]) =>
+		children?.map((child) => {
+			if (child.type === "text") {
+				return applyHighlight((child as Text).data);
+			}
+			return null;
+		});
+
 	const options: HTMLReactParserOptions = {
 		replace: (domNode) => {
 			if (domNode.type === "text") {
@@ -56,20 +67,26 @@ export default function NoteContent({ note, searchQuery }: Props) {
 				return <>{applyHighlight(textNode.data)}</>;
 			}
 
-			if (domNode.type === "tag" && domNode.name === "a") {
+			if (domNode.type === "tag") {
 				const element = domNode as Element;
-				const href = element.attribs?.href;
-				const children = element.children;
+				const { children, attribs } = element;
 
-				if (href) {
-					const textContent =
-						children
-							?.map((child) => (child.type === "text" ? (child as Text).data : ""))
-							.join("") || href;
+				if (element.name === "p") {
+					const textContent = getTextContent(children);
+
+					if (textContent === "\u200B") {
+						return (
+							<p className={`zero-space ${attribs?.class || ""}`}>{renderChildren(children)}</p>
+						);
+					}
+				}
+
+				if (element.name === "a" && attribs?.href) {
+					const textContent = getTextContent(children) || attribs.href;
 
 					return (
 						<a
-							href={href}
+							href={attribs.href}
 							target="_blank"
 							rel="noopener noreferrer"
 							onClick={(e) => e.stopPropagation()}

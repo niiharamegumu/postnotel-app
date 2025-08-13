@@ -211,8 +211,50 @@ export default function BlockNoteDrawer({
 		editor.replaceBlocks(editor.document, []);
 	};
 
+	const processEmptyBlocks = useCallback(() => {
+		const blocks = editor.document;
+
+		const processBlocksRecursively = (blocksToProcess: typeof blocks, isTopLevel = false) => {
+			for (let i = 0; i < blocksToProcess.length; i++) {
+				const block = blocksToProcess[i];
+				const isLastBlock = isTopLevel && i === blocksToProcess.length - 1;
+				if (
+					!isLastBlock &&
+					block.type === "paragraph" &&
+					(!block.content ||
+						block.content.length === 0 ||
+						(block.content.length === 1 &&
+							block.content[0].type === "text" &&
+							block.content[0].text === ""))
+				) {
+					// Insert zero-width space if content is empty
+					const updatedBlock = {
+						...block,
+						content: [
+							{
+								type: "text" as const,
+								text: "\u200B", // Zero-width space (U+200B)
+								styles: {},
+							},
+						],
+					};
+					editor.updateBlock(block.id, updatedBlock);
+				}
+
+				// Recursively process child blocks (not top level)
+				if (block.children && block.children.length > 0) {
+					processBlocksRecursively(block.children, false);
+				}
+			}
+		};
+
+		processBlocksRecursively(blocks, true);
+	}, [editor]);
+
 	const handleSubmit = async () => {
 		try {
+			processEmptyBlocks();
+
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
 			if (!markdown) {
 				toast.error("ノートの内容が空です。");
