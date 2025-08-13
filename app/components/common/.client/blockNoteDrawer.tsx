@@ -318,6 +318,7 @@ export default function BlockNoteDrawer({
 					<BlockNoteView
 						editor={editor}
 						className="mb-auto"
+						sideMenu={false}
 						onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
 					/>
 				</div>

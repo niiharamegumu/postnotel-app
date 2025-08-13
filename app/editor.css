@@ -1,14 +1,17 @@
 /* Custom Block Note */
+.bn-editor {
+	@apply pl-2 md:pl-4;
+}
 .bn-editor h1 {
-	@apply text-2xl;
+	@apply text-xl md:text-2xl;
 }
 
 .bn-editor h2 {
-	@apply text-xl;
+	@apply text-lg md:text-xl;
 }
 
 .bn-editor h3 {
-	@apply text-lg;
+	@apply text-base md:text-lg;
 }
 
 .bn-editor p {
