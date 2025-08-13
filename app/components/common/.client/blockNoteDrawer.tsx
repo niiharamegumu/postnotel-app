@@ -25,6 +25,7 @@ import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { useMobileDevice } from "~/hooks/useMobileDevice";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -60,8 +61,8 @@ export default function BlockNoteDrawer({
 		resetImages,
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
+	const { isMobileDevice } = useMobileDevice();
 
-	// BlockNoteの初期化
 	const schema = useMemo(() => {
 		const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
 		return BlockNoteSchema.create({
@@ -72,7 +73,6 @@ export default function BlockNoteDrawer({
 	}, []);
 	const editor = useCreateBlockNote({ schema });
 
-	// カーソル位置制御の共通関数
 	const setCursorPosition = useCallback(
 		(placement: "start" | "end") => {
 			if (!editor) return;
@@ -81,14 +81,22 @@ export default function BlockNoteDrawer({
 				const blocks = editor.document;
 				if (blocks.length === 0) return;
 
-				if (placement === "start") {
-					// 最初のブロックの開始位置にカーソルを設定
-					const firstBlock = blocks[0];
-					editor.setTextCursorPosition(firstBlock, "start");
-				} else {
-					// 最後のブロックの末尾位置にカーソルを設定
-					const lastBlock = blocks[blocks.length - 1];
-					editor.setTextCursorPosition(lastBlock, "end");
+				switch (placement) {
+					case "start": {
+						const firstBlock = blocks[0];
+						editor.setTextCursorPosition(firstBlock, "start");
+						break;
+					}
+					case "end": {
+						const lastBlock = blocks[blocks.length - 1];
+						editor.setTextCursorPosition(lastBlock, "end");
+						break;
+					}
+					default: {
+						const firstBlock = blocks[0];
+						editor.setTextCursorPosition(firstBlock, "start");
+						break;
+					}
 				}
 				editor.focus();
 			} catch (error) {
@@ -98,22 +106,39 @@ export default function BlockNoteDrawer({
 		[editor],
 	);
 
-	// ActionTypeに応じたカーソル位置を取得
-	const getCursorPlacement = useCallback((actionType: ActionType): "start" | "end" => {
-		return actionType === ActionType.Create ? "start" : "end";
-	}, []);
+	const getCursorPlacement = useCallback(
+		(actionType: ActionType): "start" | "end" =>
+			actionType === ActionType.Create ? "start" : "end",
+		[],
+	);
+
+	const handleContainerClick = useCallback(
+		(event: React.MouseEvent<HTMLDivElement>) => {
+			if (!isMobileDevice || !editor) return;
+
+			const target = event.target as HTMLElement;
+			const isClickOnEditor = target.closest(".bn-editor") || target.closest("[contenteditable]");
+
+			if (!isClickOnEditor) {
+				const placement = getCursorPlacement(noteDrawerType);
+				setCursorPosition(placement);
+			}
+		},
+		[editor, isMobileDevice, noteDrawerType, getCursorPlacement, setCursorPosition],
+	);
 
 	const onDraftRestore = useCallback(
 		(draft: NoteDraft) => {
 			if (editor && draft.content) {
 				editor.tryParseMarkdownToBlocks(draft.content).then((blocks) => {
 					editor.replaceBlocks(editor.document, blocks);
-					// ドラフト復元時は作成時なので先頭にカーソルを設定
-					setTimeout(() => setCursorPosition("start"), 100);
+					if (!isMobileDevice) {
+						setTimeout(() => setCursorPosition("start"), 100);
+					}
 				});
 			}
 		},
-		[editor, setCursorPosition],
+		[editor, setCursorPosition, isMobileDevice],
 	);
 
 	const noteDraft = useNoteDraft({
@@ -146,19 +171,18 @@ export default function BlockNoteDrawer({
 
 					setUploadedImages(note.images);
 
-					// タグの設定
 					if (note.tags?.tags) {
 						setSelectedTags(note.tags.tags);
 					}
 
-					// ActionTypeに応じたカーソル位置を設定
-					const placement = getCursorPlacement(noteDrawerType);
-					setTimeout(() => setCursorPosition(placement), 100);
+					if (!isMobileDevice) {
+						const placement = getCursorPlacement(noteDrawerType);
+						setTimeout(() => setCursorPosition(placement), 100);
+					}
 				} catch (error) {
 					console.error("Failed to convert markdown to blocks:", error);
 				}
-			} else if (noteDrawerType === ActionType.Create && editor && open) {
-				// 作成時はすぐに先頭にカーソルを設定
+			} else if (noteDrawerType === ActionType.Create && editor && open && !isMobileDevice) {
 				setTimeout(() => setCursorPosition("start"), 100);
 			}
 		};
@@ -174,6 +198,7 @@ export default function BlockNoteDrawer({
 		setUploadedImages,
 		getCursorPlacement,
 		setCursorPosition,
+		isMobileDevice,
 	]);
 
 	const resetDrawer = () => {
@@ -186,7 +211,6 @@ export default function BlockNoteDrawer({
 		editor.replaceBlocks(editor.document, []);
 	};
 
-	// BlockNoteをMarkdownに変換してHandlerを呼び出す
 	const handleSubmit = async () => {
 		try {
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
@@ -195,17 +219,13 @@ export default function BlockNoteDrawer({
 				return;
 			}
 			const accessLevel = isPrivate ? AccessLevel.Private : AccessLevel.Public;
-			const imagesFileNames = uploadedImages.map((url) => {
-				const parts = url.split("/");
-				return parts[parts.length - 1];
-			});
+			const imagesFileNames = uploadedImages.map((url) => url.split("/").pop() || "");
 			await onSubmit({
 				content: markdown,
 				accessLevel,
 				images: imagesFileNames,
 				tagIds: selectedTags.map((tag) => tag.id),
 			});
-			// 正常保存時に下書きデータを削除
 			noteDraft.clearDraft();
 		} catch (e) {
 			if (e instanceof ApiResponseError) {
@@ -226,7 +246,6 @@ export default function BlockNoteDrawer({
 
 		try {
 			await deleteNote(note.noteId, targetDate);
-			// 削除成功時に下書きデータも削除
 			noteDraft.clearDraft();
 			resetDrawer();
 		} catch (error) {
@@ -292,12 +311,17 @@ export default function BlockNoteDrawer({
 						))}
 					</div>
 				)}
-				<BlockNoteView
-					editor={editor}
-					className="overflow-y-auto"
-					onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
-				/>
-				<DrawerFooter className="flex items-center flex-col px-0 md:flex-row md:justify-center md:gap-4">
+				<div
+					onClick={handleContainerClick}
+					className="overflow-y-auto min-h-[200px] touch-manipulation h-full"
+				>
+					<BlockNoteView
+						editor={editor}
+						className="mb-auto"
+						onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
+					/>
+				</div>
+				<DrawerFooter className="flex items-center flex-col mt-0 px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
 							{isPrivate ? <EyeOff /> : <Eye />}
@@ -333,13 +357,9 @@ export default function BlockNoteDrawer({
 										availableTags={tags}
 										selectedTags={selectedTags}
 										onTagSelect={(tag) =>
-											setSelectedTags((prev) => {
-												// 重複チェック
-												if (prev.some((t) => t.id === tag.id)) {
-													return prev;
-												}
-												return [...prev, tag];
-											})
+											setSelectedTags((prev) =>
+												prev.some((t) => t.id === tag.id) ? prev : [...prev, tag],
+											)
 										}
 										onTagRemove={onTagRemove}
 										onCreateTag={createTag}
