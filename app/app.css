@@ -137,13 +137,16 @@ html {
 		@apply bg-background text-foreground;
 	}
 	h1 {
-		@apply text-3xl;
+		@apply text-2xl my-3 md:my-4;
 	}
 	h2 {
-		@apply text-2xl;
+		@apply text-xl my-1 md:my-3;
 	}
 	h3 {
-		@apply text-xl;
+		@apply text-lg font-normal;
+	}
+	p {
+		@apply text-sm md:text-base;
 	}
 
 	.bn-block-content[data-content-type="numberedListItem"]:before {
