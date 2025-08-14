@@ -138,19 +138,26 @@ html {
 	}
 	/* Custom BlockNote Style */
 	.bn-block-content h1 {
-		@apply text-2xl my-3 md:my-4;
+		@apply text-2xl my-3 md:my-4 leading-[1.4rem];
 	}
 	.bn-block-content h2 {
-		@apply text-xl my-1 md:my-3;
+		@apply text-xl my-1 md:my-3 leading-[1.4rem];
 	}
 	.bn-block-content h3 {
-		@apply text-lg font-normal;
+		@apply text-lg font-normal leading-[1.4rem];
 	}
 	.bn-block-content p {
-		@apply text-sm md:text-base;
+		@apply text-sm md:text-base leading-[1.5rem];
 	}
 	.bn-block-content p.zero-space {
 		@apply leading-2.5;
+	}
+	.bn-block-content th {
+		/* 線は内側にしたい */
+		@apply text-center bg-secondary text-primary py-1 px-2 outline outline-1 outline-primary;
+	}
+	.bn-block-content td {
+		@apply border-1 border-primary py-1 px-2;
 	}
 	.bn-block-content[data-content-type="numberedListItem"]:before {
 		@apply w-[1rem];
