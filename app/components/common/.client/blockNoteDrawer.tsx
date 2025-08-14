@@ -25,6 +25,7 @@ import { TagSelector } from "~/features/tags/components/TagSelector";
 import { useTags } from "~/features/tags/hooks/useTags";
 import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
+import { useKeyboardSubmit } from "~/hooks/useKeyboardSubmit";
 import { useMobileDevice } from "~/hooks/useMobileDevice";
 
 type BlockNoteDrawerProps = {
@@ -201,7 +202,7 @@ export default function BlockNoteDrawer({
 		isMobileDevice,
 	]);
 
-	const resetDrawer = () => {
+	const resetDrawer = useCallback(() => {
 		setOpen(false);
 		setNoteDrawerType(ActionType.Create);
 		setIsPrivate(true);
@@ -209,7 +210,7 @@ export default function BlockNoteDrawer({
 		setTagSelectorOpen(false);
 		resetImages();
 		editor.replaceBlocks(editor.document, []);
-	};
+	}, [editor, resetImages, setOpen, setNoteDrawerType]);
 
 	const processEmptyBlocks = useCallback(() => {
 		const blocks = editor.document;
@@ -251,7 +252,7 @@ export default function BlockNoteDrawer({
 		processBlocksRecursively(blocks, true);
 	}, [editor]);
 
-	const handleSubmit = async () => {
+	const handleSubmit = useCallback(async () => {
 		try {
 			processEmptyBlocks();
 
@@ -278,7 +279,16 @@ export default function BlockNoteDrawer({
 		} finally {
 			resetDrawer();
 		}
-	};
+	}, [
+		processEmptyBlocks,
+		editor,
+		isPrivate,
+		uploadedImages,
+		onSubmit,
+		selectedTags,
+		noteDraft,
+		resetDrawer,
+	]);
 
 	const handleDeleteNote = async () => {
 		if (!note) return;
@@ -294,6 +304,11 @@ export default function BlockNoteDrawer({
 			console.error("Failed to delete note:", error);
 		}
 	};
+
+	useKeyboardSubmit({
+		enabled: open,
+		onSubmit: handleSubmit,
+	});
 
 	const onTagRemove = (tagId: string) => {
 		setSelectedTags((prev) => prev.filter((tag) => tag.id !== tagId));
