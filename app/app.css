@@ -152,6 +152,9 @@ html {
 	.bn-block-content p.zero-space {
 		@apply leading-2.5;
 	}
+	.bn-block-content[data-content-type="table"] {
+		@apply overflow-x-auto whitespace-nowrap;
+	}
 	.bn-block-content th {
 		/* 線は内側にしたい */
 		@apply text-center bg-secondary text-primary py-1 px-2 outline outline-1 outline-primary;
