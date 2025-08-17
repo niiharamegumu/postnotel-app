@@ -147,7 +147,7 @@ html {
 		@apply text-lg font-normal leading-[1.4rem];
 	}
 	.bn-block-content p {
-		@apply text-sm md:text-base leading-[1.5rem];
+		@apply text-sm md:text-base leading-[1.3rem] md:leading-[1.5rem];
 	}
 	.bn-block-content p.zero-space {
 		@apply leading-2.5;
@@ -156,7 +156,6 @@ html {
 		@apply overflow-x-auto whitespace-nowrap;
 	}
 	.bn-block-content th {
-		/* 線は内側にしたい */
 		@apply text-center bg-secondary text-primary py-1 px-2 outline outline-1 outline-primary;
 	}
 	.bn-block-content td {
