@@ -16,6 +16,7 @@ import { Toaster } from "./components/ui/sonner";
 import { endpoints } from "./constants/endpoints";
 import { fetcher } from "./lib/fetcher";
 import type { UserInfo } from "./types/user";
+import { useAuthRevalidator } from "./hooks/useAuthRevalidator";
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -77,6 +78,7 @@ export async function loader({
 
 export default function App() {
 	const { userInfo } = useLoaderData<{ userInfo: UserInfo | null }>();
+	useAuthRevalidator();
 	return (
 		<>
 			<Toaster position="top-right" />

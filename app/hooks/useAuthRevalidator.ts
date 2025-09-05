@@ -1,0 +1,47 @@
+import { useEffect, useRef } from "react";
+import { useRevalidator } from "react-router";
+
+/**
+ * Force route loader revalidation on common resume events.
+ * This keeps auth state fresh after tab backgrounding, mobile resume, or network changes.
+ */
+export function useAuthRevalidator() {
+	const revalidator = useRevalidator();
+	const lastRunRef = useRef<number>(0);
+
+	// Avoid magic numbers: throttle interval in ms
+	const THROTTLE_INTERVAL_MS = 1000;
+
+	useEffect(() => {
+		const run = () => {
+			const now = Date.now();
+			if (now - lastRunRef.current < THROTTLE_INTERVAL_MS) return;
+			lastRunRef.current = now;
+			revalidator.revalidate();
+		};
+
+		const onVisibility = () => {
+			if (document.visibilityState === "visible") run();
+		};
+		const onFocus = () => run();
+		const onPageShow = () => run();
+		const onOnline = () => run();
+		const onStorage = (e: StorageEvent) => {
+			if (e.key === "auth:updated") run();
+		};
+
+		document.addEventListener("visibilitychange", onVisibility);
+		window.addEventListener("focus", onFocus);
+		window.addEventListener("pageshow", onPageShow);
+		window.addEventListener("online", onOnline);
+		window.addEventListener("storage", onStorage);
+
+		return () => {
+			document.removeEventListener("visibilitychange", onVisibility);
+			window.removeEventListener("focus", onFocus);
+			window.removeEventListener("pageshow", onPageShow);
+			window.removeEventListener("online", onOnline);
+			window.removeEventListener("storage", onStorage);
+		};
+	}, [revalidator]);
+}
