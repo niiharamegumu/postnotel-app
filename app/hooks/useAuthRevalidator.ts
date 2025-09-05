@@ -26,22 +26,17 @@ export function useAuthRevalidator() {
 		const onFocus = () => run();
 		const onPageShow = () => run();
 		const onOnline = () => run();
-		const onStorage = (e: StorageEvent) => {
-			if (e.key === "auth:updated") run();
-		};
 
 		document.addEventListener("visibilitychange", onVisibility);
 		window.addEventListener("focus", onFocus);
 		window.addEventListener("pageshow", onPageShow);
 		window.addEventListener("online", onOnline);
-		window.addEventListener("storage", onStorage);
 
 		return () => {
 			document.removeEventListener("visibilitychange", onVisibility);
 			window.removeEventListener("focus", onFocus);
 			window.removeEventListener("pageshow", onPageShow);
 			window.removeEventListener("online", onOnline);
-			window.removeEventListener("storage", onStorage);
 		};
 	}, [revalidator]);
 }
