@@ -257,12 +257,7 @@ export default function Index() {
 																{note.images.map((img, i) => (
 																	<div
 																		key={`${note.noteId}-img-${i}`}
-																		className={cn(
-																			"rounded-xl p-2 cursor-pointer shrink-0",
-																			note.accessLevel === AccessLevel.Private
-																				? "bg-secondary"
-																				: "bg-primary",
-																		)}
+																		className="cursor-pointer shrink-0"
 																		onClick={(event) => {
 																			event.stopPropagation();
 																			openZoom(img, `ノート添付 #${i + 1}`);
@@ -271,7 +266,9 @@ export default function Index() {
 																		<img
 																			src={img}
 																			alt={`ノート添付 #${i + 1}`}
-																			className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
+																			loading="lazy"
+																			decoding="async"
+																			className="w-auto h-auto max-h-[200px] object-cover rounded"
 																		/>
 																	</div>
 																))}

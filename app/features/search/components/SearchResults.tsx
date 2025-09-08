@@ -110,16 +110,14 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 													{note.images.map((img, i) => (
 														<div
 															key={`${note.noteId}-img-${i}`}
-															className={`rounded-xl p-2 shrink-0 ${
-																note.accessLevel === AccessLevel.Private
-																	? "bg-secondary"
-																	: "bg-primary"
-															}`}
+															className="cursor-pointer shrink-0"
 														>
 															<img
 																src={img}
 																alt={`ノート添付 #${i + 1}`}
-																className="w-auto h-auto max-h-[200px] object-cover rounded-xl cursor-pointer"
+																loading="lazy"
+																decoding="async"
+																className="w-auto h-auto max-h-[200px] object-cover rounded"
 																onClick={() => openZoom(img, `ノート添付 #${i + 1}`)}
 															/>
 														</div>
