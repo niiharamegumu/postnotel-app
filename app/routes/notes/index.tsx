@@ -253,7 +253,7 @@ export default function Index() {
 												<li className="flex flex-col items-start">
 													{note.images?.length > 0 && (
 														<div className="mb-2">
-															<div className="flex gap-2 flex-nowrap overflow-x-auto">
+															<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
 																{note.images.map((img, i) => (
 																	<div
 																		key={`${note.noteId}-img-${i}`}
@@ -268,7 +268,7 @@ export default function Index() {
 																			alt={`ノート添付 #${i + 1}`}
 																			loading="lazy"
 																			decoding="async"
-																			className="w-auto h-auto max-h-[200px] object-cover rounded"
+																			className="w-auto h-auto max-h-[200px] object-cover"
 																		/>
 																	</div>
 																))}

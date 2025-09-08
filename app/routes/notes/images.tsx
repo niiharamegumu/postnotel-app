@@ -88,11 +88,11 @@ export default function ImagesPage() {
 									>
 										{/* Images */}
 										{note.images && note.images.length > 0 && (
-											<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+											<div className="grid grid-cols-2 md:grid-cols-4 gap-[1px]">
 												{note.images.map((imageUrl, index) => (
 													<div
 														key={`${note.noteId}-img-${index}`}
-														className="aspect-square overflow-hidden rounded cursor-pointer"
+														className="aspect-square overflow-hidden cursor-pointer"
 														onClick={(event) => {
 															event.preventDefault();
 															event.stopPropagation();
