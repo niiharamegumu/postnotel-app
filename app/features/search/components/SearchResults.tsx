@@ -125,7 +125,7 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 												</div>
 											</div>
 										)}
-										<div className="wrap-anywhere overflow-y-auto rounded-sm mb-1 max-w-full">
+										<div className="wrap-anywhere overflow-y-auto rounded mb-1 max-w-full">
 											<NoteContent note={note} searchQuery={searchQuery} />
 										</div>
 										<div className="text-xs text-muted-foreground ml-2 flex gap-2 items-center">
