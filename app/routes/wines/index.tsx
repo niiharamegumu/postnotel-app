@@ -63,7 +63,7 @@ export default function Index() {
 										</Link>
 									</h2>
 									{note.images?.length > 0 && (
-										<div className="mb-3">
+										<div className="mb-1">
 											<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
 												{note.images.map((img, i) => (
 													<div
@@ -83,7 +83,7 @@ export default function Index() {
 											</div>
 										</div>
 									)}
-									<div className="wrap-anywhere rounded mb-1 max-w-full overflow-auto">
+									<div className="wrap-anywhere rounded max-w-full overflow-auto">
 										<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
 											<NoteContent note={note} />
 										</ClientOnly>
