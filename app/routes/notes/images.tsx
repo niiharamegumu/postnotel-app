@@ -71,7 +71,7 @@ export default function ImagesPage() {
 
 			<section className="w-full min-h-screen">
 				{imageNotes.length > 0 ? (
-					<div className="flex flex-col gap-2 md:gap-4">
+					<div className="flex flex-col gap-4">
 						{imageNotes.map((note) => (
 							<Suspense
 								key={note.noteId}
@@ -84,7 +84,7 @@ export default function ImagesPage() {
 								<div className="rounded">
 									<Link
 										to={`/notes?date=${format(parseISO(note.createdAt), "yyyy-MM-dd")}`}
-										className="block space-y-3"
+										className="block space-y-1"
 									>
 										{/* Images */}
 										{note.images && note.images.length > 0 && (
