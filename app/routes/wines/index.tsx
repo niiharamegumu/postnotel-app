@@ -68,25 +68,22 @@ export default function Index() {
 												{note.images.map((img, i) => (
 													<div
 														key={`${note.noteId}-img-${i}`}
-														className={cn(
-															"rounded-xl overflow-hidden p-2 shrink-0 cursor-pointer",
-															note.accessLevel === AccessLevel.Private
-																? "bg-secondary"
-																: "bg-primary",
-														)}
+														className="cursor-pointer shrink-0"
 														onClick={() => openZoom(img, `ワイン画像 #${i + 1}`)}
 													>
 														<img
 															src={img}
 															alt={`ワイン画像 #${i + 1}`}
-															className="w-auto h-auto max-h-[200px] object-cover rounded-xl"
+															loading="lazy"
+															decoding="async"
+															className="w-auto h-auto max-h-[200px] object-cover rounded"
 														/>
 													</div>
 												))}
 											</div>
 										</div>
 									)}
-									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded-xl mb-1 max-w-full">
+									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded-sm mb-1 max-w-full">
 										<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
 											<NoteContent note={note} />
 										</ClientOnly>
