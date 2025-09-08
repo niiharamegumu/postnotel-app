@@ -81,7 +81,7 @@ export default function ImagesPage() {
 									</div>
 								}
 							>
-								<div className="rounded p-4 hover:bg-accent transition-colors">
+								<div className="rounded">
 									<Link
 										to={`/notes?date=${format(parseISO(note.createdAt), "yyyy-MM-dd")}`}
 										className="block space-y-3"

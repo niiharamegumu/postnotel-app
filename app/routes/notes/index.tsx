@@ -252,7 +252,7 @@ export default function Index() {
 											>
 												<li className="flex flex-col items-start">
 													{note.images?.length > 0 && (
-														<div className="mb-2">
+														<div className="mb-1">
 															<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
 																{note.images.map((img, i) => (
 																	<div
