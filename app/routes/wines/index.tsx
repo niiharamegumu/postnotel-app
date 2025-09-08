@@ -83,7 +83,7 @@ export default function Index() {
 											</div>
 										</div>
 									)}
-									<div className="wrap-anywhere max-h-[500px] overflow-y-auto rounded mb-1 max-w-full">
+									<div className="wrap-anywhere rounded mb-1 max-w-full">
 										<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
 											<NoteContent note={note} />
 										</ClientOnly>
