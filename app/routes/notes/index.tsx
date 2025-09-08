@@ -277,7 +277,7 @@ export default function Index() {
 													)}
 													<div
 														className={cn(
-															"wrap-anywhere rounded mb-1 max-w-full",
+															"wrap-anywhere rounded mb-1 max-w-full overflow-auto",
 															note.accessLevel === AccessLevel.Private && "cursor-pointer",
 														)}
 														onClick={() => handleEditNote(note)}
