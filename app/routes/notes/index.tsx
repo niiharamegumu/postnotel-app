@@ -300,7 +300,7 @@ export default function Index() {
 															)}
 														</div>
 														{note.accessLevel === AccessLevel.Private && (
-															<div className="flex items-center px-2 bg-secondary rounded">
+															<div className="flex items-center px-2 bg-destructive/80 rounded text-white">
 																<EyeOff size={18} />
 															</div>
 														)}
