@@ -10,6 +10,7 @@ import {
 	subMonths,
 	subWeeks,
 } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { ja } from "date-fns/locale";
 import {
 	CalendarArrowDown,
@@ -46,6 +47,8 @@ export function WeekCalendar({
 	className,
 }: WeekCalendarProps) {
 	const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
+
+	const toJstYmd = useCallback((d: Date) => formatInTimeZone(d, "Asia/Tokyo", "yyyy-MM-dd"), []);
 
 	// スワイプ時に使用する期間計算関数を外部に提供
 	const getDateRangeForSwipe = useCallback(
@@ -155,23 +158,26 @@ export function WeekCalendar({
 		}
 	}, [viewMode, selectedDate, onDateRangeChange]);
 
-	const isToday = useCallback((date: Date): boolean => {
-		const today = new Date();
-		return format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
-	}, []);
+	const isToday = useCallback(
+		(date: Date): boolean => {
+			const today = new Date();
+			return toJstYmd(date) === toJstYmd(today);
+		},
+		[toJstYmd],
+	);
 
 	const isSelected = useCallback(
 		(date: Date): boolean => {
-			return format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd");
+			return toJstYmd(date) === toJstYmd(selectedDate);
 		},
-		[selectedDate],
+		[selectedDate, toJstYmd],
 	);
 
 	const hasNote = useCallback(
 		(date: Date): boolean => {
-			return noteDays.some((d) => d === format(date, "yyyy-MM-dd"));
+			return noteDays.some((d) => d === toJstYmd(date));
 		},
-		[noteDays],
+		[noteDays, toJstYmd],
 	);
 
 	return (
