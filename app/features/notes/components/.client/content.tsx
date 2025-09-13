@@ -39,7 +39,7 @@ export default function NoteContent({ note, searchQuery }: Props) {
 			match.isMatch ? (
 				<mark
 					key={`${text}-${index}-${match.text}`}
-					className="bg-yellow-200 text-accent rounded px-0.5 font-semibold"
+					className="bg-yellow-200 text-primary rounded px-0.5 font-semibold"
 				>
 					{match.text}
 				</mark>
