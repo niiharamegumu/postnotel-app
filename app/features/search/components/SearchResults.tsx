@@ -2,16 +2,17 @@ import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
 import { EyeOff, SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useOutletContext, useSearchParams } from "react-router";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
-import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
+import { AccessLevel } from "~/constants/accessLevel";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import type { Note } from "~/features/notes/types/note";
 import type { Tag } from "~/features/tags/types/tag";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import type { PaginationInfo } from "~/lib/pagination";
+import type { UserInfo } from "~/types/user";
 
 const NoteContent = lazy(() => import("~/features/notes/components/.client/content"));
 
@@ -36,6 +37,7 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 	const [searchParams] = useSearchParams();
 	const searchQuery: string = searchParams.get("q") || "";
 	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
+	const userInfo = useOutletContext<UserInfo | null>();
 
 	// URLパラメータからselectedTagsを計算
 	const selectedTagIds: string[] = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
@@ -140,8 +142,13 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 													</div>
 												)}
 											</div>
-											{note.accessLevel === AccessLevel.Private && (
-												<div className="flex items-center px-2 bg-destructive/80 rounded text-white">
+											{userInfo && note.accessLevel === AccessLevel.Private && (
+												<div className="flex items-center px-2 bg-destructive/70 rounded text-white">
+													<EyeOff size={18} />
+												</div>
+											)}
+											{userInfo && note.accessLevel === AccessLevel.Public && (
+												<div className="flex items-center px-2 bg-success/70 rounded text-white">
 													<EyeOff size={18} />
 												</div>
 											)}

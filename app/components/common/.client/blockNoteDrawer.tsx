@@ -386,7 +386,7 @@ export default function BlockNoteDrawer({
 							variant="outline"
 							onClick={() => setIsPrivate(!isPrivate)}
 							type="button"
-							className={cn("text-white", isPrivate ? "bg-destructive/80" : "bg-success")}
+							className={cn("text-white", isPrivate ? "bg-destructive/70" : "bg-success/70")}
 						>
 							{isPrivate ? <EyeOff /> : <Eye />}
 						</Button>
