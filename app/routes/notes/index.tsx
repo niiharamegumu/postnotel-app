@@ -20,7 +20,7 @@ import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
 import type { Route } from "./+types";
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -299,9 +299,14 @@ export default function Index() {
 																</div>
 															)}
 														</div>
-														{note.accessLevel === AccessLevel.Private && (
-															<div className="flex items-center px-2 bg-destructive/80 rounded text-white">
+														{userInfo && note.accessLevel === AccessLevel.Private && (
+															<div className="flex items-center px-2 bg-destructive/70 rounded text-white">
 																<EyeOff size={18} />
+															</div>
+														)}
+														{userInfo && note.accessLevel === AccessLevel.Public && (
+															<div className="flex items-center px-2 bg-success/70 rounded text-white">
+																<Eye size={18} />
 															</div>
 														)}
 													</div>
@@ -316,7 +321,7 @@ export default function Index() {
 								)}
 							</>
 						),
-					[isLoading, notes, handleEditNote, openZoom],
+					[isLoading, notes, handleEditNote, openZoom, userInfo],
 				)}
 			</motion.section>
 			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
