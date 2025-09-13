@@ -101,6 +101,8 @@ export default function NoteContent({ note, searchQuery }: Props) {
 	};
 
 	return (
-		<div className={"whitespace-pre-line p-0"}>{html ? parse(html, options) : note.content}</div>
+		<div className={"whitespace-pre-line p-0 w-full"}>
+			{html ? parse(html, options) : note.content}
+		</div>
 	);
 }
