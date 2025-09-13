@@ -27,6 +27,7 @@ import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
 import { useKeyboardSubmit } from "~/hooks/useKeyboardSubmit";
 import { useMobileDevice } from "~/hooks/useMobileDevice";
+import { cn } from "~/lib/utils";
 
 type BlockNoteDrawerProps = {
 	onSubmit: (params: NoteApiRequest) => Promise<void>;
@@ -381,7 +382,12 @@ export default function BlockNoteDrawer({
 				</div>
 				<DrawerFooter className="flex items-center flex-col mt-0 px-0 md:flex-row md:justify-center md:gap-4">
 					<div className="flex items-center gap-2">
-						<Button variant="outline" onClick={() => setIsPrivate(!isPrivate)} type="button">
+						<Button
+							variant="outline"
+							onClick={() => setIsPrivate(!isPrivate)}
+							type="button"
+							className={cn("text-white", isPrivate ? "bg-destructive/80" : "bg-success")}
+						>
 							{isPrivate ? <EyeOff /> : <Eye />}
 						</Button>
 						<Button variant="outline" type="button" onClick={() => fileInputRef.current?.click()}>
