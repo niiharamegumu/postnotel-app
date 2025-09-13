@@ -20,7 +20,7 @@ export const TagLink = memo(function TagLink({
 	const linkHref = href || `/notes/search?tagIds=${id}`;
 
 	return (
-		<Link to={linkHref} className="flex gap-1 items-center hover:underline rounded">
+		<Link to={linkHref} className="flex gap-1 items-center hover:underline whitespace-nowrap">
 			<Tag size={size} color={color} />
 			{name}
 		</Link>
