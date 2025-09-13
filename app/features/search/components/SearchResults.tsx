@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import { SquareArrowOutUpRight } from "lucide-react";
+import { EyeOff, SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
 import { Link, useSearchParams } from "react-router";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
@@ -105,7 +105,7 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 								>
 									<li className="flex flex-col items-start">
 										{note.images?.length > 0 && (
-											<div className="mb-1">
+											<div className="mb-2">
 												<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
 													{note.images.map((img, i) => (
 														<div
@@ -128,17 +128,21 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 										<div className="wrap-anywhere overflow-y-auto rounded mb-1 max-w-full">
 											<NoteContent note={note} searchQuery={searchQuery} />
 										</div>
-										<div className="text-xs text-muted-foreground ml-2 flex gap-2 items-center">
-											<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+										<div className="text-xs text-muted-foreground overflow-scroll max-w-full flex items-stretch gap-2">
+											<div className="flex items-center gap-2 p-2 bg-secondary rounded">
+												<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+												<div>{noteContentTypeLabels[note.contentType]}</div>
+												{note.tags && note.tags.tags.length > 0 && (
+													<div className="flex items-center gap-2">
+														{note.tags.tags.map((tag) => (
+															<TagLink key={tag.id} id={tag.id} name={tag.name} />
+														))}
+													</div>
+												)}
+											</div>
 											{note.accessLevel === AccessLevel.Private && (
-												<div>{accessLevelLabels[note.accessLevel]}</div>
-											)}
-											<div>{noteContentTypeLabels[note.contentType]}</div>
-											{note.tags && note.tags.tags.length > 0 && (
-												<div className="flex items-center gap-2">
-													{note.tags.tags.map((noteTag) => (
-														<TagLink key={noteTag.id} id={noteTag.id} name={noteTag.name} />
-													))}
+												<div className="flex items-center px-2 bg-secondary rounded">
+													<EyeOff size={18} />
 												</div>
 											)}
 										</div>

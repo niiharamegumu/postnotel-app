@@ -101,14 +101,6 @@ export default function NoteContent({ note, searchQuery }: Props) {
 	};
 
 	return (
-		<div
-			className={`px-4 py-2 whitespace-pre-line max-w-full ${
-				note.accessLevel === AccessLevel.Private
-					? "bg-secondary text-primary"
-					: "bg-primary text-secondary"
-			}`}
-		>
-			{html ? parse(html, options) : note.content}
-		</div>
+		<div className={"whitespace-pre-line p-0"}>{html ? parse(html, options) : note.content}</div>
 	);
 }

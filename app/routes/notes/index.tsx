@@ -20,6 +20,7 @@ import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
 import type { Route } from "./+types";
+import { EyeOff } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -252,7 +253,7 @@ export default function Index() {
 											>
 												<li className="flex flex-col items-start">
 													{note.images?.length > 0 && (
-														<div className="mb-1">
+														<div className="mb-2">
 															<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
 																{note.images.map((img, i) => (
 																	<div
@@ -286,17 +287,21 @@ export default function Index() {
 															<NoteContent note={note} />
 														</ClientOnly>
 													</div>
-													<div className="text-xs text-muted-foreground ml-2 flex items-center gap-2">
-														<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+													<div className="text-xs text-muted-foreground overflow-scroll max-w-full flex items-stretch gap-2">
+														<div className="flex items-center gap-2 p-2 bg-secondary rounded">
+															<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+															<div>{noteContentTypeLabels[note.contentType]}</div>
+															{note.tags && note.tags.tags.length > 0 && (
+																<div className="flex items-center gap-2">
+																	{note.tags.tags.map((tag) => (
+																		<TagLink key={tag.id} id={tag.id} name={tag.name} />
+																	))}
+																</div>
+															)}
+														</div>
 														{note.accessLevel === AccessLevel.Private && (
-															<div>{accessLevelLabels[note.accessLevel]}</div>
-														)}
-														<div>{noteContentTypeLabels[note.contentType]}</div>
-														{note.tags && note.tags.tags.length > 0 && (
-															<div className="flex items-center gap-2">
-																{note.tags.tags.map((tag) => (
-																	<TagLink key={tag.id} id={tag.id} name={tag.name} />
-																))}
+															<div className="flex items-center px-2 bg-secondary rounded">
+																<EyeOff size={18} />
 															</div>
 														)}
 													</div>
