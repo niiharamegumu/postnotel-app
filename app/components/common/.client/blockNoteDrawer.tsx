@@ -1,9 +1,11 @@
 import { BlockNoteSchema, defaultBlockSpecs } from "@blocknote/core";
 import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
+import { Copy, Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { Button } from "~/components/ui/button";
@@ -27,6 +29,7 @@ import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
 import { useKeyboardSubmit } from "~/hooks/useKeyboardSubmit";
 import { useMobileDevice } from "~/hooks/useMobileDevice";
+import { debounce } from "~/lib/debounce";
 import { cn } from "~/lib/utils";
 
 type BlockNoteDrawerProps = {
@@ -54,6 +57,7 @@ export default function BlockNoteDrawer({
 	const [isPrivate, setIsPrivate] = useState(true);
 	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 	const [tagSelectorOpen, setTagSelectorOpen] = useState(false);
+	const [searchParams, setSearchParams] = useSearchParams();
 	const {
 		fileInputRef,
 		uploadedImages,
@@ -64,6 +68,29 @@ export default function BlockNoteDrawer({
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
 	const { isMobileDevice } = useMobileDevice();
+
+	const EDITOR_SERIALIZE_DEBOUNCE_MS = 1000;
+	const debouncedSerializeAndSave = useMemo(
+		() =>
+			debounce(
+				async (ctx: {
+					editor: typeof editor;
+					noteDraft: typeof noteDraft;
+					noteDrawerType: ActionType;
+				}) => {
+					const { editor, noteDraft, noteDrawerType } = ctx;
+					if (!editor || noteDrawerType !== ActionType.Create) return;
+					try {
+						const markdown = await editor.blocksToMarkdownLossy(editor.document);
+						noteDraft.saveDraft({ content: markdown || "" });
+					} catch (error) {
+						console.warn("Failed to save draft:", error);
+					}
+				},
+				EDITOR_SERIALIZE_DEBOUNCE_MS,
+			),
+		[],
+	);
 
 	const schema = useMemo(() => {
 		const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -148,20 +175,10 @@ export default function BlockNoteDrawer({
 		onDraftRestore,
 	});
 
-	const handleEditorChange = useCallback(async () => {
+	const handleEditorChange = useCallback(() => {
 		if (noteDrawerType !== ActionType.Create) return;
-
-		try {
-			const markdown = await editor.blocksToMarkdownLossy(editor.document);
-			const draftData = {
-				content: markdown || "",
-			};
-
-			noteDraft.saveDraft(draftData);
-		} catch (error) {
-			console.warn("Failed to save draft:", error);
-		}
-	}, [editor, noteDrawerType, noteDraft]);
+		debouncedSerializeAndSave({ editor, noteDraft, noteDrawerType });
+	}, [noteDrawerType, editor, noteDraft, debouncedSerializeAndSave]);
 
 	useEffect(() => {
 		const initializeEditor = async () => {
@@ -210,8 +227,9 @@ export default function BlockNoteDrawer({
 		setSelectedTags([]);
 		setTagSelectorOpen(false);
 		resetImages();
+		debouncedSerializeAndSave.cancel();
 		editor.replaceBlocks(editor.document, []);
-	}, [editor, resetImages, setOpen, setNoteDrawerType]);
+	}, [editor, resetImages, setOpen, setNoteDrawerType, debouncedSerializeAndSave]);
 
 	const processEmptyBlocks = useCallback(() => {
 		const blocks = editor.document;
@@ -310,6 +328,51 @@ export default function BlockNoteDrawer({
 		enabled: open,
 		onSubmit: handleSubmit,
 	});
+
+	const handleCopyToTodayDraft = useCallback(async () => {
+		try {
+			if (!editor) return;
+			const markdown = await editor.blocksToMarkdownLossy(editor.document);
+			if (!markdown) {
+				toast.error("ノートの内容が空です。");
+				return;
+			}
+
+			const today = new Date();
+			const todayStr = format(today, "yyyy-MM-dd");
+
+			noteDraft.saveDraftImmediate({ content: markdown }, { targetDate: today });
+
+			const currentDateParam = searchParams.get("date");
+			const currentDateStr = currentDateParam ?? format(targetDate, "yyyy-MM-dd");
+			if (currentDateStr === todayStr) {
+				const restored = noteDraft.restoreDraft();
+				if (restored) onDraftRestore(restored);
+			} else {
+				const next = new URLSearchParams(searchParams);
+				next.set("date", todayStr);
+				setSearchParams(next);
+			}
+
+			setNoteDrawerType(ActionType.Create);
+			setIsPrivate(true);
+			setSelectedTags([]);
+			resetImages();
+			toast.success("コピーしました。");
+		} catch (error) {
+			console.error("Failed to copy note for duplication:", error);
+			toast.error("コピーに失敗しました。");
+		}
+	}, [
+		editor,
+		searchParams,
+		setSearchParams,
+		onDraftRestore,
+		setNoteDrawerType,
+		resetImages,
+		noteDraft,
+		targetDate,
+	]);
 
 	const onTagRemove = (tagId: string) => {
 		setSelectedTags((prev) => prev.filter((tag) => tag.id !== tagId));
@@ -438,9 +501,24 @@ export default function BlockNoteDrawer({
 							</DrawerContent>
 						</Drawer>
 						{noteDrawerType === ActionType.Edit && (
-							<Button variant="outline" type="button" onClick={handleDeleteNote} disabled={loading}>
-								<Trash2 />
-							</Button>
+							<>
+								<Button
+									variant="outline"
+									type="button"
+									onClick={handleCopyToTodayDraft}
+									disabled={loading}
+								>
+									<Copy />
+								</Button>
+								<Button
+									variant="outline"
+									type="button"
+									onClick={handleDeleteNote}
+									disabled={loading}
+								>
+									<Trash2 />
+								</Button>
+							</>
 						)}
 					</div>
 					<div className="flex items-center gap-2">

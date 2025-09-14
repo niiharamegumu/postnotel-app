@@ -14,6 +14,7 @@ export type UseNoteDraftOptions = {
 
 export type UseNoteDraftReturn = {
 	saveDraft: (draft: Partial<NoteDraft>) => void;
+	saveDraftImmediate: (draft: Partial<NoteDraft>, opts?: { targetDate?: Date }) => void;
 	clearDraft: () => void;
 	restoreDraft: () => NoteDraft | null;
 };

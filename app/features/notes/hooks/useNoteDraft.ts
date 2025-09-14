@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { debounce } from "../../../lib/debounce";
 import {
 	cleanupExpiredDrafts,
+	clearOtherDraftsExcept,
 	deleteDraft,
 	generateKey,
 	getDraft,
@@ -42,6 +43,7 @@ export function useNoteDraft(options: UseNoteDraftOptions): UseNoteDraftReturn {
 		if (!isLocalStorageAvailable()) return;
 
 		cleanupExpiredDrafts();
+		clearOtherDraftsExcept(storageKey);
 		const existingDraft = getDraft(storageKey);
 
 		if (existingDraft && onDraftRestore) {
@@ -64,6 +66,27 @@ export function useNoteDraft(options: UseNoteDraftOptions): UseNoteDraftReturn {
 		debouncedSaveRef.current?.(fullDraft);
 	}, []);
 
+	const handleSaveDraftImmediate = useCallback(
+		(draft: Partial<NoteDraft>, opts?: { targetDate?: Date }) => {
+			if (!isLocalStorageAvailable()) {
+				console.warn("Cannot save draft: localStorage not available");
+				return;
+			}
+
+			const fullDraft: NoteDraft = {
+				content: "",
+				timestamp: Date.now(),
+				...draft,
+			};
+
+			const date = opts?.targetDate ?? targetDate;
+			const dateString = date.toISOString().split("T")[0];
+			const key = generateKey(dateString);
+			saveDraft(key, fullDraft);
+		},
+		[targetDate],
+	);
+
 	const handleClearDraft = useCallback(() => {
 		debouncedSaveRef.current?.cancel();
 		deleteDraft(storageKey);
@@ -78,6 +101,7 @@ export function useNoteDraft(options: UseNoteDraftOptions): UseNoteDraftReturn {
 
 	return {
 		saveDraft: handleSaveDraft,
+		saveDraftImmediate: handleSaveDraftImmediate,
 		clearDraft: handleClearDraft,
 		restoreDraft: handleRestoreDraft,
 	};
