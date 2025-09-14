@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { debounce } from "../../../lib/debounce";
 import {
 	cleanupExpiredDrafts,
+	clearOtherDraftsExcept,
 	deleteDraft,
 	generateKey,
 	getDraft,
@@ -42,6 +43,7 @@ export function useNoteDraft(options: UseNoteDraftOptions): UseNoteDraftReturn {
 		if (!isLocalStorageAvailable()) return;
 
 		cleanupExpiredDrafts();
+		clearOtherDraftsExcept(storageKey);
 		const existingDraft = getDraft(storageKey);
 
 		if (existingDraft && onDraftRestore) {

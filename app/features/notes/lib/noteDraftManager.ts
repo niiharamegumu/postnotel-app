@@ -96,3 +96,21 @@ export function isLocalStorageAvailable(): boolean {
 		return false;
 	}
 }
+
+export function clearOtherDraftsExcept(keepKey: string): void {
+	try {
+		for (let i = localStorage.length - 1; i >= 0; i--) {
+			const key = localStorage.key(i);
+			if (!key) continue;
+			if (!key.startsWith(STORAGE_PREFIX)) continue;
+			if (key === keepKey) continue;
+			try {
+				localStorage.removeItem(key);
+			} catch {
+				// ignore
+			}
+		}
+	} catch {
+		return;
+	}
+}

@@ -29,6 +29,7 @@ import type { Tag } from "~/features/tags/types/tag";
 import { useImageUpload } from "~/hooks/useImageUpload";
 import { useKeyboardSubmit } from "~/hooks/useKeyboardSubmit";
 import { useMobileDevice } from "~/hooks/useMobileDevice";
+import { debounce } from "~/lib/debounce";
 import { cn } from "~/lib/utils";
 
 type BlockNoteDrawerProps = {
@@ -67,6 +68,29 @@ export default function BlockNoteDrawer({
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
 	const { isMobileDevice } = useMobileDevice();
+
+	const EDITOR_SERIALIZE_DEBOUNCE_MS = 1000;
+	const debouncedSerializeAndSave = useMemo(
+		() =>
+			debounce(
+				async (ctx: {
+					editor: typeof editor;
+					noteDraft: typeof noteDraft;
+					noteDrawerType: ActionType;
+				}) => {
+					const { editor, noteDraft, noteDrawerType } = ctx;
+					if (!editor || noteDrawerType !== ActionType.Create) return;
+					try {
+						const markdown = await editor.blocksToMarkdownLossy(editor.document);
+						noteDraft.saveDraft({ content: markdown || "" });
+					} catch (error) {
+						console.warn("Failed to save draft:", error);
+					}
+				},
+				EDITOR_SERIALIZE_DEBOUNCE_MS,
+			),
+		[],
+	);
 
 	const schema = useMemo(() => {
 		const { video, audio, file, image, ...customBlockSpecs } = defaultBlockSpecs;
@@ -151,20 +175,10 @@ export default function BlockNoteDrawer({
 		onDraftRestore,
 	});
 
-	const handleEditorChange = useCallback(async () => {
+	const handleEditorChange = useCallback(() => {
 		if (noteDrawerType !== ActionType.Create) return;
-
-		try {
-			const markdown = await editor.blocksToMarkdownLossy(editor.document);
-			const draftData = {
-				content: markdown || "",
-			};
-
-			noteDraft.saveDraft(draftData);
-		} catch (error) {
-			console.warn("Failed to save draft:", error);
-		}
-	}, [editor, noteDrawerType, noteDraft]);
+		debouncedSerializeAndSave({ editor, noteDraft, noteDrawerType });
+	}, [noteDrawerType, editor, noteDraft, debouncedSerializeAndSave]);
 
 	useEffect(() => {
 		const initializeEditor = async () => {
@@ -213,8 +227,9 @@ export default function BlockNoteDrawer({
 		setSelectedTags([]);
 		setTagSelectorOpen(false);
 		resetImages();
+		debouncedSerializeAndSave.cancel();
 		editor.replaceBlocks(editor.document, []);
-	}, [editor, resetImages, setOpen, setNoteDrawerType]);
+	}, [editor, resetImages, setOpen, setNoteDrawerType, debouncedSerializeAndSave]);
 
 	const processEmptyBlocks = useCallback(() => {
 		const blocks = editor.document;
