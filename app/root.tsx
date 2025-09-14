@@ -14,9 +14,9 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { Toaster } from "./components/ui/sonner";
 import { endpoints } from "./constants/endpoints";
+import { useAuthRevalidator } from "./hooks/useAuthRevalidator";
 import { fetcher } from "./lib/fetcher";
 import type { UserInfo } from "./types/user";
-import { useAuthRevalidator } from "./hooks/useAuthRevalidator";
 
 export const links: Route.LinksFunction = () => [
 	{ rel: "preconnect", href: "https://fonts.googleapis.com" },

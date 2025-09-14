@@ -1,6 +1,7 @@
 import { addDays, endOfWeek, format, parseISO, startOfWeek, subDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { type PanInfo, motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 import { useLoaderData, useNavigate, useOutletContext } from "react-router";
 import ClientOnly from "~/components/common/ClientOnly";
@@ -8,8 +9,8 @@ import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
 import { WeekCalendar } from "~/components/common/WeekCalendar";
-import { AccessLevel, accessLevelLabels } from "~/constants/accessLevel";
-import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
+import { AccessLevel } from "~/constants/accessLevel";
+import { noteContentTypeLabels } from "~/constants/noteContentType";
 import type { ViewMode } from "~/constants/viewMode";
 import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
@@ -20,7 +21,6 @@ import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
 import type { Route } from "./+types";
-import { Eye, EyeOff } from "lucide-react";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -80,7 +80,8 @@ export default function Index() {
 		noteDays: string[];
 	};
 
-	const [selectedDate, setSelectedDate] = useState<Date>(new Date(date));
+	// Derive selected date directly from loader param (event = navigation)
+	const selectedDate = useMemo(() => parseISO(date), [date]);
 	const [isSwipeActive, setIsSwipeActive] = useState(false);
 	const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 	const { noteDays: hookNoteDays, fetchNoteDays } = useNoteDays();
@@ -98,7 +99,6 @@ export default function Index() {
 
 	const handleDateSelect = useCallback(
 		(selected: Date) => {
-			setSelectedDate(selected);
 			const dateStr = format(selected, "yyyy-MM-dd");
 			navigate(`?date=${dateStr}`);
 		},
@@ -121,7 +121,6 @@ export default function Index() {
 
 	const handleWeekChange = useCallback(
 		(date: Date) => {
-			setSelectedDate(date);
 			navigate(`?date=${format(date, "yyyy-MM-dd")}`);
 		},
 		[navigate],
@@ -148,7 +147,6 @@ export default function Index() {
 				return;
 			}
 
-			setSelectedDate(newDate);
 			navigateToDate(newDate, navigate);
 
 			// swipe時にnoteDaysを更新（WeekCalendarから期間計算を取得）
