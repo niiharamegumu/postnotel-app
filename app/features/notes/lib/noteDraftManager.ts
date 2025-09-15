@@ -3,8 +3,8 @@ import type { NoteDraft } from "../types/noteDraft";
 const STORAGE_PREFIX = "note_draft";
 const EXPIRY_DAYS = 7;
 
-export function generateKey(date: string): string {
-	return `${STORAGE_PREFIX}_${date}`;
+export function getSingletonKey(): string {
+	return STORAGE_PREFIX;
 }
 
 export function saveDraft(key: string, draft: NoteDraft): void {
@@ -94,23 +94,5 @@ export function isLocalStorageAvailable(): boolean {
 		return true;
 	} catch {
 		return false;
-	}
-}
-
-export function clearOtherDraftsExcept(keepKey: string): void {
-	try {
-		for (let i = localStorage.length - 1; i >= 0; i--) {
-			const key = localStorage.key(i);
-			if (!key) continue;
-			if (!key.startsWith(STORAGE_PREFIX)) continue;
-			if (key === keepKey) continue;
-			try {
-				localStorage.removeItem(key);
-			} catch {
-				// ignore
-			}
-		}
-	} catch {
-		return;
 	}
 }
