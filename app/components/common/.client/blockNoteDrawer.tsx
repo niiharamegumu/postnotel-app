@@ -170,10 +170,7 @@ export default function BlockNoteDrawer({
 		[editor, setCursorPosition, isMobileDevice],
 	);
 
-	const noteDraft = useNoteDraft({
-		targetDate,
-		onDraftRestore,
-	});
+	const noteDraft = useNoteDraft({ onDraftRestore });
 
 	const handleEditorChange = useCallback(() => {
 		if (noteDrawerType !== ActionType.Create) return;
@@ -341,7 +338,7 @@ export default function BlockNoteDrawer({
 			const today = new Date();
 			const todayStr = format(today, "yyyy-MM-dd");
 
-			noteDraft.saveDraftImmediate({ content: markdown }, { targetDate: today });
+			noteDraft.saveDraftImmediate({ content: markdown });
 
 			const currentDateParam = searchParams.get("date");
 			const currentDateStr = currentDateParam ?? format(targetDate, "yyyy-MM-dd");

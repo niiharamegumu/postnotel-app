@@ -3,8 +3,8 @@ import type { NoteDraft } from "../types/noteDraft";
 const STORAGE_PREFIX = "note_draft";
 const EXPIRY_DAYS = 7;
 
-export function generateKey(date: string): string {
-	return `${STORAGE_PREFIX}_${date}`;
+export function getSingletonKey(): string {
+	return STORAGE_PREFIX;
 }
 
 export function saveDraft(key: string, draft: NoteDraft): void {
