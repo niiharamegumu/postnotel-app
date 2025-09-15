@@ -70,6 +70,7 @@ export default function BlockNoteDrawer({
 	const { isMobileDevice } = useMobileDevice();
 
 	const EDITOR_SERIALIZE_DEBOUNCE_MS = 1000;
+	const [isComposing, setIsComposing] = useState(false);
 	const debouncedSerializeAndSave = useMemo(
 		() =>
 			debounce(
@@ -174,7 +175,19 @@ export default function BlockNoteDrawer({
 
 	const handleEditorChange = useCallback(() => {
 		if (noteDrawerType !== ActionType.Create) return;
+		if (isComposing) return;
 		debouncedSerializeAndSave({ editor, noteDraft, noteDrawerType });
+	}, [noteDrawerType, editor, noteDraft, debouncedSerializeAndSave, isComposing]);
+
+	const handleCompositionStart = useCallback(() => {
+		setIsComposing(true);
+	}, []);
+
+	const handleCompositionEnd = useCallback(() => {
+		setIsComposing(false);
+		if (noteDrawerType !== ActionType.Create) return;
+		debouncedSerializeAndSave({ editor, noteDraft, noteDrawerType });
+		debouncedSerializeAndSave.flush();
 	}, [noteDrawerType, editor, noteDraft, debouncedSerializeAndSave]);
 
 	useEffect(() => {
@@ -431,6 +444,8 @@ export default function BlockNoteDrawer({
 				)}
 				<div
 					onClick={handleContainerClick}
+					onCompositionStart={handleCompositionStart}
+					onCompositionEnd={handleCompositionEnd}
 					className="overflow-y-auto min-h-[200px] touch-manipulation h-full"
 				>
 					<BlockNoteView
