@@ -296,17 +296,17 @@ export default function Index() {
 																	))}
 																</div>
 															)}
+															{userInfo && note.accessLevel === AccessLevel.Private && (
+																<div className="flex items-center text-destructive">
+																	<EyeOff size={18} />
+																</div>
+															)}
+															{userInfo && note.accessLevel === AccessLevel.Public && (
+																<div className="flex items-center text-success">
+																	<Eye size={18} />
+																</div>
+															)}
 														</div>
-														{userInfo && note.accessLevel === AccessLevel.Private && (
-															<div className="flex items-center text-destructive">
-																<EyeOff size={18} />
-															</div>
-														)}
-														{userInfo && note.accessLevel === AccessLevel.Public && (
-															<div className="flex items-center text-success">
-																<Eye size={18} />
-															</div>
-														)}
 													</div>
 												</li>
 											</Suspense>
