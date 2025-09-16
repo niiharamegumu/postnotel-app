@@ -143,12 +143,12 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 												)}
 											</div>
 											{userInfo && note.accessLevel === AccessLevel.Private && (
-												<div className="flex items-center px-2 bg-destructive/70 rounded text-white">
+												<div className="flex items-center text-destructive">
 													<EyeOff size={18} />
 												</div>
 											)}
 											{userInfo && note.accessLevel === AccessLevel.Public && (
-												<div className="flex items-center px-2 bg-success/70 rounded text-white">
+												<div className="flex items-center text-success">
 													<EyeOff size={18} />
 												</div>
 											)}
