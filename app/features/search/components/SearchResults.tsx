@@ -1,6 +1,6 @@
 import { format, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
-import { EyeOff, SquareArrowOutUpRight } from "lucide-react";
+import { Eye, EyeOff, SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
 import { Link, useOutletContext, useSearchParams } from "react-router";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
@@ -141,17 +141,17 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 														))}
 													</div>
 												)}
+												{userInfo && note.accessLevel === AccessLevel.Private && (
+													<div className="flex items-center text-destructive">
+														<EyeOff size={18} />
+													</div>
+												)}
+												{userInfo && note.accessLevel === AccessLevel.Public && (
+													<div className="flex items-center text-success">
+														<Eye size={18} />
+													</div>
+												)}
 											</div>
-											{userInfo && note.accessLevel === AccessLevel.Private && (
-												<div className="flex items-center text-destructive">
-													<EyeOff size={18} />
-												</div>
-											)}
-											{userInfo && note.accessLevel === AccessLevel.Public && (
-												<div className="flex items-center text-success">
-													<EyeOff size={18} />
-												</div>
-											)}
 										</div>
 									</li>
 								</Suspense>
