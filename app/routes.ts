@@ -36,6 +36,8 @@ const routes: RouteConfig = [
 
 		...prefix("wines", [route("/recognize", "routes/api/wines/recognize.tsx")]),
 
+		...prefix("users", [route("/me", "routes/api/users/me.tsx")]),
+
 		...prefix("tags", [
 			route("/", "routes/api/tags/index.tsx"),
 			route("/create", "routes/api/tags/create.tsx"),
