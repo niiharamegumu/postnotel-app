@@ -5,13 +5,11 @@ import { Link, useLoaderData } from "react-router";
 import ClientOnly from "~/components/common/ClientOnly";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
-import { AccessLevel } from "~/constants/accessLevel";
 import { NoteContentType } from "~/constants/noteContentType";
 import { fetchNotesWithPagination } from "~/features/notes/api/get";
 import type { Note } from "~/features/notes/types/note";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import type { PaginationInfo } from "~/lib/pagination";
-import { cn } from "~/lib/utils";
 import type { Route } from "./+types";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
