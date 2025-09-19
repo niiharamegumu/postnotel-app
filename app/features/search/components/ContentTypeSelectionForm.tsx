@@ -36,7 +36,7 @@ export function ContentTypeSelectionForm() {
 	return (
 		<div className="space-y-2">
 			<Select value={currentValue} onValueChange={handleContentTypeChange}>
-				<SelectTrigger className="w-full min-w-[250px]">
+				<SelectTrigger className="w-full min-w-[250px] shadow-none">
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent>
