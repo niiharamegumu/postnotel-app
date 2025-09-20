@@ -136,6 +136,54 @@ PostNotel is a note-taking application with support for tagging, images, and dif
   - **Response**: 204 No Content
 
 ### Image Endpoints (`/v1/image`)
+- **GET** `/v1/image`
+  - **Purpose**: Get paginated note images with associated note metadata (image-centric listing)
+  - **Authentication**: None required (but admin status affects visibility of linked notes)
+  - **Query Parameters**:
+    - `date` (optional): Date in YYYY-MM-DD format (exact match)
+    - `startDate` (optional): Start date in YYYY-MM-DD format (range filter)
+    - `endDate` (optional): End date in YYYY-MM-DD format (range filter)
+    - `accessLevel` (optional): Access level filter for linked notes
+    - `contentType` (optional): Content type filter for linked notes (note, post, winebyAI)
+    - `q` (optional): Full text search keyword applied to linked notes
+    - `tagIds` (optional): Array of tag IDs for linked notes
+    - `noteId` (optional): Filter by specific note ID
+    - `offset` (optional): Pagination offset (default: 0)
+    - `limit` (optional): Pagination limit (default: 100, max: 100)
+  - **Response**: Note images with pagination metadata
+    ```json
+    {
+      "noteImages": [
+        {
+          "noteImageId": "uuid",
+          "imageUrl": "https://storage.example.com/note_images/uuid.jpg",
+          "note": {
+            "noteId": "uuid",
+            "content": "string",
+            "accessLevel": "public|private",
+            "tags": {
+              "tags": [{"id": "uuid", "name": "string"}],
+              "count": 0
+            },
+            "generationStatus": "done|pending|error",
+            "contentType": "note|post|winebyAI",
+            "createdAt": "2025-01-01 00:00:00",
+            "updatedAt": "2025-01-01 00:00:00"
+          }
+        }
+      ],
+      "pagination": {
+        "total": 100,
+        "count": 20,
+        "offset": 0,
+        "limit": 100,
+        "hasNext": false,
+        "hasPrevious": false
+      }
+    }
+    ```
+  - **Status Codes**: 200 (success), 204 (no content), 400 (bad request), 500 (server error)
+
 - **GET** `/v1/image/upload-url`
   - **Purpose**: Get pre-signed URL for image upload to cloud storage
   - **Authentication**: Required
