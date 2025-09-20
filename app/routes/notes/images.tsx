@@ -3,13 +3,13 @@ import { StatusCodes } from "http-status-codes";
 import { Link, redirect, useLoaderData } from "react-router";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { PaginationControls } from "~/components/common/PaginationControls";
-import { TagLink } from "~/components/common/TagLink";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
 import { fetchNoteImagesWithPagination } from "~/features/image/api/get";
 import type { NoteImage } from "~/features/image/types/image";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
 import type { Route } from "./+types/images";
+import { NoteContentType } from "~/constants/noteContentType";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -19,6 +19,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const offset = calculateOffset(page, limit);
 
 	const noteImagesResult = await fetchNoteImagesWithPagination(request, context, {
+		contentType: NoteContentType.Note,
 		limit,
 		offset,
 	});
