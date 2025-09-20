@@ -63,7 +63,7 @@ export default function ImagesPage() {
 
 			<section className="w-full min-h-screen">
 				{noteImages.length > 0 ? (
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-[1px]">
+					<div className="grid grid-cols-2 md:grid-cols-5 gap-[1px]">
 						{noteImages.map((noteImage) => {
 							const createdDate = parseISO(noteImage.note.createdAt);
 							const displayDate = format(createdDate, "yyyy年M月d日 HH:mm");
