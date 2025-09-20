@@ -20,6 +20,19 @@ export type GetNoteDaysParams = {
 	endDate: Date;
 };
 
+export type GetNoteImagesParams = {
+	date?: Date;
+	startDate?: Date;
+	endDate?: Date;
+	q?: string;
+	tagIds?: string[];
+	accessLevel?: AccessLevel;
+	contentType?: NoteContentType;
+	limit?: number;
+	offset?: number;
+	noteId?: string;
+};
+
 export const endpoints = {
 	auth: {
 		login: "/v1/auth/google/login",
@@ -82,6 +95,46 @@ export const endpoints = {
 		delete: (id: string) => `/v1/notes/${id}`,
 	},
 	image: {
+		list: (params?: GetNoteImagesParams) => {
+			let path = "/v1/image";
+			const queryParams: string[] = [];
+
+			if (params) {
+				const {
+					date,
+					startDate,
+					endDate,
+					q,
+					tagIds,
+					accessLevel,
+					contentType,
+					limit,
+					offset,
+					noteId,
+				} = params;
+
+				if (date) queryParams.push(`date=${format(date, "yyyy-MM-dd")}`);
+				if (startDate) queryParams.push(`startDate=${format(startDate, "yyyy-MM-dd")}`);
+				if (endDate) queryParams.push(`endDate=${format(endDate, "yyyy-MM-dd")}`);
+				if (q) queryParams.push(`q=${encodeURIComponent(q)}`);
+				if (tagIds && tagIds.length > 0) {
+					for (const tagId of tagIds) {
+						queryParams.push(`tagIds=${tagId}`);
+					}
+				}
+				if (accessLevel) queryParams.push(`accessLevel=${accessLevel}`);
+				if (contentType) queryParams.push(`contentType=${contentType}`);
+				if (limit !== undefined) queryParams.push(`limit=${limit}`);
+				if (offset !== undefined) queryParams.push(`offset=${offset}`);
+				if (noteId) queryParams.push(`noteId=${noteId}`);
+			}
+
+			if (queryParams.length > 0) {
+				path += `?${queryParams.join("&")}`;
+			}
+
+			return path;
+		},
 		getUploadUrl: "/v1/image/upload-url",
 	},
 	wines: {
