@@ -36,7 +36,7 @@ function groupNotesByDate(notes: Note[]): Record<string, Note[]> {
 export function SearchResults({ notes, availableTags, paginationInfo }: SearchResultsProps) {
 	const [searchParams] = useSearchParams();
 	const searchQuery: string = searchParams.get("q") || "";
-	const { isOpen, imageUrl, alt, content, openZoom, closeZoom } = useImageZoom();
+	const { isOpen, imageUrl, alt, overlayContent, openZoom, closeZoom } = useImageZoom();
 	const userInfo = useOutletContext<UserInfo | null>();
 
 	// URLパラメータからselectedTagsを計算
@@ -165,7 +165,7 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 				onClose={closeZoom}
 				imageUrl={imageUrl}
 				alt={alt}
-				content={content}
+				overlayContent={overlayContent}
 			/>
 		</div>
 	);
