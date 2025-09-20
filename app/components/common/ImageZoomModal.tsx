@@ -31,7 +31,7 @@ export function ImageZoomModal({
 							onClick={onClose}
 						/>
 						{overlayContent ? (
-							<div className="absolute top-0 left-1/2 flex -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white/50 px-3 py-1 text-sm font-medium text-primary">
+							<div className="absolute top-[6vh] md:top-0 left-1/2 flex -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-primary whitespace-nowrap">
 								{overlayContent}
 							</div>
 						) : null}
