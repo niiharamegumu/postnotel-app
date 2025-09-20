@@ -24,7 +24,7 @@ export default function Wines() {
 	const { recognizeWine, loading } = useWineRecognition();
 
 	const [open, setOpen] = useState(false);
-	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
+	const { isOpen, imageUrl, alt, overlayContent, openZoom, closeZoom } = useImageZoom();
 
 	const requestAI = async (): Promise<void> => {
 		try {
@@ -134,7 +134,13 @@ export default function Wines() {
 					)}
 				</div>
 			</main>
-			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
+			<ImageZoomModal
+				isOpen={isOpen}
+				onClose={closeZoom}
+				imageUrl={imageUrl}
+				alt={alt}
+				overlayContent={overlayContent}
+			/>
 		</div>
 	);
 }

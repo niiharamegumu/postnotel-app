@@ -34,7 +34,7 @@ export default function Index() {
 		notes: Note[] | null;
 		paginationInfo: PaginationInfo | null;
 	};
-	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
+	const { isOpen, imageUrl, alt, overlayContent, openZoom, closeZoom } = useImageZoom();
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-10">
@@ -94,7 +94,13 @@ export default function Index() {
 					<p className="text-primary text-center mt-10">ワインノートがありません。</p>
 				)}
 			</section>
-			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
+			<ImageZoomModal
+				isOpen={isOpen}
+				onClose={closeZoom}
+				imageUrl={imageUrl}
+				alt={alt}
+				overlayContent={overlayContent}
+			/>
 		</div>
 	);
 }

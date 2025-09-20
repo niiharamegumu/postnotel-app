@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 interface UseImageZoomReturn {
 	isOpen: boolean;
 	imageUrl: string;
 	alt: string;
-	openZoom: (url: string, altText: string) => void;
+	overlayContent: ReactNode | null;
+	openZoom: (url: string, altText: string, content?: ReactNode) => void;
 	closeZoom: () => void;
 }
 
@@ -12,10 +13,12 @@ export function useImageZoom(): UseImageZoomReturn {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [imageUrl, setImageUrl] = useState<string>("");
 	const [alt, setAlt] = useState<string>("");
+	const [overlayContent, setOverlayContent] = useState<ReactNode | null>(null);
 
-	const openZoom = (url: string, altText: string): void => {
+	const openZoom = (url: string, altText: string, content?: ReactNode): void => {
 		setImageUrl(url);
 		setAlt(altText);
+		setOverlayContent(content ?? null);
 		setIsOpen(true);
 	};
 
@@ -23,12 +26,14 @@ export function useImageZoom(): UseImageZoomReturn {
 		setIsOpen(false);
 		setImageUrl("");
 		setAlt("");
+		setOverlayContent(null);
 	};
 
 	return {
 		isOpen,
 		imageUrl,
 		alt,
+		overlayContent,
 		openZoom,
 		closeZoom,
 	};

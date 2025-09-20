@@ -52,7 +52,7 @@ export default function ImagesPage() {
 		paginationInfo: PaginationInfo;
 	};
 
-	const { isOpen, imageUrl, alt, openZoom, closeZoom } = useImageZoom();
+	const { isOpen, imageUrl, alt, overlayContent, openZoom, closeZoom } = useImageZoom();
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-6">
@@ -73,7 +73,18 @@ export default function ImagesPage() {
 									<button
 										type="button"
 										className="group relative block aspect-square w-full overflow-hidden bg-muted"
-										onClick={() => openZoom(noteImage.imageUrl, `ノート画像 ${displayDate}`)}
+										onClick={() =>
+											openZoom(
+												noteImage.imageUrl,
+												`ノート画像 ${displayDate}`,
+												<Link
+													to={`/notes?date=${dateParam}`}
+													className="flex items-center gap-1 text-primary"
+												>
+													{format(createdDate, "yyyy年MM月dd日 HH:mm")}
+												</Link>,
+											)
+										}
 										aria-label={`ノート画像 ${displayDate}`}
 									>
 										<img
@@ -98,7 +109,13 @@ export default function ImagesPage() {
 			{paginationInfo.totalPages > 1 && (
 				<PaginationControls pagination={paginationInfo} baseUrl="/notes/images" />
 			)}
-			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
+			<ImageZoomModal
+				isOpen={isOpen}
+				onClose={closeZoom}
+				imageUrl={imageUrl}
+				alt={alt}
+				overlayContent={overlayContent}
+			/>
 		</div>
 	);
 }
