@@ -19,20 +19,23 @@ export function ImageZoomModal({
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent
-				className="w-screen max-w-[98vw] sm:max-w-[98vw] md:max-w-[98vw] lg:max-w-[98vw] xl:max-w-[98vw] 2xl:max-w-[98vw] max-h-[98vh] overflow-auto p-0 border-0 bg-transparent rounded-none"
+				className="top-0 left-1/2 h-screen w-screen max-h-none max-w-none -translate-1/2 translate-y-0 overflow-hidden p-0 border-0 bg-transparent rounded-none shadow-none"
 				showCloseButton={false}
+				onClick={onClose}
 			>
-				<div className="w-screen max-h-screen overflow-auto flex justify-center">
+				<div className="flex h-full w-full items-center justify-center overflow-hidden">
 					<div className="relative">
 						<img
 							src={imageUrl}
 							alt={alt}
-							className="block w-screen h-screen object-contain"
+							className="block max-h-full max-w-full object-contain"
 							onClick={onClose}
 						/>
 						{overlayContent ? (
-							<div className="absolute top-[6vh] md:top-0 left-1/2 flex -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-primary whitespace-nowrap">
-								{overlayContent}
+							<div className="pointer-events-none absolute bottom-0 right-0 flex justify-end">
+								<div className="pointer-events-auto bg-white/50 px-3 py-1 text-sm whitespace-nowrap">
+									{overlayContent}
+								</div>
 							</div>
 						) : null}
 					</div>

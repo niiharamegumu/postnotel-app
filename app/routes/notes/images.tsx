@@ -79,7 +79,7 @@ export default function ImagesPage() {
 												`ノート画像 ${displayDate}`,
 												<Link
 													to={`/notes?date=${dateParam}`}
-													className="flex items-center gap-1 text-primary"
+													className="flex items-center text-primary"
 												>
 													{format(createdDate, "yyyy年MM月dd日 HH:mm")}
 												</Link>,
