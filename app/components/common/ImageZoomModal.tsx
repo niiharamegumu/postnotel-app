@@ -33,7 +33,7 @@ export function ImageZoomModal({
 						/>
 						{overlayContent ? (
 							<div className="pointer-events-none absolute bottom-0 right-0 flex justify-end">
-								<div className="pointer-events-auto bg-white/50 px-3 py-1 text-sm whitespace-nowrap">
+								<div className="pointer-events-auto bg-white/30 px-[3px] py-[1px] text-xs whitespace-nowrap">
 									{overlayContent}
 								</div>
 							</div>
