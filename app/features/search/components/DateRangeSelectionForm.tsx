@@ -78,9 +78,9 @@ export function DateRangeSelectionForm() {
 				variant="outline"
 				size="sm"
 				onClick={handleToggleCalendar}
-				className="shadow-none rounded w-full justify-start md:justify-center"
+				className="shadow-none rounded w-full justify-center"
 			>
-				{isCalendarOpen ? <X /> : rangeLabel}
+				{isCalendarOpen ? "Close" : rangeLabel}
 			</Button>
 			{isCalendarOpen ? (
 				<div className="rounded border bg-background p-2">
