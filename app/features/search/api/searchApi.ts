@@ -11,6 +11,8 @@ export type SearchFetchParams = {
 	tagIds?: string[];
 	contentType?: NoteContentType;
 	q?: string;
+	startDate?: Date;
+	endDate?: Date;
 };
 
 export async function fetchAvailableTags(
@@ -50,6 +52,14 @@ export async function fetchSearchResults(
 	// Add text search if query exists
 	if (params.q) {
 		fetchParams.q = params.q;
+	}
+
+	if (params.startDate) {
+		fetchParams.startDate = params.startDate;
+	}
+
+	if (params.endDate) {
+		fetchParams.endDate = params.endDate;
 	}
 
 	return await fetchNotesWithPagination(request, context, fetchParams);

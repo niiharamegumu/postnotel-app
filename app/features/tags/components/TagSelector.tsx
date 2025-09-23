@@ -78,7 +78,7 @@ export function TagSelector({
 
 	return (
 		<div className={cn("w-full space-y-2", className)}>
-			<Command className="border rounded-lg">
+			<Command className="border rounded">
 				<CommandInput
 					placeholder={placeholder}
 					value={inputValue}
