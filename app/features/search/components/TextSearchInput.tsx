@@ -70,7 +70,7 @@ export function TextSearchInput({
 					placeholder={placeholder}
 					className={cn(
 						"w-full pl-10 pr-10 py-2 text-sm",
-						"border border-input rounded-md",
+						"border border-input rounded",
 						"bg-background text-foreground",
 						"placeholder:text-muted-foreground",
 						"focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
