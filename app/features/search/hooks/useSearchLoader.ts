@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import type { AppLoadContext } from "react-router";
 import type { NoteContentType } from "~/constants/noteContentType";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
@@ -39,7 +40,14 @@ export async function useSearchLoader(
 	const availableTags: Tag[] = await fetchAvailableTags(request, context);
 
 	// Validate search parameters
-	const validation = validateSearchParams(searchParams.q, tagIds, contentType, availableTags);
+	const validation = validateSearchParams(
+		searchParams.q,
+		tagIds,
+		contentType,
+		searchParams.startDate,
+		searchParams.endDate,
+		availableTags,
+	);
 
 	// Handle redirect if parameters were cleaned
 	handleSearchRedirect(validation, url);
@@ -51,6 +59,8 @@ export async function useSearchLoader(
 		tagIds: validation.validTagIds,
 		contentType: validation.validContentType || undefined,
 		q: validation.validSearchQuery || undefined,
+		startDate: validation.validStartDate ? parseISO(validation.validStartDate) : undefined,
+		endDate: validation.validEndDate ? parseISO(validation.validEndDate) : undefined,
 	});
 
 	// Handle pagination redirect if page is invalid

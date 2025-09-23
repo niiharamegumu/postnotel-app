@@ -1,6 +1,7 @@
 import type { Tag } from "~/features/tags/types/tag";
 import { useNavigation } from "~/hooks/useNavigation";
 import { ContentTypeSelectionForm } from "./ContentTypeSelectionForm";
+import { DateRangeSelectionForm } from "./DateRangeSelectionForm";
 import { TagSelectionForm } from "./TagSelectionForm";
 import { TextSearchInput } from "./TextSearchInput";
 
@@ -20,7 +21,8 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 				{/* コンテンツタイプ検索 */}
 				<ContentTypeSelectionForm />
 			</div>
-
+			{/* 日付範囲検索 */}
+			<DateRangeSelectionForm />
 			{/* タグ検索 */}
 			<TagSelectionForm availableTags={availableTags} />
 		</div>
