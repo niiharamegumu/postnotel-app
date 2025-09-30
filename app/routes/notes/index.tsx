@@ -14,6 +14,7 @@ import { noteContentTypeLabels } from "~/constants/noteContentType";
 import type { ViewMode } from "~/constants/viewMode";
 import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
+import { useNoteDateKeyboardNavigation } from "~/features/notes/hooks/useNoteDateKeyboardNavigation";
 import type { Note } from "~/features/notes/types/note";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import { useNavigation } from "~/hooks/useNavigation";
@@ -157,6 +158,10 @@ export default function Index() {
 		},
 		[selectedDate, navigate, getCalendarDateRange, fetchNoteDays],
 	);
+
+	useNoteDateKeyboardNavigation({
+		onNavigate: handleSwipe,
+	});
 
 	return (
 		<div className="max-w-2xl mx-auto space-y-6">
