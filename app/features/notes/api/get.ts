@@ -49,6 +49,28 @@ export async function fetchNotesWithPagination(
 	}
 }
 
+export async function fetchNoteById(
+	request: Route.ActionArgs["request"],
+	context: Route.ActionArgs["context"],
+	noteId: string,
+): Promise<Note | null> {
+	try {
+		const res = await fetcher(context, endpoints.notes.get(noteId), {
+			headers: {
+				Cookie: request.headers.get("cookie") || "",
+			},
+		});
+
+		if (res.status === StatusCodes.NOT_FOUND || res.status === StatusCodes.NO_CONTENT) {
+			return null;
+		}
+
+		return (await res.json()) as Note;
+	} catch (e) {
+		return null;
+	}
+}
+
 export async function fetchDays(
 	request: Route.ActionArgs["request"],
 	context: Route.ActionArgs["context"],

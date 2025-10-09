@@ -8,6 +8,13 @@ const routes: RouteConfig = [
 			route("/search", "routes/notes/search.tsx"),
 			route("/images", "routes/notes/images.tsx"),
 		]),
+
+		...prefix("posts", [
+			route("/", "routes/posts/index.tsx"),
+			route("/new", "routes/posts/new.tsx"),
+			route("/:postId", "routes/posts/$postId.tsx"),
+			route("/:postId/edit", "routes/posts/$postId.edit.tsx"),
+		]),
 	]),
 
 	// notes

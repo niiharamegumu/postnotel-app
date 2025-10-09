@@ -91,6 +91,7 @@ export const endpoints = {
 			return `/v1/notes/days?${queryParams.join("&")}`;
 		},
 		create: "/v1/notes",
+		get: (id: string) => `/v1/notes/${id}`,
 		update: (id: string) => `/v1/notes/${id}`,
 		delete: (id: string) => `/v1/notes/${id}`,
 	},
