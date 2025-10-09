@@ -1,11 +1,11 @@
 import { format } from "date-fns";
+import { StatusCodes } from "http-status-codes";
 import { type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
-import { useFetcher, useNavigate } from "react-router";
+import { useFetcher, useLocation, useNavigate, useRevalidator } from "react-router";
 import type { FetcherWithComponents } from "react-router";
 import { toast } from "sonner";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import type { NoteApiRequest } from "../types/note";
-import { StatusCodes } from "http-status-codes";
 
 type NoteActionResponse = {
 	success: boolean;
@@ -23,6 +23,8 @@ type NoteFetcher = FetcherWithComponents<NoteActionResponse>;
 
 export function useNotes() {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const revalidator = useRevalidator();
 	const createFetcher = useFetcher<NoteActionResponse>();
 	const updateFetcher = useFetcher<NoteActionResponse>();
 	const deleteFetcher = useFetcher<NoteActionResponse>();
@@ -138,7 +140,13 @@ export function useNotes() {
 			if (data?.success) {
 				const message = data.message || fallbackMessage;
 				if (data.targetDate) {
-					navigate(`/notes?date=${data.targetDate}`);
+					const currentParams = new URLSearchParams(location.search);
+					const currentDate = currentParams.get("date");
+					if (currentDate === data.targetDate) {
+						revalidator.revalidate();
+					} else {
+						navigate(`/notes?date=${data.targetDate}`);
+					}
 				}
 				toast.success(message);
 				pending.resolve();
@@ -149,7 +157,7 @@ export function useNotes() {
 			const status = data?.status ?? StatusCodes.INTERNAL_SERVER_ERROR;
 			pending.reject(new ApiResponseError(status, message));
 		},
-		[navigate],
+		[location.search, navigate, revalidator],
 	);
 
 	useEffect(() => {
@@ -185,8 +193,5 @@ export function useNotes() {
 		updateNote,
 		deleteNote,
 		loading,
-		createState: createFetcher.state,
-		updateState: updateFetcher.state,
-		deleteState: deleteFetcher.state,
 	};
 }

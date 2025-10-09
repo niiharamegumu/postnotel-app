@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFetcher } from "react-router";
 import { toast } from "sonner";
 import type { CreateTagRequest, Tag } from "../types/tag";
@@ -13,6 +13,7 @@ export function useTags() {
 	const pendingRef = useRef<{
 		resolve: (value: Tag | null) => void;
 	} | null>(null);
+	const [tags, setTags] = useState<Tag[]>([]);
 
 	const fetchTags = useCallback(async () => {
 		listFetcher.load("/api/tags");
@@ -23,6 +24,12 @@ export function useTags() {
 			listFetcher.load("/api/tags");
 		}
 	}, [listFetcher]);
+
+	useEffect(() => {
+		if (Array.isArray(listFetcher.data)) {
+			setTags(listFetcher.data);
+		}
+	}, [listFetcher.data]);
 
 	const createTag = useCallback(
 		(name: string): Promise<Tag | null> => {
@@ -56,20 +63,18 @@ export function useTags() {
 
 		const data = createFetcher.data;
 		if (data?.success && data.tag) {
+			setTags((prev) => (prev.some((tag) => tag.id === data.tag.id) ? prev : [...prev, data.tag]));
 			toast.success(`Tag「${data.tag.name}」を作成しました`);
 			pending.resolve(data.tag);
-			listFetcher.load("/api/tags");
 			return;
 		}
 
-		const message = data && "message" in data && data.message
-			? data.message
-			: "タグの作成に失敗しました";
+		const message =
+			data && "message" in data && data.message ? data.message : "タグの作成に失敗しました";
 		toast.error(message);
 		pending.resolve(null);
-	}, [createFetcher, listFetcher]);
+	}, [createFetcher]);
 
-	const tags = useMemo(() => listFetcher.data ?? [], [listFetcher.data]);
 	const loading = useMemo(
 		() => listFetcher.state === "loading" || createFetcher.state !== "idle",
 		[listFetcher.state, createFetcher.state],
