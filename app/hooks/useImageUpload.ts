@@ -8,57 +8,115 @@ import type { UploadUrlResponse } from "~/features/image/types/image";
 export const useImageUpload = () => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+	const [isUploading, setIsUploading] = useState(false);
 	const uploadFetcher = useFetcher<{
 		success: boolean;
-		upload?: UploadUrlResponse;
+		uploads?: UploadUrlResponse[];
 		message?: string;
+		status?: number;
 	}>();
-	const pendingRef = useRef<{
-		file: File;
-		resolve: (value: string | null) => void;
+	const batchPendingRef = useRef<{
+		files: File[];
+		resolve: (uploads: UploadUrlResponse[]) => void;
+		reject: (error: Error) => void;
 	} | null>(null);
 
-	const handleSingleImageUpload = useCallback(
-		async (file: File): Promise<string | null> => {
-			try {
-				const fileNameParts = file.name.split(".");
-				const ext =
-					fileNameParts.length > 1 ? fileNameParts[fileNameParts.length - 1].toLowerCase() : "";
+	const requestUploadInfos = useCallback(
+		async (files: File[]): Promise<UploadUrlResponse[]> => {
+			if (files.length === 0) return [];
 
-				const contentType = file.type;
-				const query = `/api/image/get-upload-url?ext=${encodeURIComponent(ext)}&contentType=${encodeURIComponent(contentType)}`;
-
-				return await new Promise<string | null>((resolve) => {
-					pendingRef.current = { file, resolve };
-					uploadFetcher.load(query);
-				});
-			} catch (error) {
-				console.error("Image upload failed:", error);
-				toast.error("画像のアップロードに失敗しました");
-				return null;
+			if (batchPendingRef.current) {
+				throw new Error("別のアップロード処理が進行中です");
 			}
+
+			const payload = {
+				files: files.map((file) => {
+					const fileNameParts = file.name.split(".");
+					const ext =
+						fileNameParts.length > 1 ? fileNameParts[fileNameParts.length - 1].toLowerCase() : "";
+					return {
+						ext,
+						contentType: file.type,
+					};
+				}),
+			};
+
+			return await new Promise<UploadUrlResponse[]>((resolve, reject) => {
+				batchPendingRef.current = {
+					files,
+					resolve,
+					reject,
+				};
+				uploadFetcher.submit(JSON.stringify(payload), {
+					action: "/api/image/get-upload-url",
+					method: "post",
+					encType: "application/json",
+				});
+			});
 		},
 		[uploadFetcher],
 	);
 
+	const uploadToStorage = useCallback(
+		async (file: File, uploadData: UploadUrlResponse): Promise<string> => {
+			const uploadResponse = await fetch(uploadData.url, {
+				method: uploadData.method,
+				headers: {
+					"Content-Type": file.type,
+				},
+				body: file,
+			});
+
+			if (!uploadResponse.ok) {
+				throw new Error("Failed to upload image");
+			}
+
+			return `${uploadData.storageBaseUrl}/temporary/${uploadData.fileName}`;
+		},
+		[],
+	);
+
 	const handleImageUpload = useCallback(
 		async (files: File[]) => {
-			let successCount = 0;
+			try {
+				const uploadInfos = await requestUploadInfos(files);
+				if (uploadInfos.length !== files.length) {
+					throw new Error("アップロード情報の取得に失敗しました");
+				}
 
-			for (const file of files) {
-				const result = await handleSingleImageUpload(file);
-				if (result) successCount++;
-			}
+				const uploadResults = await Promise.allSettled(
+					uploadInfos.map((info, index) => uploadToStorage(files[index], info)),
+				);
 
-			if (successCount > 0) {
-				toast.success(`${successCount}枚の画像をアップロードしました`);
+				const successfulUrls = uploadResults
+					.filter(
+						(result): result is PromiseFulfilledResult<string> => result.status === "fulfilled",
+					)
+					.map((result) => result.value);
+
+				const failedCount = uploadResults.length - successfulUrls.length;
+				if (successfulUrls.length > 0) {
+					setUploadedImages((prev) => [...prev, ...successfulUrls]);
+					toast.success(`${successfulUrls.length}枚の画像をアップロードしました`);
+				}
+
+				if (failedCount > 0) {
+					toast.error(`${failedCount}枚の画像のアップロードに失敗しました`);
+				}
+			} catch (error) {
+				console.error("Image upload failed:", error);
+				const message = error instanceof Error ? error.message : "画像のアップロードに失敗しました";
+				toast.error(message);
+			} finally {
+				setIsUploading(false);
 			}
 		},
-		[handleSingleImageUpload],
+		[requestUploadInfos, uploadToStorage],
 	);
 
 	const handleFileChange = useCallback(
 		async (event: React.ChangeEvent<HTMLInputElement>) => {
+			setIsUploading(true);
 			const files = event.target.files;
 			if (!files || files.length === 0) return;
 
@@ -79,7 +137,7 @@ export const useImageUpload = () => {
 			}
 
 			if (validFiles.length > 0) {
-				handleImageUpload(validFiles);
+				await handleImageUpload(validFiles);
 			}
 
 			if (fileInputRef.current) {
@@ -101,52 +159,28 @@ export const useImageUpload = () => {
 	}, []);
 
 	useEffect(() => {
-		if (uploadFetcher.state !== "idle" || !pendingRef.current) {
+		if (uploadFetcher.state !== "idle" || !batchPendingRef.current) {
 			return;
 		}
 
-		const pending = pendingRef.current;
-		pendingRef.current = null;
+		const pending = batchPendingRef.current;
+		batchPendingRef.current = null;
 
 		const data = uploadFetcher.data;
-		if (!data?.success || !data.upload) {
-			console.error("Image upload failed: invalid response", data);
-			toast.error(data?.message || "画像のアップロードに失敗しました");
-			pending.resolve(null);
+		if (data?.success && Array.isArray(data.uploads)) {
+			pending.resolve(data.uploads);
 			return;
 		}
 
-		const uploadData = data.upload;
-		const { file } = pending;
-
-		void (async () => {
-			try {
-				const uploadResponse = await fetch(uploadData.url, {
-					method: uploadData.method,
-					headers: {
-						"Content-Type": file.type,
-					},
-					body: file,
-				});
-
-				if (!uploadResponse.ok) {
-					throw new Error("Failed to upload image");
-				}
-
-				const imageUrl = `${uploadData.storageBaseUrl}/temporary/${uploadData.fileName}`;
-				setUploadedImages((prev) => [...prev, imageUrl]);
-				pending.resolve(imageUrl);
-			} catch (error) {
-				console.error("Image upload failed:", error);
-				toast.error("画像のアップロードに失敗しました");
-				pending.resolve(null);
-			}
-		})();
+		const message = data?.message || "画像のアップロードに失敗しました";
+		const error = new Error(message);
+		toast.error(message);
+		pending.reject(error);
 	}, [uploadFetcher.data, uploadFetcher.state]);
 
 	useEffect(() => {
 		return () => {
-			pendingRef.current = null;
+			batchPendingRef.current = null;
 		};
 	}, []);
 
@@ -157,5 +191,6 @@ export const useImageUpload = () => {
 		handleFileChange,
 		removeImage,
 		resetImages,
+		isUploading,
 	};
 };

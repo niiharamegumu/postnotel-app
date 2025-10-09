@@ -3,7 +3,7 @@ import { BlockNoteView } from "@blocknote/mantine";
 import { useCreateBlockNote } from "@blocknote/react";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { Copy, Eye, EyeOff, ImagePlus, Plus, Tags, Trash2, X } from "lucide-react";
+import { Copy, Eye, EyeOff, ImagePlus, Loader2, Plus, Tags, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -65,6 +65,7 @@ export default function BlockNoteDrawer({
 		handleFileChange,
 		removeImage,
 		resetImages,
+		isUploading,
 	} = useImageUpload();
 	const { tags, createTag } = useTags();
 	const { isMobileDevice } = useMobileDevice();
@@ -283,6 +284,11 @@ export default function BlockNoteDrawer({
 
 	const handleSubmit = useCallback(async () => {
 		try {
+			if (isUploading) {
+				toast.error("画像のアップロード完了をお待ちください。");
+				return;
+			}
+
 			processEmptyBlocks();
 
 			const markdown = await editor.blocksToMarkdownLossy(editor.document);
@@ -317,6 +323,7 @@ export default function BlockNoteDrawer({
 		selectedTags,
 		noteDraft,
 		resetDrawer,
+		isUploading,
 	]);
 
 	const handleDeleteNote = async () => {
@@ -419,6 +426,11 @@ export default function BlockNoteDrawer({
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent className="px-4 !mt-0 !max-h-none !rounded-none h-[100dvh]">
+				{isUploading && (
+					<div className="flex items-center gap-2 text-sm text-muted-foreground px-2 py-2">
+						画像をアップロード中…
+					</div>
+				)}
 				{uploadedImages.length > 0 && (
 					<div className="w-full p-2 flex justify-start flex-wrap items-center gap-2">
 						{uploadedImages.map((imageUrl, index) => (
@@ -467,11 +479,17 @@ export default function BlockNoteDrawer({
 							onClick={() => setIsPrivate(!isPrivate)}
 							type="button"
 							className={cn("text-white", isPrivate ? "bg-destructive/70" : "bg-success/70")}
+							disabled={isUploading}
 						>
 							{isPrivate ? <EyeOff /> : <Eye />}
 						</Button>
-						<Button variant="outline" type="button" onClick={() => fileInputRef.current?.click()}>
-							<ImagePlus />
+						<Button
+							variant="outline"
+							type="button"
+							disabled={isUploading}
+							onClick={() => fileInputRef.current?.click()}
+						>
+							{isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus />}
 						</Button>
 						<input
 							ref={fileInputRef}
@@ -539,8 +557,8 @@ export default function BlockNoteDrawer({
 						)}
 					</div>
 					<div className="flex items-center gap-2">
-						<Button variant="default" onClick={handleSubmit} disabled={loading}>
-							{loading ? `${noteDrawerType}...` : noteDrawerType}
+						<Button variant="default" onClick={handleSubmit} disabled={loading || isUploading}>
+							{isUploading ? "Uploading..." : loading ? `${noteDrawerType}...` : noteDrawerType}
 						</Button>
 						<DrawerClose>
 							<Button variant="outline">Cancel</Button>
