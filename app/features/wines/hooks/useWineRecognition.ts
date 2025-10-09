@@ -1,97 +1,97 @@
 import { format } from "date-fns";
 import { StatusCodes } from "http-status-codes";
-import { useCallback, useState } from "react";
-import { useNavigate } from "react-router";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useFetcher, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import { AccessLevel } from "~/constants/accessLevel";
 
 export function useWineRecognition() {
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 	const navigate = useNavigate();
+	const fetcher = useFetcher<{
+		success: boolean;
+		message?: string;
+		status?: number;
+		details?: string;
+	}>();
+	const pendingRef = useRef<{
+		resolve: () => void;
+		reject: (error: Error) => void;
+	} | null>(null);
 
 	const recognizeWine = useCallback(
-		async (
+		(
 			images: string[],
 			options?: { noteDay?: string; accessLevel?: AccessLevel },
 		): Promise<void> => {
 			if (images.length === 0) {
 				toast.error("画像を選択してください");
-				return;
+				return Promise.resolve();
 			}
 
-			setLoading(true);
-			setError(null);
+			const imagesFileNames = images.map((url) => {
+				const parts = url.split("/");
+				return parts[parts.length - 1];
+			});
 
-			try {
-				const noteDay = options?.noteDay || format(new Date(), "yyyy-MM-dd");
-				const accessLevel = options?.accessLevel || AccessLevel.Public;
+			if (imagesFileNames.some((name) => !name || name.trim() === "")) {
+				toast.error("無効な画像ファイルが含まれています");
+				return Promise.resolve();
+			}
 
-				const imagesFileNames = images.map((url) => {
-					const parts = url.split("/");
-					return parts[parts.length - 1];
-				});
-
-				if (imagesFileNames.some((name) => !name || name.trim() === "")) {
-					throw new Error("無効な画像ファイルが含まれています");
-				}
-
-				const body = JSON.stringify({
-					noteDay,
-					accessLevel,
-					images: imagesFileNames,
-				});
-
-				const res = await fetch("/api/wines/recognize", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+			const noteDay = options?.noteDay || format(new Date(), "yyyy-MM-dd");
+			const accessLevel = options?.accessLevel || AccessLevel.Public;
+			const formData = new FormData();
+			formData.append(
+				"payload",
+				JSON.stringify({
+					request: {
+						noteDay,
+						accessLevel,
+						images: imagesFileNames,
 					},
-					body,
-				});
+				}),
+			);
 
-				if (!res.ok) {
-					const errorData = (await res.json().catch(() => ({}))) as {
-						error?: string;
-						details?: string;
-					};
-					let errorMessage = errorData.error || "処理に失敗しました";
+			fetcher.submit(formData, { action: "/api/wines/recognize", method: "post" });
 
-					if (errorData.details && res.status === StatusCodes.BAD_REQUEST) {
-						errorMessage += `: ${errorData.details}`;
-					}
-
-					throw new ApiResponseError(res.status, errorMessage);
-				}
-
-				navigate("/wines");
-				toast.success("ワインノートの作成をAIへリクエストしました");
-			} catch (err) {
-				console.error("ワインノートの作成に失敗:", err);
-
-				let errorMessage: string;
-				if (err instanceof ApiResponseError) {
-					errorMessage = err.message;
-				} else if (err instanceof Error) {
-					errorMessage = err.message;
-				} else {
-					errorMessage = "ワインノートの作成に失敗しました";
-				}
-
-				setError(errorMessage);
-				toast.error(errorMessage);
-				throw err;
-			} finally {
-				setLoading(false);
-			}
+			return new Promise<void>((resolve, reject) => {
+				pendingRef.current = { resolve, reject };
+			});
 		},
-		[navigate],
+		[fetcher],
 	);
+
+	useEffect(() => {
+		if (fetcher.state !== "idle" || !pendingRef.current) return;
+
+		const pending = pendingRef.current;
+		pendingRef.current = null;
+
+		const data = fetcher.data;
+		if (data?.success) {
+			toast.success(data.message ?? "ワインノートの作成をAIへリクエストしました");
+			navigate("/wines");
+			pending.resolve();
+			return;
+		}
+
+		const message = data?.message || data?.details || "ワインノートの作成に失敗しました";
+		const status = data?.status ?? StatusCodes.INTERNAL_SERVER_ERROR;
+		toast.error(message);
+		pending.reject(new ApiResponseError(status, message));
+	}, [fetcher, navigate]);
+
+	useEffect(() => {
+		return () => {
+			pendingRef.current = null;
+		};
+	}, []);
+
+	const loading = useMemo(() => fetcher.state !== "idle", [fetcher.state]);
 
 	return {
 		recognizeWine,
 		loading,
-		error,
 	};
 }

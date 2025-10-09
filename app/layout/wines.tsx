@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, ImagePlus, X } from "lucide-react";
+import { Bot, ImagePlus, Loader2, X } from "lucide-react";
 import { Suspense, useState } from "react";
 import { Outlet, useOutletContext } from "react-router";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
@@ -19,7 +19,7 @@ import type { UserInfo } from "~/types/user";
 
 export default function Wines() {
 	const userInfo = useOutletContext<UserInfo | null>();
-	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages } =
+	const { fileInputRef, uploadedImages, handleFileChange, removeImage, resetImages, isUploading } =
 		useImageUpload();
 	const { recognizeWine, loading } = useWineRecognition();
 
@@ -102,9 +102,16 @@ export default function Wines() {
 											<Button
 												variant="outline"
 												type="button"
+												disabled={isUploading}
 												onClick={() => fileInputRef.current?.click()}
 											>
-												<ImagePlus />
+												{isUploading ? (
+													<span className="flex items-center gap-2 text-sm">
+														画像をアップロード中...
+													</span>
+												) : (
+													<ImagePlus />
+												)}
 											</Button>
 											<input
 												ref={fileInputRef}
@@ -119,9 +126,9 @@ export default function Wines() {
 											<Button
 												variant="default"
 												onClick={requestAI}
-												disabled={loading || uploadedImages.length === 0}
+												disabled={loading || uploadedImages.length === 0 || isUploading}
 											>
-												{loading ? "Request AI..." : "Request AI"}
+												{isUploading ? "Uploading..." : loading ? "Request AI..." : "Request AI"}
 											</Button>
 											<DrawerClose>
 												<Button variant="outline">Cancel</Button>
