@@ -59,23 +59,16 @@ export async function loader({
 	context,
 }: Route.LoaderArgs): Promise<{ userInfo: UserInfo | null }> {
 	try {
-		if (context?.cloudflare?.env?.API_BASE_URL) {
-			const response = await fetcher(context, endpoints.users.me, {
+		const response = await fetcher(
+			context,
+			endpoints.users.me,
+			{
 				headers: {
 					Cookie: request.headers.get("cookie") || "",
 				},
-			});
-
-			if (response.status === 204) return { userInfo: null };
-			if (!response.ok) return { userInfo: null };
-
-			const data = await response.json();
-			if (!data) return { userInfo: null };
-
-			return { userInfo: data as UserInfo };
-		}
-
-		const response = await fetch("/api/users/me", { credentials: "include" });
+			},
+			{ fallbackPath: "/api/users/me" },
+		);
 		if (response.status === 204) return { userInfo: null };
 		if (!response.ok) return { userInfo: null };
 
