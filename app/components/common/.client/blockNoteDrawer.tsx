@@ -331,6 +331,11 @@ export default function BlockNoteDrawer({
 			resetDrawer();
 		} catch (error) {
 			console.error("Failed to delete note:", error);
+			if (error instanceof ApiResponseError) {
+				toast.error(error.message);
+			} else {
+				toast.error("ノートの削除に失敗しました");
+			}
 		}
 	};
 

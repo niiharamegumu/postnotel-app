@@ -1,133 +1,192 @@
 import { format } from "date-fns";
-import { useCallback, useState } from "react";
-import { useNavigate } from "react-router";
+import { type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { useFetcher, useNavigate } from "react-router";
+import type { FetcherWithComponents } from "react-router";
 import { toast } from "sonner";
 import { ApiResponseError } from "~/api/error/apiResponseError";
 import type { NoteApiRequest } from "../types/note";
+import { StatusCodes } from "http-status-codes";
+
+type NoteActionResponse = {
+	success: boolean;
+	message?: string;
+	targetDate?: string;
+	status?: number;
+};
+
+type PendingResolver = {
+	resolve: () => void;
+	reject: (error: Error) => void;
+};
+
+type NoteFetcher = FetcherWithComponents<NoteActionResponse>;
 
 export function useNotes() {
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 	const navigate = useNavigate();
+	const createFetcher = useFetcher<NoteActionResponse>();
+	const updateFetcher = useFetcher<NoteActionResponse>();
+	const deleteFetcher = useFetcher<NoteActionResponse>();
+
+	const createPendingRef = useRef<PendingResolver | null>(null);
+	const updatePendingRef = useRef<PendingResolver | null>(null);
+	const deletePendingRef = useRef<PendingResolver | null>(null);
+
+	const submitPayload = useCallback(
+		(
+			fetcher: NoteFetcher,
+			payload: unknown,
+			action: string,
+			setPending: (resolver: PendingResolver | null) => void,
+		) => {
+			const formData = new FormData();
+			formData.append("payload", JSON.stringify(payload));
+
+			fetcher.submit(formData, {
+				action,
+				method: "post",
+			});
+
+			return new Promise<void>((resolve, reject) => {
+				setPending({ resolve, reject });
+			});
+		},
+		[],
+	);
 
 	const createNote = useCallback(
-		async (params: NoteApiRequest, targetDate: Date): Promise<void> => {
+		(params: NoteApiRequest, targetDate: Date): Promise<void> => {
 			const { content, accessLevel, images, tagIds } = params;
-			if (!content) return;
+			if (!content) return Promise.resolve();
 
-			setLoading(true);
-			setError(null);
-
-			try {
-				const body = JSON.stringify({
-					content,
-					accessLevel,
-					images: images,
-					tagIds: tagIds,
-					noteDay: format(targetDate, "yyyy-MM-dd"),
-				});
-
-				const res = await fetch("/api/notes/create", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+			const noteDay = format(targetDate, "yyyy-MM-dd");
+			return submitPayload(
+				createFetcher,
+				{
+					targetDate: noteDay,
+					request: {
+						content,
+						accessLevel,
+						images,
+						tagIds,
+						noteDay,
 					},
-					body,
-				});
-
-				if (!res.ok) {
-					throw new ApiResponseError(res.status, "ノートの作成に失敗しました");
-				}
-
-				navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-				toast.success("ノートを作成しました");
-			} catch (err) {
-				const errorMessage =
-					err instanceof ApiResponseError ? err.message : "ノートの作成に失敗しました";
-				setError(errorMessage);
-				throw err;
-			} finally {
-				setLoading(false);
-			}
+				},
+				"/api/notes/create",
+				(resolver) => {
+					createPendingRef.current = resolver;
+				},
+			);
 		},
-		[navigate],
+		[createFetcher, submitPayload],
 	);
 
 	const updateNote = useCallback(
-		async (noteId: string, params: NoteApiRequest, targetDate: Date): Promise<void> => {
+		(noteId: string, params: NoteApiRequest, targetDate: Date): Promise<void> => {
 			const { content, accessLevel, images, tagIds } = params;
-			if (!content) return;
+			if (!content) return Promise.resolve();
 
-			setLoading(true);
-			setError(null);
-
-			try {
-				const body = JSON.stringify({
-					content,
-					accessLevel,
-					images,
-					tagIds,
-				});
-
-				const res = await fetch(`/api/notes/${noteId}/update`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+			const targetDateStr = format(targetDate, "yyyy-MM-dd");
+			return submitPayload(
+				updateFetcher,
+				{
+					targetDate: targetDateStr,
+					request: {
+						content,
+						accessLevel,
+						images,
+						tagIds,
 					},
-					body,
-				});
-
-				if (!res.ok) {
-					throw new ApiResponseError(res.status, "ノートの編集に失敗しました");
-				}
-
-				navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-				toast.success("ノートを編集しました");
-			} catch (err) {
-				const errorMessage =
-					err instanceof ApiResponseError ? err.message : "ノートの編集に失敗しました";
-				setError(errorMessage);
-				throw err;
-			} finally {
-				setLoading(false);
-			}
+				},
+				`/api/notes/${noteId}/update`,
+				(resolver) => {
+					updatePendingRef.current = resolver;
+				},
+			);
 		},
-		[navigate],
+		[submitPayload, updateFetcher],
 	);
 
 	const deleteNote = useCallback(
-		async (noteId: string, targetDate: Date): Promise<void> => {
-			setLoading(true);
-			setError(null);
+		(noteId: string, targetDate: Date): Promise<void> => {
+			const targetDateStr = format(targetDate, "yyyy-MM-dd");
+			return submitPayload(
+				deleteFetcher,
+				{
+					targetDate: targetDateStr,
+				},
+				`/api/notes/${noteId}/delete`,
+				(resolver) => {
+					deletePendingRef.current = resolver;
+				},
+			);
+		},
+		[deleteFetcher, submitPayload],
+	);
 
-			try {
-				const res = await fetch(`/api/notes/${noteId}/delete`, {
-					method: "POST",
-				});
+	const handleCompletion = useCallback(
+		(
+			fetcher: typeof createFetcher,
+			pendingRef: RefObject<PendingResolver | null>,
+			fallbackMessage: string,
+		) => {
+			if (fetcher.state !== "idle" || !pendingRef.current) return;
 
-				if (!res.ok) {
-					throw new ApiResponseError(res.status, "ノートの削除に失敗しました");
+			const pending = pendingRef.current;
+			pendingRef.current = null;
+
+			const data = fetcher.data;
+			if (data?.success) {
+				const message = data.message || fallbackMessage;
+				if (data.targetDate) {
+					navigate(`/notes?date=${data.targetDate}`);
 				}
-
-				navigate(`/notes?date=${format(targetDate, "yyyy-MM-dd")}`);
-				toast.success("ノートを削除しました");
-			} catch (err) {
-				const errorMessage =
-					err instanceof ApiResponseError ? err.message : "ノートの削除に失敗しました";
-				setError(errorMessage);
-				throw err;
-			} finally {
-				setLoading(false);
+				toast.success(message);
+				pending.resolve();
+				return;
 			}
+
+			const message = data?.message || fallbackMessage;
+			const status = data?.status ?? StatusCodes.INTERNAL_SERVER_ERROR;
+			pending.reject(new ApiResponseError(status, message));
 		},
 		[navigate],
 	);
+
+	useEffect(() => {
+		handleCompletion(createFetcher, createPendingRef, "ノートの作成に失敗しました");
+	}, [createFetcher, handleCompletion]);
+
+	useEffect(() => {
+		handleCompletion(updateFetcher, updatePendingRef, "ノートの編集に失敗しました");
+	}, [handleCompletion, updateFetcher]);
+
+	useEffect(() => {
+		handleCompletion(deleteFetcher, deletePendingRef, "ノートの削除に失敗しました");
+	}, [deleteFetcher, handleCompletion]);
+
+	const loading = useMemo(
+		() =>
+			createFetcher.state !== "idle" ||
+			updateFetcher.state !== "idle" ||
+			deleteFetcher.state !== "idle",
+		[createFetcher.state, updateFetcher.state, deleteFetcher.state],
+	);
+
+	useEffect(() => {
+		return () => {
+			createPendingRef.current = null;
+			updatePendingRef.current = null;
+			deletePendingRef.current = null;
+		};
+	}, []);
 
 	return {
 		createNote,
 		updateNote,
 		deleteNote,
 		loading,
-		error,
+		createState: createFetcher.state,
+		updateState: updateFetcher.state,
+		deleteState: deleteFetcher.state,
 	};
 }

@@ -1,87 +1,89 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useFetcher } from "react-router";
 import { toast } from "sonner";
 import type { CreateTagRequest, Tag } from "../types/tag";
 
+type CreateTagResponse =
+	| { success: true; tag: Tag }
+	| { success: false; message: string; status?: number };
+
 export function useTags() {
-	const [tags, setTags] = useState<Tag[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const listFetcher = useFetcher<Tag[]>();
+	const createFetcher = useFetcher<CreateTagResponse>();
+	const pendingRef = useRef<{
+		resolve: (value: Tag | null) => void;
+	} | null>(null);
 
 	const fetchTags = useCallback(async () => {
-		setLoading(true);
-		setError(null);
+		listFetcher.load("/api/tags");
+	}, [listFetcher]);
 
-		try {
-			const response = await fetch("/api/tags", {
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error("Tags fetch error:", errorText);
-				throw new Error(`タグの取得に失敗しました: ${response.status}`);
-			}
-
-			const tags = (await response.json()) as Tag[];
-			setTags(tags || []);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "タグの取得に失敗しました";
-			console.error("Tags fetch error:", err);
-			setError(errorMessage);
-			toast.error(errorMessage);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	const createTag = useCallback(async (name: string): Promise<Tag | null> => {
-		setLoading(true);
-		setError(null);
-
-		try {
-			const body: CreateTagRequest = { name };
-			const response = await fetch("/api/tags/create", {
-				method: "POST",
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(body),
-			});
-
-			if (!response.ok) {
-				throw new Error("タグの作成に失敗しました");
-			}
-
-			const tag = (await response.json()) as Tag;
-			if (!tag) {
-				throw new Error("タグの作成に失敗しました");
-			}
-			setTags((prev) => [...prev, tag]);
-			toast.success(`Tag「${tag.name}」を作成しました`);
-			return tag;
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "タグの作成に失敗しました";
-			setError(errorMessage);
-			toast.error(errorMessage);
-			return null;
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// 初回読み込み
 	useEffect(() => {
-		fetchTags();
-	}, [fetchTags]);
+		if (listFetcher.state === "idle" && listFetcher.data === undefined) {
+			listFetcher.load("/api/tags");
+		}
+	}, [listFetcher]);
+
+	const createTag = useCallback(
+		(name: string): Promise<Tag | null> => {
+			const trimmed = name.trim();
+			if (!trimmed) {
+				toast.error("タグ名を入力してください");
+				return Promise.resolve(null);
+			}
+
+			const formData = new FormData();
+			const payload: { request: CreateTagRequest } = {
+				request: { name: trimmed },
+			};
+			formData.append("payload", JSON.stringify(payload));
+			createFetcher.submit(formData, { action: "/api/tags/create", method: "post" });
+
+			return new Promise<Tag | null>((resolve) => {
+				pendingRef.current = { resolve };
+			});
+		},
+		[createFetcher],
+	);
+
+	useEffect(() => {
+		if (createFetcher.state !== "idle" || !pendingRef.current) {
+			return;
+		}
+
+		const pending = pendingRef.current;
+		pendingRef.current = null;
+
+		const data = createFetcher.data;
+		if (data?.success && data.tag) {
+			toast.success(`Tag「${data.tag.name}」を作成しました`);
+			pending.resolve(data.tag);
+			listFetcher.load("/api/tags");
+			return;
+		}
+
+		const message = data && "message" in data && data.message
+			? data.message
+			: "タグの作成に失敗しました";
+		toast.error(message);
+		pending.resolve(null);
+	}, [createFetcher, listFetcher]);
+
+	const tags = useMemo(() => listFetcher.data ?? [], [listFetcher.data]);
+	const loading = useMemo(
+		() => listFetcher.state === "loading" || createFetcher.state !== "idle",
+		[listFetcher.state, createFetcher.state],
+	);
+
+	useEffect(() => {
+		return () => {
+			pendingRef.current = null;
+		};
+	}, []);
 
 	return {
 		tags,
 		loading,
-		error,
 		fetchTags,
 		createTag,
 	};
