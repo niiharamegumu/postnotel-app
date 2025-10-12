@@ -13,9 +13,8 @@ import "@blocknote/mantine/style.css";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { Toaster } from "./components/ui/sonner";
-import { endpoints } from "./constants/endpoints";
+import { fetchCurrentUser } from "./features/auth/api/getCurrentUser.server";
 import { useAuthRevalidator } from "./hooks/useAuthRevalidator";
-import { fetcher } from "./lib/fetcher";
 import type { UserInfo } from "./types/user";
 
 export const links: Route.LinksFunction = () => [
@@ -58,27 +57,10 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<{ userInfo: UserInfo | null }> {
-	try {
-		const response = await fetcher(
-			context,
-			endpoints.users.me,
-			{
-				headers: {
-					Cookie: request.headers.get("cookie") || "",
-				},
-			},
-			{ fallbackPath: "/api/users/me" },
-		);
-		if (response.status === 204) return { userInfo: null };
-		if (!response.ok) return { userInfo: null };
+	const currentUserResult = await fetchCurrentUser({ request, context });
+	const userInfo = currentUserResult.status === "authenticated" ? currentUserResult.user : null;
 
-		const data = (await response.json()) as UserInfo | null;
-		if (!data) return { userInfo: null };
-
-		return { userInfo: data };
-	} catch (error) {
-		return { userInfo: null };
-	}
+	return { userInfo };
 }
 
 export default function App() {
