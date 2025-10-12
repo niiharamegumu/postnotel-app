@@ -13,8 +13,16 @@ import { AccessLevel } from "~/constants/accessLevel";
 import { noteContentTypeLabels } from "~/constants/noteContentType";
 import type { ViewMode } from "~/constants/viewMode";
 import { fetchDays, fetchNotesWithPagination } from "~/features/notes/api/get";
+import {
+	buildNotesCachePolicy,
+	deriveNotesCacheContext,
+} from "~/features/notes/lib/cachePolicy.server";
 import { useNoteDateKeyboardNavigation } from "~/features/notes/hooks/useNoteDateKeyboardNavigation";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
+import {
+	fetchCurrentUser,
+	type FetchCurrentUserResult,
+} from "~/features/auth/api/getCurrentUser.server";
 import type { Note } from "~/features/notes/types/note";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import { useNavigation } from "~/hooks/useNavigation";
@@ -22,6 +30,7 @@ import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
 import type { Route } from "./+types";
+import { StatusCodes } from "http-status-codes";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const url = new URL(request.url);
@@ -29,10 +38,87 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	const date = dateParam
 		? formatInTimeZone(new Date(dateParam), "Asia/Tokyo", "yyyy-MM-dd")
 		: formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-	const notesResult = await fetchNotesWithPagination(request, context, { date: parseISO(date) });
-	const notes = notesResult?.notes || [];
-
 	const selectedDate = parseISO(date);
+
+	const headerSnapshot = {
+		cacheControl: request.headers.get("Cache-Control"),
+		cookie: request.headers.get("cookie"),
+		ifNoneMatch: request.headers.get("If-None-Match"),
+		ifModifiedSince: request.headers.get("If-Modified-Since"),
+	};
+
+	const forceRevalidate = (headerSnapshot.cacheControl ?? "").includes("no-cache");
+	const hasAnyCookies = Boolean(headerSnapshot.cookie && headerSnapshot.cookie.trim().length > 0);
+	let currentUserResult: FetchCurrentUserResult;
+	if (hasAnyCookies) {
+		currentUserResult = await fetchCurrentUser({ request, context });
+	} else {
+		currentUserResult = { status: "unauthenticated" };
+	}
+	const isAuthenticatedForCache = currentUserResult.status !== "unauthenticated";
+	const cacheContext = deriveNotesCacheContext({
+		selectedDate,
+		isAuthenticated: isAuthenticatedForCache,
+	});
+
+	let cacheStore: Cache | null = null;
+	let cacheKeyRequest: Request | null = null;
+
+	if (cacheContext.shouldUsePublicCache && typeof caches !== "undefined") {
+		const cacheStorage = caches as CacheStorage & { default?: Cache };
+
+		if (cacheStorage.default) {
+			cacheStore = cacheStorage.default;
+		} else {
+			try {
+				cacheStore = await cacheStorage.open("notes-loader");
+			} catch (error) {
+				console.error("Failed to open cache store:", error);
+			}
+		}
+
+		if (cacheStore) {
+			const cacheKeyUrl = new URL(url.toString());
+			cacheKeyUrl.hash = "";
+
+			const sortedQueryEntries = Array.from(cacheKeyUrl.searchParams.entries()).sort(([a], [b]) =>
+				a.localeCompare(b),
+			);
+			cacheKeyUrl.search = "";
+			for (const [key, value] of sortedQueryEntries) {
+				cacheKeyUrl.searchParams.append(key, value);
+			}
+
+			cacheKeyRequest = new Request(cacheKeyUrl.toString(), { method: request.method });
+
+			if (!forceRevalidate) {
+				const cachedResponse = await cacheStore.match(cacheKeyRequest);
+				if (cachedResponse) {
+					return cachedResponse;
+				}
+			}
+		}
+	}
+
+	const notesResult = await fetchNotesWithPagination(request, context, { date: selectedDate });
+	const notes = notesResult?.notes ?? [];
+
+	const policy = buildNotesCachePolicy({
+		selectedDate,
+		notes,
+		headers: headerSnapshot,
+		context: cacheContext,
+	});
+
+	const responseHeaders = new Headers(policy.headers);
+
+	if (policy.isNotModified) {
+		return new Response(null, {
+			status: StatusCodes.NOT_MODIFIED,
+			headers: responseHeaders,
+		});
+	}
+
 	const startDate = startOfWeek(selectedDate, { weekStartsOn: 1 });
 	const endDate = endOfWeek(selectedDate, { weekStartsOn: 1 });
 
@@ -44,7 +130,27 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 		noteDays = [];
 	}
 
-	return { notes, date, noteDays };
+	const response = Response.json(
+		{
+			notes,
+			date,
+			noteDays,
+		},
+		{ headers: responseHeaders },
+	);
+
+	if (cacheContext.shouldUsePublicCache && cacheStore && cacheKeyRequest) {
+		const putPromise = cacheStore
+			.put(cacheKeyRequest, response.clone())
+			.catch((error) => console.error("Failed to cache notes loader response:", error));
+
+		const waitUntil = context.cloudflare?.ctx?.waitUntil?.bind(context.cloudflare.ctx);
+		if (waitUntil) {
+			waitUntil(putPromise);
+		}
+	}
+
+	return response;
 }
 
 export function meta() {
