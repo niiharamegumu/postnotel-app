@@ -19,10 +19,6 @@ import {
 } from "~/features/notes/lib/cachePolicy.server";
 import { useNoteDateKeyboardNavigation } from "~/features/notes/hooks/useNoteDateKeyboardNavigation";
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
-import {
-	fetchCurrentUser,
-	type FetchCurrentUserResult,
-} from "~/features/auth/api/getCurrentUser.server";
 import type { Note } from "~/features/notes/types/note";
 import { useImageZoom } from "~/hooks/useImageZoom";
 import { useNavigation } from "~/hooks/useNavigation";
@@ -49,13 +45,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
 	const forceRevalidate = (headerSnapshot.cacheControl ?? "").includes("no-cache");
 	const hasAnyCookies = Boolean(headerSnapshot.cookie && headerSnapshot.cookie.trim().length > 0);
-	let currentUserResult: FetchCurrentUserResult;
-	if (hasAnyCookies) {
-		currentUserResult = await fetchCurrentUser({ request, context });
-	} else {
-		currentUserResult = { status: "unauthenticated" };
-	}
-	const isAuthenticatedForCache = currentUserResult.status !== "unauthenticated";
+	const isAuthenticatedForCache = hasAnyCookies;
 	const cacheContext = deriveNotesCacheContext({
 		selectedDate,
 		isAuthenticated: isAuthenticatedForCache,
