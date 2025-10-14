@@ -23,6 +23,14 @@ const ONE_YEAR_SECONDS = SECONDS_PER_DAY * 365;
 const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_SECONDS}, immutable`;
 const SHORT_CACHE_CONTROL = `public, max-age=${ONE_WEEK_SECONDS}`;
 const HAS_HASH = /-[0-9A-Za-z_-]{6,}\.(?:js|css|map|svg|png|jpg|jpeg|webp|ico|woff2?)$/;
+const CONDITIONAL_REQUEST_HEADERS = [
+  "if-none-match",
+  "if-modified-since",
+  "if-match",
+  "if-unmodified-since",
+  "cache-control",
+  "pragma",
+];
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
@@ -46,9 +54,18 @@ export default {
         return cachedResponse;
       }
 
-      const assetResponse = await env.ASSETS.fetch(request);
+      const assetRequestHeaders = new Headers(request.headers);
+      for (const header of CONDITIONAL_REQUEST_HEADERS) {
+        assetRequestHeaders.delete(header);
+      }
+      const assetRequest = new Request(request.url, {
+        method: request.method,
+        headers: assetRequestHeaders,
+      });
 
-      if (!assetResponse.ok || assetResponse.status === 304) {
+      const assetResponse = await env.ASSETS.fetch(assetRequest);
+
+      if (!assetResponse.ok && assetResponse.status !== 304) {
         return assetResponse;
       }
 
@@ -64,7 +81,7 @@ export default {
         headers,
       });
 
-      if (request.method === "GET") {
+      if (assetResponse.status !== 304 && request.method === "GET") {
         ctx.waitUntil(cache.put(cacheKey, response.clone()));
       }
 
