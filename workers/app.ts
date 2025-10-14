@@ -22,7 +22,7 @@ const ONE_WEEK_SECONDS = SECONDS_PER_DAY * 7;
 const ONE_YEAR_SECONDS = SECONDS_PER_DAY * 365;
 const IMMUTABLE_CACHE_CONTROL = `public, max-age=${ONE_YEAR_SECONDS}, immutable`;
 const SHORT_CACHE_CONTROL = `public, max-age=${ONE_WEEK_SECONDS}`;
-const HAS_HASH = /-[a-f0-9]{8,}\.(?:js|css|map|svg|png|jpg|jpeg|webp|ico|woff2?)$/i;
+const HAS_HASH = /-[0-9A-Za-z_-]{6,}\.(?:js|css|map|svg|png|jpg|jpeg|webp|ico|woff2?)$/;
 
 const requestHandler = createRequestHandler(
   () => import("virtual:react-router/server-build"),
