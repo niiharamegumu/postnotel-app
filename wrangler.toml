@@ -3,5 +3,9 @@ compatibility_date = "2025-02-24"
 main = "./workers/app.ts"
 keep_vars = true
 
+[assets]
+binding = "ASSETS"
+directory = "./build/client"
+
 [observability.logs]
 enabled = true
