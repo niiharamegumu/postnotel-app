@@ -8,16 +8,26 @@ import { useRevalidator } from "react-router";
 export function useAuthRevalidator() {
 	const revalidator = useRevalidator();
 	const lastRunRef = useRef<number>(0);
+	const timeoutIdRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
 	// Avoid magic numbers: throttle interval in ms
 	const THROTTLE_INTERVAL_MS = 1000;
+	const REVALIDATE_DELAY_MS = 500;
 
 	useEffect(() => {
 		const run = () => {
 			const now = Date.now();
 			if (now - lastRunRef.current < THROTTLE_INTERVAL_MS) return;
 			lastRunRef.current = now;
-			revalidator.revalidate();
+
+			if (timeoutIdRef.current) {
+				clearTimeout(timeoutIdRef.current);
+			}
+
+			timeoutIdRef.current = window.setTimeout(() => {
+				timeoutIdRef.current = null;
+				revalidator.revalidate();
+			}, REVALIDATE_DELAY_MS);
 		};
 
 		const onVisibility = () => {
@@ -37,6 +47,10 @@ export function useAuthRevalidator() {
 			window.removeEventListener("focus", onFocus);
 			window.removeEventListener("pageshow", onPageShow);
 			window.removeEventListener("online", onOnline);
+			if (timeoutIdRef.current) {
+				clearTimeout(timeoutIdRef.current);
+				timeoutIdRef.current = null;
+			}
 		};
 	}, [revalidator]);
 }
