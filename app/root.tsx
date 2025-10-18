@@ -7,11 +7,9 @@ import {
 	isRouteErrorResponse,
 	useLoaderData,
 } from "react-router";
-import { useEffect, useState } from "react";
 
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
-import { StatusCodes } from "http-status-codes";
 import type { Route } from "./+types/root";
 import "./app.css";
 import { Toaster } from "./components/ui/sonner";
@@ -56,20 +54,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	);
 }
 
-type LoaderStatus = "success" | "unauthenticated" | "no-content" | "error" | "network-error";
-
-type RootLoaderData = {
-	userInfo: UserInfo | null;
-	status: LoaderStatus;
-};
-
-const buildLoaderResult = (userInfo: UserInfo | null, status: LoaderStatus): RootLoaderData => ({
-	userInfo,
-	status,
-});
-
-export async function loader({ request, context }: Route.LoaderArgs): Promise<RootLoaderData> {
+export async function loader({
+	request,
+	context,
+}: Route.LoaderArgs): Promise<{ userInfo: UserInfo | null }> {
 	try {
+		const cookieHeader = request.headers.get("cookie");
+		console.info("[root.loader] cookie length:", cookieHeader?.length ?? 0);
 		const response = await fetcher(
 			context,
 			endpoints.users.me,
@@ -80,60 +71,25 @@ export async function loader({ request, context }: Route.LoaderArgs): Promise<Ro
 			},
 			{ fallbackPath: "/api/users/me" },
 		);
-
-		if (response.status === StatusCodes.NO_CONTENT) {
-			return buildLoaderResult(null, "no-content");
-		}
-
-		if (
-			response.status === StatusCodes.UNAUTHORIZED ||
-			response.status === StatusCodes.FORBIDDEN
-		) {
-			return buildLoaderResult(null, "unauthenticated");
-		}
-
-		if (!response.ok) {
-			const errorText = await response
-				.text()
-				.then((text) => text)
-				.catch(() => undefined);
-			console.error("Failed to load user info:", response.status, errorText);
-			return buildLoaderResult(null, "error");
-		}
+		if (response.status === 204) return { userInfo: null };
+		if (!response.ok) return { userInfo: null };
 
 		const data = (await response.json()) as UserInfo | null;
-		if (!data) return buildLoaderResult(null, "no-content");
+		if (!data) return { userInfo: null };
 
-		return buildLoaderResult(data, "success");
+		return { userInfo: data };
 	} catch (error) {
-		console.error("Failed to load user info:", error);
-		return buildLoaderResult(null, "network-error");
+		return { userInfo: null };
 	}
 }
 
 export default function App() {
-	const { userInfo, status } = useLoaderData<RootLoaderData>();
-	const [cachedUserInfo, setCachedUserInfo] = useState<UserInfo | null>(() => userInfo);
-
-	useEffect(() => {
-		if (userInfo) {
-			setCachedUserInfo(userInfo);
-			return;
-		}
-
-		if (status === "unauthenticated" || status === "no-content") {
-			setCachedUserInfo(null);
-		}
-	}, [userInfo, status]);
-
-	const effectiveUserInfo =
-		userInfo ?? (status === "network-error" || status === "error" ? cachedUserInfo : null);
-
+	const { userInfo } = useLoaderData<{ userInfo: UserInfo | null }>();
 	useAuthRevalidator();
 	return (
 		<>
 			<Toaster position="top-right" />
-			<Outlet context={effectiveUserInfo} />
+			<Outlet context={userInfo} />
 		</>
 	);
 }
