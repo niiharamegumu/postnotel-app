@@ -59,8 +59,6 @@ export async function loader({
 	context,
 }: Route.LoaderArgs): Promise<{ userInfo: UserInfo | null }> {
 	try {
-		const cookieHeader = request.headers.get("cookie");
-		console.info("[root.loader] cookie length:", cookieHeader?.length ?? 0);
 		const response = await fetcher(
 			context,
 			endpoints.users.me,
