@@ -52,15 +52,7 @@ npm install
 
 ### 2. 環境変数の設定
 
-Cloudflare Workersとローカル開発で利用する環境変数を`.dev.vars`に設定します。
-
-```text
-API_BASE_URL="https://api.example.com"
-R2_BASE_URL="https://r2.example.com"
-# 必要に応じてOAuthやストレージ関連のシークレットを追記してください
-```
-
-Wranglerにシークレットを登録する場合は`npx wrangler secret put <NAME>`を使用します。
+Cloudflare Workersとローカル開発で利用する環境変数を`.dev.vars`に設定します。バックエンドAPIは独自開発の非公開サービスのため、必要なURLやシークレットはプロジェクトオーナーから取得してください。Wranglerにシークレットを登録する場合は`npx wrangler secret put <NAME>`を使用します。
 
 ### 3. 開発サーバー
 
@@ -86,12 +78,11 @@ Wranglerにシークレットを登録する場合は`npx wrangler secret put <N
 ## 仕様とドキュメント
 
 - `context/PostNotel_Frontend_Specification.md`: フロントエンド仕様と画面要件。
-- `context/PostNotel_API_Documentation.md`: BFFがアクセスするREST APIの詳細。
 - `AGENTS.md` / `CLAUDE.md`: AIエージェント向けのワークフローとリポジトリ運用ルール。
+- 独自APIの詳細ドキュメントは非公開です。必要な場合はプロジェクトオーナーに問い合わせてください。
 
 ## トラブルシューティング
 
-- API呼び出しで`API_BASE_URL`未設定エラーが発生する場合は`.dev.vars`とWranglerシークレットを確認してください。
 - Cloudflare Workersで新しい環境変数を追加した場合は`npm run typecheck`を再実行し、生成された型を利用してください。
 - shadcn/ui配下のコンポーネントは自動生成物のため手動で編集しないでください。
 
