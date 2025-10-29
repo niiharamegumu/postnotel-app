@@ -1,80 +1,100 @@
-# Welcome to React Router!
+# PostNotel
 
-A modern, production-ready template for building full-stack React applications using React Router.
+PostNotelはカレンダーを中心に日々の記録を残すモダンなノートアプリケーションです。写真付きノート、タグ管理、AIによるワインラベル認識を備え、Cloudflare Workers上で高速に動作します。
 
-## Features
+## 主な機能
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- カレンダードリブンなノート管理: ノート作成・編集・削除とアクセスレベル制御、日付やタグによる絞り込みをサポートします。
+- BlockNoteベースのリッチテキストエディタ: マークダウン入力、画像埋め込み、複数画像のプレビューに対応します。
+- 画像アップロードと最適化: ブラウザ側で圧縮した画像をアップロードし、R2等のオブジェクトストレージに保存します。
+- AIワイン認識: ワインラベル画像から銘柄情報を抽出して専用ノートを生成します。
+- レスポンシブUI: スマートフォンからデスクトップまで最適化され、タッチジェスチャーやショートカットも提供します。
+- サーバーサイドレンダリング: React Router v7 + Cloudflare Workersによるエッジ配信で高速に描画します。
 
-## Getting Started
+## 技術スタック
 
-### Installation
+- React Router v7 (SSR) / React 19
+- TypeScript / Vite 6
+- Cloudflare Workers / Wrangler
+- Tailwind CSS v4
+- BlockNote, React Hook Form, Zod, Radix UI, Sonner, Framer Motion, date-fns
 
-Install the dependencies:
+## ディレクトリ構成
+
+```text
+app/
+├── components/        # 再利用可能なUIコンポーネント（shadcn/uiは自動生成物）
+├── features/          # 機能単位の状態・ロジック（auth, notes, tags, wines, image等）
+├── routes/            # ファイルベースのReact RouterルートとBFFエンドポイント
+├── layout/            # 画面レイアウト
+├── hooks/             # 共通Reactフック
+├── lib/               # フェッチャーやユーティリティ
+├── constants/         # アプリ定数
+├── types/             # 型定義
+└── root.tsx           # エントリーポイント
+workers/               # Cloudflare Workerエントリ
+context/               # API・フロントエンド仕様書
+```
+
+## セットアップ
+
+### 前提条件
+
+- Node.js 20以上
+- npm
+- Cloudflare Wrangler CLI (`npm install -g wrangler`)
+
+### 1. 依存関係のインストール
 
 ```bash
 npm install
 ```
 
-### Development
+### 2. 環境変数の設定
 
-Start the development server with HMR:
+Cloudflare Workersとローカル開発で利用する環境変数を`.dev.vars`に設定します。
 
-```bash
-npm run dev
+```text
+API_BASE_URL="https://api.example.com"
+R2_BASE_URL="https://r2.example.com"
+# 必要に応じてOAuthやストレージ関連のシークレットを追記してください
 ```
 
-Your application will be available at `http://localhost:5173`.
+Wranglerにシークレットを登録する場合は`npx wrangler secret put <NAME>`を使用します。
 
-## Previewing the Production Build
+### 3. 開発サーバー
 
-Preview the production build locally:
+- `npm run dev`: React Router開発サーバー（HMR、http://localhost:5173）
+- `npm run start`: Cloudflare Workersローカルエミュレーション
 
-```bash
-npm run preview
-```
+### 4. ビルド・プレビュー
 
-## Building for Production
+- `npm run build`: SSRビルドを生成します。
+- `npm run preview`: 生成物をローカルで確認します。
 
-Create a production build:
+### 5. デプロイと検証
 
-```bash
-npm run build
-```
+- `npm run deploy`: ビルド後にWranglerで本番へデプロイします。
+- `npx wrangler versions upload`: プレビュー向けバージョンをアップロードします。
+- `npx wrangler versions deploy`: 検証済みバージョンを本番へ昇格します。
 
-## Deployment
+### 6. 型検査と整形
 
-Deployment is done using the Wrangler CLI.
+- `npm run typecheck`: Worker型生成とTypeScriptビルドをまとめて実行します。
+- `npx biome check app --write`: Biomeによるコード整形とLint（必要に応じてディレクトリを調整してください）。
 
-To build and deploy directly to production:
+## 仕様とドキュメント
 
-```sh
-npm run deploy
-```
+- `context/PostNotel_Frontend_Specification.md`: フロントエンド仕様と画面要件。
+- `context/PostNotel_API_Documentation.md`: BFFがアクセスするREST APIの詳細。
+- `AGENTS.md` / `CLAUDE.md`: AIエージェント向けのワークフローとリポジトリ運用ルール。
 
-To deploy a preview URL:
+## トラブルシューティング
 
-```sh
-npx wrangler versions upload
-```
+- API呼び出しで`API_BASE_URL`未設定エラーが発生する場合は`.dev.vars`とWranglerシークレットを確認してください。
+- Cloudflare Workersで新しい環境変数を追加した場合は`npm run typecheck`を再実行し、生成された型を利用してください。
+- shadcn/ui配下のコンポーネントは自動生成物のため手動で編集しないでください。
 
-You can then promote a version to production after verification or roll it out progressively.
+## ライセンス
 
-```sh
-npx wrangler versions deploy
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
-# postnotel-app
+このリポジトリのライセンスは未指定です。必要に応じてプロジェクトオーナーに確認してください。
