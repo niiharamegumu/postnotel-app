@@ -54,7 +54,7 @@ export default function Top() {
 							<li>
 								Twitter :
 								<a
-									href="https://twitter.com/megumu_niihara"
+									href="https://x.com/megumu_me"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="ml-1"
