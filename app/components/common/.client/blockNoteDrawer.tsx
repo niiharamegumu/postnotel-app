@@ -41,6 +41,7 @@ type BlockNoteDrawerProps = {
 	setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	note: Note | null;
 	targetDate: Date;
+	disableTrigger?: boolean;
 };
 
 export default function BlockNoteDrawer({
@@ -52,6 +53,7 @@ export default function BlockNoteDrawer({
 	setOpen,
 	targetDate,
 	note,
+	disableTrigger = false,
 }: BlockNoteDrawerProps) {
 	const { deleteNote } = useNotes();
 	const [isPrivate, setIsPrivate] = useState(true);
@@ -410,8 +412,11 @@ export default function BlockNoteDrawer({
 				setOpen(isOpen);
 			}}
 		>
-			<DrawerTrigger asChild>
-				<Button className="border-solid border-secondary border-1">
+			<DrawerTrigger asChild disabled={disableTrigger && noteDrawerType === ActionType.Create}>
+				<Button
+					className="border-solid border-secondary border-1"
+					disabled={disableTrigger && noteDrawerType === ActionType.Create}
+				>
 					<AnimatePresence mode="wait" initial={false}>
 						<motion.span
 							key={open ? "close" : "plus"}
