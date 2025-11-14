@@ -168,6 +168,7 @@ export default function Index() {
 			<div className="w-full sticky top-0 z-2  px-4 md:px-2 py-2 backdrop-blur-md">
 				<WeekCalendar
 					selectedDate={selectedDate}
+					isLoading={isLoading}
 					onDateSelect={handleDateSelect}
 					onWeekChange={handleWeekChange}
 					noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
@@ -175,11 +176,6 @@ export default function Index() {
 					onCalendarReady={handleCalendarReady}
 					className="p-0"
 				/>
-				{isLoading && (
-					<div className="py-4">
-						<LoadingState variant="spinner" className="text-center" />
-					</div>
-				)}
 			</div>
 			<motion.section
 				className="w-full min-h-screen md:min-h-[80vh] px-4 md:px-0"
