@@ -165,7 +165,7 @@ export default function Index() {
 
 	return (
 		<div className="max-w-2xl mx-auto space-y-6">
-			<div className="w-full sticky top-0 z-2  px-4 md:px-2 py-2 backdrop-blur-md">
+			<div className="w-full sticky top-0 z-2  px-4 md:px-2 py-2 backdrop-blur-xs">
 				<WeekCalendar
 					selectedDate={selectedDate}
 					isLoading={isLoading}
