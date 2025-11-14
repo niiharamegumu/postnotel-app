@@ -165,7 +165,7 @@ export default function Index() {
 
 	return (
 		<div className="max-w-2xl mx-auto space-y-6">
-			<div className="w-full">
+			<div className="w-full sticky top-0 z-2  px-1 py-2 backdrop-blur-md">
 				<WeekCalendar
 					selectedDate={selectedDate}
 					onDateSelect={handleDateSelect}
@@ -177,7 +177,7 @@ export default function Index() {
 				/>
 			</div>
 			<motion.section
-				className="w-full min-h-screen md:min-h-[80vh]"
+				className="w-full min-h-screen md:min-h-[80vh] px-4 md:px-0"
 				initial={{ x: 0, opacity: 1 }}
 				animate={{ x: 0, opacity: 1 }}
 				transition={{
