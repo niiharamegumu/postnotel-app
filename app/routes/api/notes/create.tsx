@@ -1,4 +1,4 @@
-import { isToday } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { StatusCodes } from "http-status-codes";
 import type { ActionFunctionArgs } from "react-router";
 import type { AccessLevel } from "~/constants/accessLevel";
@@ -37,9 +37,9 @@ export async function action({ request, context }: ActionFunctionArgs): Promise<
 			);
 		}
 
-		const noteDate: Date = new Date(payload.request.noteDay);
+		const todayJST: string = formatInTimeZone(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
 
-		if (!isToday(noteDate)) {
+		if (payload.request.noteDay !== todayJST) {
 			return Response.json(
 				{
 					success: false,
