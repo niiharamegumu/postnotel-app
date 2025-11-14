@@ -175,6 +175,11 @@ export default function Index() {
 					onCalendarReady={handleCalendarReady}
 					className="p-0"
 				/>
+				{isLoading && (
+					<div className="py-4">
+						<LoadingState variant="spinner" className="text-center" />
+					</div>
+				)}
 			</div>
 			<motion.section
 				className="w-full min-h-screen md:min-h-[80vh] px-4 md:px-0"
@@ -236,95 +241,90 @@ export default function Index() {
 				}}
 			>
 				{useMemo(
-					() =>
-						isLoading ? (
-							<div className="space-y-4">
-								<LoadingState variant="spinner" className="text-center" />
-							</div>
-						) : (
-							<>
-								{notes && notes.length > 0 ? (
-									<ul className="space-y-4">
-										{notes.map((note) => (
-											<Suspense
-												key={note.noteId}
-												fallback={
-													<li>
-														<LoadingState className="h-10 w-full" />
-													</li>
-												}
-											>
-												<li className="flex flex-col items-start">
-													{note.images?.length > 0 && (
-														<div className="mb-2">
-															<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
-																{note.images.map((img, i) => (
-																	<div
-																		key={`${note.noteId}-img-${i}`}
-																		className="cursor-pointer shrink-0"
-																		onClick={(event) => {
-																			event.stopPropagation();
-																			openZoom(img, `ノート添付 #${i + 1}`);
-																		}}
-																	>
-																		<img
-																			src={img}
-																			alt={`ノート添付 #${i + 1}`}
-																			loading="lazy"
-																			decoding="async"
-																			className="w-auto h-auto max-h-[200px] object-cover"
-																		/>
-																	</div>
+					() => (
+						<>
+							{notes && notes.length > 0 ? (
+								<ul className="space-y-4">
+									{notes.map((note) => (
+										<Suspense
+											key={note.noteId}
+											fallback={
+												<li>
+													<LoadingState className="h-10 w-full" />
+												</li>
+											}
+										>
+											<li className="flex flex-col items-start">
+												{note.images?.length > 0 && (
+													<div className="mb-2">
+														<div className="flex gap-[1px] flex-nowrap overflow-x-auto rounded">
+															{note.images.map((img, i) => (
+																<div
+																	key={`${note.noteId}-img-${i}`}
+																	className="cursor-pointer shrink-0"
+																	onClick={(event) => {
+																		event.stopPropagation();
+																		openZoom(img, `ノート添付 #${i + 1}`);
+																	}}
+																>
+																	<img
+																		src={img}
+																		alt={`ノート添付 #${i + 1}`}
+																		loading="lazy"
+																		decoding="async"
+																		className="w-auto h-auto max-h-[200px] object-cover"
+																	/>
+																</div>
+															))}
+														</div>
+													</div>
+												)}
+												<div
+													className={cn(
+														"wrap-anywhere rounded mb-1 max-w-full overflow-auto w-full",
+														note.accessLevel === AccessLevel.Private && "cursor-pointer",
+													)}
+													onClick={() => handleEditNote(note)}
+												>
+													<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
+														<NoteContent note={note} />
+													</ClientOnly>
+												</div>
+												<div className="text-xs text-muted-foreground overflow-scroll max-w-full flex items-stretch gap-2">
+													<div className="flex items-center gap-2 p-2 bg-secondary rounded">
+														<div>{format(new Date(note.createdAt), "HH:mm")}</div>
+														<div>{noteContentTypeLabels[note.contentType]}</div>
+														{note.tags && note.tags.tags.length > 0 && (
+															<div className="flex items-center gap-2">
+																{note.tags.tags.map((tag) => (
+																	<TagLink key={tag.id} id={tag.id} name={tag.name} />
 																))}
 															</div>
-														</div>
-													)}
-													<div
-														className={cn(
-															"wrap-anywhere rounded mb-1 max-w-full overflow-auto w-full",
-															note.accessLevel === AccessLevel.Private && "cursor-pointer",
 														)}
-														onClick={() => handleEditNote(note)}
-													>
-														<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
-															<NoteContent note={note} />
-														</ClientOnly>
+														{userInfo && note.accessLevel === AccessLevel.Private && (
+															<div className="flex items-center text-destructive">
+																<EyeOff size={18} />
+															</div>
+														)}
+														{userInfo && note.accessLevel === AccessLevel.Public && (
+															<div className="flex items-center text-success">
+																<Eye size={18} />
+															</div>
+														)}
 													</div>
-													<div className="text-xs text-muted-foreground overflow-scroll max-w-full flex items-stretch gap-2">
-														<div className="flex items-center gap-2 p-2 bg-secondary rounded">
-															<div>{format(new Date(note.createdAt), "HH:mm")}</div>
-															<div>{noteContentTypeLabels[note.contentType]}</div>
-															{note.tags && note.tags.tags.length > 0 && (
-																<div className="flex items-center gap-2">
-																	{note.tags.tags.map((tag) => (
-																		<TagLink key={tag.id} id={tag.id} name={tag.name} />
-																	))}
-																</div>
-															)}
-															{userInfo && note.accessLevel === AccessLevel.Private && (
-																<div className="flex items-center text-destructive">
-																	<EyeOff size={18} />
-																</div>
-															)}
-															{userInfo && note.accessLevel === AccessLevel.Public && (
-																<div className="flex items-center text-success">
-																	<Eye size={18} />
-																</div>
-															)}
-														</div>
-													</div>
-												</li>
-											</Suspense>
-										))}
-									</ul>
-								) : (
-									<div className="flex items-center justify-center min-h-[60vh]">
-										<p className="text-primary text-center">ノートがありません。</p>
-									</div>
-								)}
-							</>
-						),
-					[isLoading, notes, handleEditNote, openZoom, userInfo],
+												</div>
+											</li>
+										</Suspense>
+									))}
+								</ul>
+							) : (
+								<div className="flex items-center justify-center min-h-[60vh]">
+									<p className="text-primary text-center">ノートがありません。</p>
+								</div>
+							)}
+						</>
+					),
+					[notes, handleEditNote, openZoom, userInfo],
 				)}
 			</motion.section>
 			<ImageZoomModal isOpen={isOpen} onClose={closeZoom} imageUrl={imageUrl} alt={alt} />
