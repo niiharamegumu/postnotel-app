@@ -1,3 +1,4 @@
+import { isToday } from "date-fns";
 import { Plus } from "lucide-react";
 import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 import { Outlet, useOutletContext, useSearchParams } from "react-router";
@@ -22,6 +23,8 @@ export default function WithPost() {
 
 	const date = searchParams.get("date");
 	const targetDate = useMemo(() => (date ? new Date(date) : new Date()), [date]);
+
+	const isTodayDate = useMemo(() => isToday(targetDate), [targetDate]);
 
 	const handleCreateNote = useCallback(
 		async (params: NoteApiRequest): Promise<void> => {
@@ -83,7 +86,10 @@ export default function WithPost() {
 						>
 							<Suspense
 								fallback={
-									<Button className="border-solid border-secondary border-1">
+									<Button
+										className="border-solid border-secondary border-1"
+										disabled={!isTodayDate}
+									>
 										<Plus />
 									</Button>
 								}
@@ -97,6 +103,7 @@ export default function WithPost() {
 									setOpen={setNoteDrawerOpen}
 									note={targetNote}
 									targetDate={targetDate}
+									disableTrigger={!isTodayDate}
 								/>
 							</Suspense>
 						</ClientOnly>

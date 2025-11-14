@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { StatusCodes } from "http-status-codes";
 import { type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { useFetcher, useLocation, useNavigate, useRevalidator } from "react-router";
@@ -59,6 +59,13 @@ export function useNotes() {
 		(params: NoteApiRequest, targetDate: Date): Promise<void> => {
 			const { content, accessLevel, images, tagIds } = params;
 			if (!content) return Promise.resolve();
+
+			if (!isToday(targetDate)) {
+				toast.error("今日の日付のノートのみ作成できます");
+				return Promise.reject(
+					new ApiResponseError(StatusCodes.BAD_REQUEST, "今日の日付のノートのみ作成できます"),
+				);
+			}
 
 			const noteDay = format(targetDate, "yyyy-MM-dd");
 			return submitPayload(

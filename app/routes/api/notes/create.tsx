@@ -1,3 +1,4 @@
+import { isToday } from "date-fns";
 import { StatusCodes } from "http-status-codes";
 import type { ActionFunctionArgs } from "react-router";
 import type { AccessLevel } from "~/constants/accessLevel";
@@ -32,6 +33,19 @@ export async function action({ request, context }: ActionFunctionArgs): Promise<
 		if (!payload?.request?.content || !payload.request.accessLevel || !payload.request.noteDay) {
 			return Response.json(
 				{ success: false, message: "Missing required fields", status: StatusCodes.BAD_REQUEST },
+				{ status: StatusCodes.BAD_REQUEST },
+			);
+		}
+
+		const noteDate: Date = new Date(payload.request.noteDay);
+
+		if (!isToday(noteDate)) {
+			return Response.json(
+				{
+					success: false,
+					message: "今日の日付のノートのみ作成できます",
+					status: StatusCodes.BAD_REQUEST,
+				},
 				{ status: StatusCodes.BAD_REQUEST },
 			);
 		}
