@@ -84,7 +84,7 @@ export function TextSearchInput({
 				/>
 				{(isLoading || isComposing) && (
 					<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-						<LoadingState variant="spinner" className="h-4 w-4" />
+						<LoadingState variant="spinner" size="sm" className="h-4 w-4" />
 					</div>
 				)}
 			</div>

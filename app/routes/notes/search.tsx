@@ -29,7 +29,7 @@ export default function SearchPage() {
 			<SelectedTagsDisplay availableTags={availableTags} />
 
 			{isLoading ? (
-				<LoadingState variant="spinner" className="text-center" />
+				<LoadingState variant="spinner" size="sm" className="text-center" />
 			) : (
 				<>
 					{paginationInfo && paginationInfo.totalPages > 1 && (
