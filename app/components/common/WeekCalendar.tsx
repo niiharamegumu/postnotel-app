@@ -192,7 +192,7 @@ export function WeekCalendar({
 				</span>
 				{isLoading && (
 					<div className="py-4">
-						<LoadingState variant="spinner" className="text-center" />
+						<LoadingState variant="spinner" size="sm" />
 					</div>
 				)}
 				<div className="ml-auto flex items-center gap-4">
