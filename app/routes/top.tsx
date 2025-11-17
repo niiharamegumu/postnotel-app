@@ -43,6 +43,44 @@ export default function Top() {
 						</p>
 					</div>
 
+				<div>
+					<h3 className="text-lg font-semibold mb-2">This Site</h3>
+					<div className="space-y-4">
+						<div>
+							<h4 className="font-semibold">Frontend</h4>
+							<ul className="list-disc list-inside text-sm space-y-1">
+								<li>React Router v7 (SSR) + React 19 with TypeScript</li>
+								<li>Tailwind CSS v4, Radix UI primitives, BlockNote editor</li>
+								<li>Framer Motion, date-fns, Sonner for UX polish</li>
+							</ul>
+						</div>
+						<div>
+							<h4 className="font-semibold">Backend For Frontend</h4>
+							<ul className="list-disc list-inside text-sm space-y-1">
+								<li>Cloudflare Workers runtime handling SSR and `/api/*` BFF routes</li>
+								<li>React Router loaders/actions + fetcher utilities bridging to REST API</li>
+								<li>Cloudflare R2 integrations for media delivery</li>
+							</ul>
+						</div>
+						<div>
+							<h4 className="font-semibold">Backend (REST API)</h4>
+							<ul className="list-disc list-inside text-sm space-y-1">
+								<li>Go + Gin framework exposing `/v1` endpoints</li>
+								<li>Session-based Google OAuth auth, note/tag/image services</li>
+								<li>Pagination-rich responses optimized for BFF consumers</li>
+							</ul>
+						</div>
+						<div>
+							<h4 className="font-semibold">Tooling</h4>
+							<ul className="list-disc list-inside text-sm space-y-1">
+								<li>React Hook Form + Zod validation pipeline</li>
+								<li>Vite build orchestrated via Wrangler deploys</li>
+								<li>Biome formatting/linting for TypeScript stack</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
 					<div>
 						<h3 className="text-lg font-semibold mb-2">Interests</h3>
 						<p>Coffee, solo camping, cooking</p>
