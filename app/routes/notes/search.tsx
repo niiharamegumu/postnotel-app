@@ -33,15 +33,16 @@ export default function SearchPage() {
 				{isLoading ? (
 					<LoadingState variant="spinner" size="sm" className="text-center" />
 				) : (
-					paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" className="mt-2"/>
-					)
+					<>
+						<h3 className="text-sm font-medium text-muted-foreground mt-2">{paginationInfo?.totalItems || 0}件</h3>
+						{paginationInfo && paginationInfo.totalPages > 1 && (
+							<PaginationControls pagination={paginationInfo} baseUrl="/notes/search"/>
+						)}
+					</>
 				)}
 			</div>
 
-			{isLoading ? (
-				<LoadingState variant="spinner" size="sm" className="text-center" />
-			) : (
+			{!isLoading && paginationInfo && (
 				<div className="px-4">
 					<SearchResults
 						notes={notes}
