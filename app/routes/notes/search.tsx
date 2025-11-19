@@ -29,12 +29,16 @@ export default function SearchPage() {
 					<SearchHeader />
 					<SearchForm availableTags={availableTags} />
 				</div>
-				<ActiveFilters availableTags={availableTags} />
+				{availableTags.length > 0 && (
+					<div className="mb-2">
+						<ActiveFilters availableTags={availableTags} />
+					</div>
+				)}
 				{isLoading ? (
 					<LoadingState variant="spinner" size="sm" className="text-center" />
 				) : (
 					<>
-						<h3 className="text-sm font-medium text-muted-foreground mt-2">{paginationInfo?.totalItems || 0}件</h3>
+						<h3 className="text-sm font-medium text-muted-foreground mb-2">{paginationInfo?.totalItems || 0}件</h3>
 						{paginationInfo && paginationInfo.totalPages > 1 && (
 							<PaginationControls pagination={paginationInfo} baseUrl="/notes/search"/>
 						)}
