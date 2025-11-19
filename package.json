@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "npx wrangler types && react-router build",
     "deploy": "npm run build && npx wrangler deploy",
-    "dev": "react-router dev",
+    "dev": "npx wrangler types && react-router dev",
     "preview": "vite preview",
     "start": "npx wrangler dev",
     "typecheck": "npx wrangler types && react-router typegen && tsc -b"
