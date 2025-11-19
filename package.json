@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "npx wrangler types && react-router build",
     "deploy": "npm run build && npx wrangler deploy",
-    "dev": "react-router dev",
+    "dev": "npx wrangler types && react-router dev",
     "preview": "vite preview",
     "start": "npx wrangler dev",
     "typecheck": "npx wrangler types && react-router typegen && tsc -b"
@@ -16,6 +16,7 @@
     "@blocknote/react": "^0.30.0",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-avatar": "^1.1.9",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@radix-ui/react-label": "^2.1.2",
