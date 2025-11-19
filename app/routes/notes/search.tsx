@@ -1,10 +1,10 @@
 import { useLoaderData } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { PaginationControls } from "~/components/common/PaginationControls";
+import { ActiveFilters } from "~/features/search/components/ActiveFilters";
 import { SearchForm } from "~/features/search/components/SearchForm";
 import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
-import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
 import { type SearchLoaderData, useSearchLoader } from "~/features/search/hooks/useSearchLoader";
 import { useSearchMeta } from "~/features/search/hooks/useSearchMeta";
 import { useNavigation } from "~/hooks/useNavigation";
@@ -26,7 +26,7 @@ export default function SearchPage() {
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<SearchHeader />
 			<SearchForm availableTags={availableTags} />
-			<SelectedTagsDisplay availableTags={availableTags} />
+			<ActiveFilters availableTags={availableTags} />
 
 			{isLoading ? (
 				<LoadingState variant="spinner" size="sm" className="text-center" />
