@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
 import type { Route } from "./+types/redirect";
 
-export async function clientLoader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const target = url.searchParams.get("target");
 
