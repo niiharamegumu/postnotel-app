@@ -24,7 +24,7 @@ export default function SearchPage() {
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
-			<div className="sticky top-0 left-0 right-0 z-2 backdrop-blur-xs">
+			<div className="sticky top-0 left-0 right-0 z-2 backdrop-blur-xs px-4">
 				<div className="flex items-center gap-2 relative">
 					<SearchHeader />
 					<SearchForm availableTags={availableTags} />
@@ -42,13 +42,13 @@ export default function SearchPage() {
 			{isLoading ? (
 				<LoadingState variant="spinner" size="sm" className="text-center" />
 			) : (
-				<>
+				<div className="px-4">
 					<SearchResults
 						notes={notes}
 						availableTags={availableTags}
 						paginationInfo={paginationInfo}
 					/>
-				</>
+				</div>
 			)}
 		</div>
 	);

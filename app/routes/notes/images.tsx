@@ -55,7 +55,7 @@ export default function ImagesPage() {
 	const { isOpen, imageUrl, alt, overlayContent, openZoom, closeZoom } = useImageZoom();
 
 	return (
-		<div className="max-w-2xl mx-auto py-8 space-y-6">
+		<div className="max-w-2xl mx-auto py-8 space-y-6 px-4">
 			<div className="w-full">
 				<h1 className="text-3xl font-bold text-primary mb-2">Images</h1>
 				<p className="text-sm text-muted-foreground">{paginationInfo.totalItems || 0}件</p>

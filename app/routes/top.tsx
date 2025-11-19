@@ -4,7 +4,7 @@ export function meta() {
 
 export default function Top() {
 	return (
-		<div className="max-w-2xl mx-auto py-8 space-y-10">
+		<div className="max-w-2xl mx-auto py-8 space-y-10 px-4">
 			<section>
 				<h1 className="flex items-center gap-4 text-3xl font-bold">
 					<img
