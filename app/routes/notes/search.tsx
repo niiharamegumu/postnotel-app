@@ -26,7 +26,9 @@ export default function SearchPage() {
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<SearchHeader />
 			<SearchForm availableTags={availableTags} />
-			<ActiveFilters availableTags={availableTags} />
+			<div className="fixed top-0 left-0 right-0 z-2 backdrop-blur-xs">
+				<ActiveFilters availableTags={availableTags} />
+			</div>
 
 			{isLoading ? (
 				<LoadingState variant="spinner" size="sm" className="text-center" />
