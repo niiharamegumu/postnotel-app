@@ -61,7 +61,8 @@ export function ActiveFilters({ availableTags }: ActiveFiltersProps) {
 	};
 
 	return (
-		<div className="space-y-2 p-3 bg-card/50 rounded-md border">
+		<div className="fixed top-0 left-0 right-0 z-2 backdrop-blur-xs px-4 md:px-2 py-2">
+			<div className="max-w-2xl mx-auto space-y-2">
 			<div className="flex items-center justify-between">
 				<h3 className="text-sm font-medium text-muted-foreground">適用中のフィルター</h3>
 				<Button
@@ -140,6 +141,7 @@ export function ActiveFilters({ availableTags }: ActiveFiltersProps) {
 						</button>
 					</div>
 				))}
+			</div>
 			</div>
 		</div>
 	);
