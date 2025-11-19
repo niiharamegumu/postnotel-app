@@ -24,27 +24,30 @@ export default function SearchPage() {
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
-			<SearchHeader />
-			<SearchForm availableTags={availableTags} />
-			<div className="fixed top-0 left-0 right-0 z-2 backdrop-blur-xs">
+			<div className="sticky top-0 left-0 right-0 z-2 backdrop-blur-xs">
+				<div className="flex items-center gap-2">
+					<SearchHeader />
+					<SearchForm availableTags={availableTags} />
+				</div>
 				<ActiveFilters availableTags={availableTags} />
+				{isLoading ? (
+					<LoadingState variant="spinner" size="sm" className="text-center" />
+				) : (
+					paginationInfo && paginationInfo.totalPages > 1 && (
+						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
+					)
+				)}
 			</div>
 
 			{isLoading ? (
 				<LoadingState variant="spinner" size="sm" className="text-center" />
 			) : (
 				<>
-					{paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
-					)}
 					<SearchResults
 						notes={notes}
 						availableTags={availableTags}
 						paginationInfo={paginationInfo}
 					/>
-					{paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
-					)}
 				</>
 			)}
 		</div>

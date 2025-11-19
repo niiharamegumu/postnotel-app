@@ -18,7 +18,7 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+		<div className="flex justify-start">
 			<AnimatePresence>
 				{isOpen && (
 					<motion.div
@@ -62,11 +62,11 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 			<Button
 				variant="outline"
 				size="icon"
-				className="rounded-full w-12 h-12 transition-all bg-background"
+				className="rounded-full w-8 h-8 transition-all bg-background"
 				onClick={() => setIsOpen(!isOpen)}
 				aria-label={isOpen ? "検索条件を閉じる" : "検索条件を開く"}
 			>
-				{isOpen ? <X size={20} /> : <Filter size={20} />}
+				{isOpen ? <X size={8} /> : <Filter size={8} />}
 			</Button>
 		</div>
 	);
