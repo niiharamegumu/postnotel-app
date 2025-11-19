@@ -18,15 +18,25 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="flex justify-start">
+		<div className="relative flex justify-start">
+			<Button
+				variant="outline"
+				size="icon"
+				className="rounded-full w-8 h-8 transition-all bg-background"
+				onClick={() => setIsOpen(!isOpen)}
+				aria-label={isOpen ? "検索条件を閉じる" : "検索条件を開く"}
+			>
+				{isOpen ? <X size={8} /> : <Filter size={8} />}
+			</Button>
+
 			<AnimatePresence>
 				{isOpen && (
 					<motion.div
-						initial={{ opacity: 0, scale: 0.95, transformOrigin: "bottom right" }}
-						animate={{ opacity: 1, scale: 1, transformOrigin: "bottom right" }}
-						exit={{ opacity: 0, scale: 0.95, transformOrigin: "bottom right" }}
+						initial={{ opacity: 0, scale: 0.95, transformOrigin: "top left" }}
+						animate={{ opacity: 1, scale: 1, transformOrigin: "top left" }}
+						exit={{ opacity: 0, scale: 0.95, transformOrigin: "top left" }}
 						transition={{ duration: 0.2, ease: "easeOut" }}
-						className="mb-4 bg-background border rounded-lg p-4 shadow-lg"
+						className="absolute top-full left-0 mt-2 z-50 bg-background border rounded-lg p-4 shadow-lg"
 					>
 						<div className="space-y-4">
 							<div className="space-y-1">
@@ -58,16 +68,6 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 					</motion.div>
 				)}
 			</AnimatePresence>
-
-			<Button
-				variant="outline"
-				size="icon"
-				className="rounded-full w-8 h-8 transition-all bg-background"
-				onClick={() => setIsOpen(!isOpen)}
-				aria-label={isOpen ? "検索条件を閉じる" : "検索条件を開く"}
-			>
-				{isOpen ? <X size={8} /> : <Filter size={8} />}
-			</Button>
 		</div>
 	);
 }
