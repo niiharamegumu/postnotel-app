@@ -31,7 +31,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		}
 
 		if (!response.ok) {
-			const errorCode = response.status >= 500 ? "server_error" : "login_failed";
+			const errorCode = response.status >= StatusCodes.INTERNAL_SERVER_ERROR ? "server_error" : "login_failed";
 			console.log(`Login error: HTTP ${response.status}`);
 			return redirect(`/auth/login?error=${errorCode}`);
 		}

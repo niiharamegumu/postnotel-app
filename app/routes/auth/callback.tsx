@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { redirect } from "react-router";
 import { endpoints } from "~/constants/endpoints";
 import { fetcher } from "~/lib/fetcher";
@@ -25,12 +26,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 			},
 		);
 
-		if (response.ok) {
+		if (response.status === StatusCodes.OK) {
 			return redirect("/", { headers: response.headers });
 		}
 
 		// エラーステータスに応じて異なるエラーを返す
-		const errorCode = response.status >= 500 ? "server_error" : "auth_failed";
+		const errorCode = response.status >= StatusCodes.INTERNAL_SERVER_ERROR ? "server_error" : "auth_failed";
 		console.log(`認証コールバックエラー: HTTP ${response.status}`);
 		return redirect(`/auth/login?error=${errorCode}`);
 	} catch (error) {
