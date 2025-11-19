@@ -83,7 +83,7 @@ Cloudflare Workersとローカル開発で利用する環境変数を`.dev.vars`
 
 ## トラブルシューティング
 
-- Cloudflare Workersで新しい環境変数を追加した場合は`npm run typecheck`を再実行し、生成された型を利用してください。
+- Cloudflare Workersで新しい環境変数を追加した場合、`npm run dev` または `npm run build` の実行時に型定義が自動更新されます。
 - shadcn/ui配下のコンポーネントは自動生成物のため手動で編集しないでください。
 
 ## ライセンス

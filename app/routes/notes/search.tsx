@@ -1,10 +1,10 @@
 import { useLoaderData } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { PaginationControls } from "~/components/common/PaginationControls";
+import { ActiveFilters } from "~/features/search/components/ActiveFilters";
 import { SearchForm } from "~/features/search/components/SearchForm";
 import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
-import { SelectedTagsDisplay } from "~/features/search/components/SelectedTagsDisplay";
 import { type SearchLoaderData, useSearchLoader } from "~/features/search/hooks/useSearchLoader";
 import { useSearchMeta } from "~/features/search/hooks/useSearchMeta";
 import { useNavigation } from "~/hooks/useNavigation";
@@ -24,25 +24,30 @@ export default function SearchPage() {
 
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
-			<SearchHeader />
-			<SearchForm availableTags={availableTags} />
-			<SelectedTagsDisplay availableTags={availableTags} />
+			<div className="sticky top-0 left-0 right-0 z-2 backdrop-blur-xs">
+				<div className="flex items-center gap-2 relative">
+					<SearchHeader />
+					<SearchForm availableTags={availableTags} />
+				</div>
+				<ActiveFilters availableTags={availableTags} />
+				{isLoading ? (
+					<LoadingState variant="spinner" size="sm" className="text-center" />
+				) : (
+					paginationInfo && paginationInfo.totalPages > 1 && (
+						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" className="mt-2"/>
+					)
+				)}
+			</div>
 
 			{isLoading ? (
 				<LoadingState variant="spinner" size="sm" className="text-center" />
 			) : (
 				<>
-					{paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
-					)}
 					<SearchResults
 						notes={notes}
 						availableTags={availableTags}
 						paginationInfo={paginationInfo}
 					/>
-					{paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
-					)}
 				</>
 			)}
 		</div>

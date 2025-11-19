@@ -22,3 +22,6 @@
 
 # Claude
 /.claude/
+
+# Worker Types
+worker-configuration.d.ts
