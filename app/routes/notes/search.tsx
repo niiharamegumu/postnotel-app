@@ -25,7 +25,7 @@ export default function SearchPage() {
 	return (
 		<div className="max-w-2xl mx-auto py-8 space-y-4">
 			<div className="sticky top-0 left-0 right-0 z-2 backdrop-blur-xs">
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-2 relative">
 					<SearchHeader />
 					<SearchForm availableTags={availableTags} />
 				</div>
@@ -34,7 +34,7 @@ export default function SearchPage() {
 					<LoadingState variant="spinner" size="sm" className="text-center" />
 				) : (
 					paginationInfo && paginationInfo.totalPages > 1 && (
-						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" />
+						<PaginationControls pagination={paginationInfo} baseUrl="/notes/search" className="mt-2"/>
 					)
 				)}
 			</div>

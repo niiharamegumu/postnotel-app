@@ -18,7 +18,7 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="relative flex justify-start">
+		<div className="flex justify-start w-full">
 			<Button
 				variant="outline"
 				size="icon"
@@ -32,11 +32,11 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 			<AnimatePresence>
 				{isOpen && (
 					<motion.div
-						initial={{ opacity: 0, scale: 0.95, transformOrigin: "top left" }}
-						animate={{ opacity: 1, scale: 1, transformOrigin: "top left" }}
-						exit={{ opacity: 0, scale: 0.95, transformOrigin: "top left" }}
+						initial={{ opacity: 0, scale: 0.95, transformOrigin: "top center" }}
+						animate={{ opacity: 1, scale: 1, transformOrigin: "top center" }}
+						exit={{ opacity: 0, scale: 0.95, transformOrigin: "top center" }}
 						transition={{ duration: 0.2, ease: "easeOut" }}
-						className="absolute top-full left-0 mt-2 z-50 bg-background border rounded-lg p-4 shadow-lg"
+						className="absolute top-full left-0 mt-2 z-2 w-full bg-background border rounded-lg p-4 shadow-lg"
 					>
 						<div className="space-y-4">
 							<div className="space-y-1">
