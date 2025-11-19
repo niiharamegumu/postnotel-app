@@ -26,7 +26,7 @@ export function SearchForm({ availableTags }: SearchFormProps) {
 						animate={{ opacity: 1, scale: 1, transformOrigin: "bottom right" }}
 						exit={{ opacity: 0, scale: 0.95, transformOrigin: "bottom right" }}
 						transition={{ duration: 0.2, ease: "easeOut" }}
-						className="mb-4 w-80 bg-background border rounded-lg p-4 shadow-lg"
+						className="mb-4 bg-background border rounded-lg p-4 shadow-lg"
 					>
 						<div className="space-y-4">
 							<div className="space-y-1">
