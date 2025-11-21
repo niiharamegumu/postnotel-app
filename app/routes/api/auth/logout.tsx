@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { redirect } from "react-router";
-import type { LoaderFunctionArgs } from "react-router";
+import type { ActionFunctionArgs } from "react-router";
 import { endpoints } from "~/constants/endpoints";
 import { fetcher } from "~/lib/fetcher";
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
 	try {
 		const response = await fetcher(context, endpoints.auth.logout, {
 			headers: {
