@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Form, Link } from "react-router";
 import type { UserInfo } from "~/types/user";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -47,7 +47,11 @@ export default function FloatMenu({ userInfo }: Props) {
 							{userInfo.name}
 						</DropdownMenuLabel>
 						<DropdownMenuItem asChild>
-							<Link to="/auth/logout">Logout</Link>
+							<Form action="/api/auth/logout" method="post" className="w-full">
+								<button type="submit" className="w-full text-left">
+									Logout
+								</button>
+							</Form>
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
 					</div>
