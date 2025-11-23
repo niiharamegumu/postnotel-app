@@ -1,20 +1,22 @@
 import { Trash, X } from "lucide-react";
 import { Tag } from "lucide-react";
+import { useQueryState } from "nuqs";
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router";
 import type { Tag as TagType } from "~/features/tags/types/tag";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 type SelectedTagsDisplayProps = {
 	availableTags: TagType[];
 };
 
 export function SelectedTagsDisplay({ availableTags }: SelectedTagsDisplayProps) {
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
+	const [tagIds, setTagIds] = useQueryState(
+		"tagIds",
+		searchParamsParsers.tagIds.withOptions({ shallow: false }),
+	);
 
 	// URLパラメータからselectedTagsを計算
-	const selectedTagIds: string[] = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
+	const selectedTagIds = tagIds || [];
 	const selectedTags: TagType[] = useMemo(
 		() => availableTags.filter((tag) => selectedTagIds.includes(tag.id)),
 		[availableTags, selectedTagIds],
@@ -22,15 +24,15 @@ export function SelectedTagsDisplay({ availableTags }: SelectedTagsDisplayProps)
 
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
-			const newTagIds: string[] = selectedTagIds.filter((id) => id !== tagIdToRemove);
-			updateSearchParams({ tagIds: newTagIds });
+			const newTagIds = selectedTagIds.filter((id) => id !== tagIdToRemove);
+			setTagIds(newTagIds.length > 0 ? newTagIds : null);
 		},
-		[selectedTagIds, updateSearchParams],
+		[selectedTagIds, setTagIds],
 	);
 
 	const handleClearAll = useCallback(() => {
-		updateSearchParams({ tagIds: [] });
-	}, [updateSearchParams]);
+		setTagIds(null);
+	}, [setTagIds]);
 
 	if (selectedTags.length === 0) {
 		return null;

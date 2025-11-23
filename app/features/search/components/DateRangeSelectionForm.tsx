@@ -1,11 +1,11 @@
 import { format, isValid, parseISO } from "date-fns";
 import { ja } from "date-fns/locale";
+import { useQueryState } from "nuqs";
 import { useCallback, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
-import { useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 const URL_FORMAT = "yyyy-MM-dd";
 
@@ -22,34 +22,39 @@ const toDisplayText = (value: string | null): string => {
 
 export function DateRangeSelectionForm() {
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
-
-	const startDateParam = searchParams.get("startDate");
-	const endDateParam = searchParams.get("endDate");
+	const [startDate, setStartDate] = useQueryState(
+		"startDate",
+		searchParamsParsers.startDate.withOptions({ shallow: false }),
+	);
+	const [endDate, setEndDate] = useQueryState(
+		"endDate",
+		searchParamsParsers.endDate.withOptions({ shallow: false }),
+	);
 
 	const selectedRange = useMemo<DateRange | undefined>(() => {
-		const from = toDateOrNull(startDateParam);
-		const to = toDateOrNull(endDateParam);
+		const from = toDateOrNull(startDate);
+		const to = toDateOrNull(endDate);
 		if (!from && !to) {
 			return undefined;
 		}
 		return { from: from ?? undefined, to: to ?? undefined };
-	}, [startDateParam, endDateParam]);
+	}, [startDate, endDate]);
 
 	const handleRangeSelect = useCallback(
 		(range: DateRange | undefined) => {
 			if (!range || (!range.from && !range.to)) {
-				updateSearchParams({ startDate: null, endDate: null });
+				setStartDate(null);
+				setEndDate(null);
 				return;
 			}
 
 			const start = range.from ? format(range.from, URL_FORMAT) : null;
 			const end = range.to ? format(range.to, URL_FORMAT) : null;
 
-			updateSearchParams({ startDate: start, endDate: end });
+			setStartDate(start);
+			setEndDate(end);
 		},
-		[updateSearchParams],
+		[setStartDate, setEndDate],
 	);
 
 	const handleToggleCalendar = useCallback(() => {
@@ -57,8 +62,8 @@ export function DateRangeSelectionForm() {
 	}, []);
 
 	const rangeLabel = useMemo(() => {
-		const start = toDisplayText(startDateParam);
-		const end = toDisplayText(endDateParam);
+		const start = toDisplayText(startDate);
+		const end = toDisplayText(endDate);
 		if (!start && !end) {
 			return "日付選択";
 		}
@@ -69,7 +74,7 @@ export function DateRangeSelectionForm() {
 			return `〜 ${end}`;
 		}
 		return `${start} 〜 ${end}`;
-	}, [startDateParam, endDateParam]);
+	}, [startDate, endDate]);
 
 	return (
 		<div className="space-y-2">

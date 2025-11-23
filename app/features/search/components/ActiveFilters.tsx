@@ -1,32 +1,27 @@
 import { Calendar, FileType, Search, Tag, Trash2, X } from "lucide-react";
-import { useSearchParams } from "react-router";
+import { useQueryStates } from "nuqs";
 import { Button } from "~/components/ui/button";
 import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
 import type { Tag as TagType } from "~/features/tags/types/tag";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 type ActiveFiltersProps = {
 	availableTags: TagType[];
 };
 
 export function ActiveFilters({ availableTags }: ActiveFiltersProps) {
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
+	const [filters, setFilters] = useQueryStates(searchParamsParsers, { shallow: false });
 
-	const query: string = searchParams.get("q") || "";
-	const contentType: string | null = searchParams.get("contentType");
-	const startDate: string | null = searchParams.get("startDate");
-	const endDate: string | null = searchParams.get("endDate");
-	const tagIds: string[] = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
+	const { q: query, contentType, startDate, endDate, tagIds } = filters;
 
-	const selectedTags: TagType[] = availableTags.filter((tag) => tagIds.includes(tag.id));
+	const selectedTags: TagType[] = availableTags.filter((tag) => tagIds?.includes(tag.id));
 
 	const hasActiveFilters: boolean = !!(
 		query ||
 		contentType ||
 		startDate ||
 		endDate ||
-		tagIds.length > 0
+		(tagIds && tagIds.length > 0)
 	);
 
 	if (!hasActiveFilters) {
@@ -34,29 +29,29 @@ export function ActiveFilters({ availableTags }: ActiveFiltersProps) {
 	}
 
 	const handleRemoveQuery = (): void => {
-		updateSearchParams({ q: "" });
+		setFilters({ q: null });
 	};
 
 	const handleRemoveContentType = (): void => {
-		updateSearchParams({ contentType: "all" });
+		setFilters({ contentType: null });
 	};
 
 	const handleRemoveDateRange = (): void => {
-		updateSearchParams({ startDate: null, endDate: null });
+		setFilters({ startDate: null, endDate: null });
 	};
 
 	const handleRemoveTag = (tagId: string): void => {
-		const newTagIds: string[] = tagIds.filter((id) => id !== tagId);
-		updateSearchParams({ tagIds: newTagIds });
+		const newTagIds = tagIds?.filter((id) => id !== tagId) || [];
+		setFilters({ tagIds: newTagIds.length > 0 ? newTagIds : null });
 	};
 
 	const handleClearAll = (): void => {
-		updateSearchParams({
-			q: "",
-			contentType: "all",
+		setFilters({
+			q: null,
+			contentType: null,
 			startDate: null,
 			endDate: null,
-			tagIds: [],
+			tagIds: null,
 		});
 	};
 
