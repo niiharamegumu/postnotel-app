@@ -1,5 +1,6 @@
 name = "postnotel-app"
 compatibility_date = "2025-02-24"
+compatibility_flags = ["nodejs_compat"]
 main = "./workers/app.ts"
 keep_vars = true
 
