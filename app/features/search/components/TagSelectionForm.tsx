@@ -1,19 +1,21 @@
+import { useQueryState } from "nuqs";
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router";
 import { TagSelector } from "~/features/tags/components/TagSelector";
 import type { Tag } from "~/features/tags/types/tag";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 type TagSelectionFormProps = {
 	availableTags: Tag[];
 };
 
 export function TagSelectionForm({ availableTags }: TagSelectionFormProps) {
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
+	const [tagIds, setTagIds] = useQueryState(
+		"tagIds",
+		searchParamsParsers.tagIds.withOptions({ shallow: false }),
+	);
 
 	// URLパラメータからselectedTagsを計算
-	const selectedTagIds = searchParams.get("tagIds")?.split(",").filter(Boolean) || [];
+	const selectedTagIds = tagIds || [];
 	const selectedTags = useMemo(
 		() => availableTags.filter((tag) => selectedTagIds.includes(tag.id)),
 		[availableTags, selectedTagIds],
@@ -22,17 +24,17 @@ export function TagSelectionForm({ availableTags }: TagSelectionFormProps) {
 	const handleTagAdd = useCallback(
 		(tag: Tag) => {
 			const newTagIds = [...selectedTagIds, tag.id];
-			updateSearchParams({ tagIds: newTagIds });
+			setTagIds(newTagIds);
 		},
-		[selectedTagIds, updateSearchParams],
+		[selectedTagIds, setTagIds],
 	);
 
 	const handleTagRemove = useCallback(
 		(tagIdToRemove: string) => {
 			const newTagIds = selectedTagIds.filter((id) => id !== tagIdToRemove);
-			updateSearchParams({ tagIds: newTagIds });
+			setTagIds(newTagIds.length > 0 ? newTagIds : null);
 		},
-		[selectedTagIds, updateSearchParams],
+		[selectedTagIds, setTagIds],
 	);
 
 	// 選択可能なタグは、まだ選択されていないタグのみ

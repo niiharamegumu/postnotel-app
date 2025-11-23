@@ -1,43 +1,41 @@
 import { Search } from "lucide-react";
+import { useQueryState } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
 import { LoadingState } from "~/components/common/LoadingState";
 import { useTextSearchDebounce } from "~/hooks/useTextSearchDebounce";
 import { cn } from "~/lib/utils";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 type TextSearchInputProps = {
 	className?: string;
 	placeholder?: string;
 	isLoading?: boolean;
 };
-
 export function TextSearchInput({
 	className,
 	placeholder = "テキスト検索",
 	isLoading = false,
 }: TextSearchInputProps) {
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
-	const urlQuery = searchParams.get("q") || "";
-	const [inputValue, setInputValue] = useState<string>(urlQuery);
+	const [query, setQuery] = useQueryState("q", searchParamsParsers.q.withOptions({ shallow: false }));
+	const [inputValue, setInputValue] = useState<string>(query || "");
 
 	const handleSearch = useCallback(
-		(query: string) => {
-			updateSearchParams({ q: query });
+		(newQuery: string) => {
+			setQuery(newQuery || null);
 		},
-		[updateSearchParams],
+		[setQuery],
 	);
 
 	const { isComposing, handleInputChange, handleCompositionStart, handleCompositionEnd } =
 		useTextSearchDebounce({
 			delay: 300,
 			onSearch: handleSearch,
+			initialQuery: query || "",
 		});
 
 	useEffect(() => {
-		setInputValue(urlQuery);
-	}, [urlQuery]);
+		setInputValue(query || "");
+	}, [query]);
 
 	const handleInputChangeEvent = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {

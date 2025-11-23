@@ -8,14 +8,6 @@ export type ValidationResult = {
 	validContentType: NoteContentType | null;
 	validStartDate: string | null;
 	validEndDate: string | null;
-	needsRedirect: boolean;
-	redirectParams: {
-		q?: string;
-		tagIds?: string[];
-		contentType?: NoteContentType;
-		startDate?: string;
-		endDate?: string;
-	};
 };
 
 const DATE_FORMAT = "yyyy-MM-dd";
@@ -86,64 +78,11 @@ export function validateSearchParams(
 		endDate,
 	);
 
-	let needsRedirect = false;
-	const redirectParams: {
-		q?: string;
-		tagIds?: string[];
-		contentType?: NoteContentType;
-		startDate?: string;
-		endDate?: string;
-	} = {};
-
-	// Handle invalid tag IDs
-	if (tagIds.length !== validTagIds.length) {
-		if (validTagIds.length > 0) {
-			redirectParams.tagIds = validTagIds;
-		} else {
-			redirectParams.tagIds = undefined;
-		}
-		needsRedirect = true;
-	}
-
-	// Handle invalid search query
-	if (searchQuery && !validSearchQuery) {
-		redirectParams.q = undefined;
-		needsRedirect = true;
-	} else if (validSearchQuery && validSearchQuery !== searchQuery) {
-		redirectParams.q = validSearchQuery;
-		needsRedirect = true;
-	}
-
-	// Handle invalid content type
-	if (contentType && !validContentType) {
-		redirectParams.contentType = undefined;
-		needsRedirect = true;
-	}
-
-	// Handle invalid date range
-	if (startDate && !validStartDate) {
-		redirectParams.startDate = undefined;
-		needsRedirect = true;
-	} else if (validStartDate && validStartDate !== startDate) {
-		redirectParams.startDate = validStartDate;
-		needsRedirect = true;
-	}
-
-	if (endDate && !validEndDate) {
-		redirectParams.endDate = undefined;
-		needsRedirect = true;
-	} else if (validEndDate && validEndDate !== endDate) {
-		redirectParams.endDate = validEndDate;
-		needsRedirect = true;
-	}
-
 	return {
 		validSearchQuery,
 		validTagIds,
 		validContentType,
 		validStartDate,
 		validEndDate,
-		needsRedirect,
-		redirectParams,
 	};
 }

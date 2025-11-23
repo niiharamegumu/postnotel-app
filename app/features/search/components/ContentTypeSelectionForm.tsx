@@ -1,5 +1,5 @@
+import { useQueryState } from "nuqs";
 import { useCallback } from "react";
-import { useSearchParams } from "react-router";
 import {
 	Select,
 	SelectContent,
@@ -8,19 +8,20 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { NoteContentType, noteContentTypeLabels } from "~/constants/noteContentType";
-import { useSearchParamsUpdate } from "../hooks/useSearchParamsUpdate";
+import { searchParamsParsers } from "../searchParams";
 
 export function ContentTypeSelectionForm() {
-	const [searchParams] = useSearchParams();
-	const updateSearchParams = useSearchParamsUpdate();
-	const selectedContentType = searchParams.get("contentType") as NoteContentType | null;
+	const [contentType, setContentType] = useQueryState(
+		"contentType",
+		searchParamsParsers.contentType.withOptions({ shallow: false }),
+	);
 
 	const handleContentTypeChange = useCallback(
 		(value: string) => {
-			const contentType = value === "all" ? value : (value as NoteContentType);
-			updateSearchParams({ contentType });
+			const newContentType = value === "all" ? null : (value as NoteContentType);
+			setContentType(newContentType);
 		},
-		[updateSearchParams],
+		[setContentType],
 	);
 
 	const contentTypeOptions = [
@@ -31,7 +32,7 @@ export function ContentTypeSelectionForm() {
 		})),
 	];
 
-	const currentValue = selectedContentType || "all";
+	const currentValue = contentType || "all";
 
 	return (
 		<div className="space-y-2">
