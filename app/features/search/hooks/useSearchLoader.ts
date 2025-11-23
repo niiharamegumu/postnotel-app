@@ -1,13 +1,11 @@
 import { parseISO } from "date-fns";
-import type { AppLoadContext } from "react-router";
-import type { NoteContentType } from "~/constants/noteContentType";
+import { type AppLoadContext, redirect } from "react-router";
 import { PAGINATION_LIMITS } from "~/constants/pagination";
 import type { Note } from "~/features/notes/types/note";
 import type { Tag } from "~/features/tags/types/tag";
-import { type PaginationInfo, calculateOffset, getPageFromSearchParams } from "~/lib/pagination";
+import { type PaginationInfo, calculateOffset } from "~/lib/pagination";
 import { fetchAvailableTags, fetchSearchResults } from "../api/searchApi";
-import { handlePaginationRedirect, handleSearchRedirect } from "../utils/searchRedirect";
-import { parseSearchParams } from "../utils/searchUrlUtils";
+import { searchParamsCache } from "../searchParams";
 import { validateSearchParams } from "../utils/searchValidation";
 
 export type SearchLoaderData = {
@@ -23,34 +21,29 @@ export async function useSearchLoader(
 	request: Request,
 	context: AppLoadContext,
 ): Promise<SearchLoaderData> {
-	const url: URL = new URL(request.url);
-	const urlSearchParams: URLSearchParams = url.searchParams;
+	const url = new URL(request.url);
+	const searchParams = searchParamsCache.parse(Object.fromEntries(url.searchParams.entries()));
 
-	// Parse search parameters
-	const searchParams = parseSearchParams(urlSearchParams);
-	const page: number = getPageFromSearchParams(urlSearchParams);
-	const limit: number = PAGINATION_LIMITS.SEARCH_PAGE;
-	const offset: number = calculateOffset(page, limit);
+	const page = searchParams.page;
+	const limit = PAGINATION_LIMITS.SEARCH_PAGE;
+	const offset = calculateOffset(page, limit);
 
 	// Process tag IDs and content type
-	const tagIds: string[] = searchParams.tagIds || [];
-	const contentType: NoteContentType | undefined = searchParams.contentType;
+	const tagIds = searchParams.tagIds || [];
+	const contentType = searchParams.contentType || undefined;
 
 	// Get all available tags
-	const availableTags: Tag[] = await fetchAvailableTags(request, context);
+	const availableTags = await fetchAvailableTags(request, context);
 
 	// Validate search parameters
 	const validation = validateSearchParams(
 		searchParams.q,
 		tagIds,
 		contentType,
-		searchParams.startDate,
-		searchParams.endDate,
+		searchParams.startDate || undefined,
+		searchParams.endDate || undefined,
 		availableTags,
 	);
-
-	// Handle redirect if parameters were cleaned
-	handleSearchRedirect(validation, url);
 
 	// Fetch search results
 	const notesResult = await fetchSearchResults(request, context, {
@@ -65,7 +58,12 @@ export async function useSearchLoader(
 
 	// Handle pagination redirect if page is invalid
 	if (notesResult) {
-		handlePaginationRedirect(page, notesResult.paginationInfo.totalPages, url);
+		const { totalPages } = notesResult.paginationInfo;
+		if (page > totalPages && totalPages > 0) {
+			const redirectUrl = new URL(url);
+			redirectUrl.searchParams.delete("page");
+			throw redirect(redirectUrl.toString());
+		}
 	}
 
 	return {
