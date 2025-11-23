@@ -81,14 +81,16 @@ export async function loader({
 	}
 }
 
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
+
 export default function App() {
 	const { userInfo } = useLoaderData<{ userInfo: UserInfo | null }>();
 	useAuthRevalidator();
 	return (
-		<>
+		<NuqsAdapter>
 			<Toaster position="top-right" />
 			<Outlet context={userInfo} />
-		</>
+		</NuqsAdapter>
 	);
 }
 
