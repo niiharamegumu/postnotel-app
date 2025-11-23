@@ -30,6 +30,7 @@ export function TextSearchInput({
 		useTextSearchDebounce({
 			delay: 300,
 			onSearch: handleSearch,
+			initialQuery: query || "",
 		});
 
 	useEffect(() => {

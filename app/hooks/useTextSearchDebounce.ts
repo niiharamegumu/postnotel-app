@@ -4,11 +4,16 @@ import { debounce } from "~/lib/debounce";
 type UseTextSearchDebounceOptions = {
 	delay: number;
 	onSearch: (query: string) => void;
+	initialQuery?: string;
 };
 
-export const useTextSearchDebounce = ({ delay, onSearch }: UseTextSearchDebounceOptions) => {
+export const useTextSearchDebounce = ({
+	delay,
+	onSearch,
+	initialQuery = "",
+}: UseTextSearchDebounceOptions) => {
 	const [isComposing, setIsComposing] = useState<boolean>(false);
-	const lastQueryRef = useRef<string>("");
+	const lastQueryRef = useRef<string>(initialQuery);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: onSearch needs to be in deps to ensure latest function reference
 	const debouncedSearch = useCallback(
