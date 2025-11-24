@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Filter, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import type { Tag } from "~/features/tags/types/tag";
+import { useClickOutside } from "~/hooks/useClickOutside";
 import { useNavigation } from "~/hooks/useNavigation";
 import { ContentTypeSelectionForm } from "./ContentTypeSelectionForm";
 import { DateRangeSelectionForm } from "./DateRangeSelectionForm";
@@ -16,9 +17,14 @@ type SearchFormProps = {
 export function SearchForm({ availableTags }: SearchFormProps) {
 	const { isLoading } = useNavigation();
 	const [isOpen, setIsOpen] = useState(false);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useClickOutside(containerRef, () => {
+		if (isOpen) setIsOpen(false);
+	});
 
 	return (
-		<div className="flex justify-start w-full">
+		<div ref={containerRef} className="flex justify-start w-full">
 			<Button
 				variant="outline"
 				size="icon"
