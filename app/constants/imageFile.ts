@@ -13,10 +13,10 @@ export const allowedImageContentTypes: string[] = Object.values(AllowImageConten
 export const allowedImageFileExtensions: string[] = Object.values(AllowImageFileExtension);
 
 // Ensures resized images remain suitable for desktop and mobile screens.
-export const imageCompressionMaxDimension = 2500;
+export const imageCompressionMaxDimension = 3000;
 
 export const imageCompressionOptions = {
-	maxSizeMB: 0.4,
+	maxSizeMB: 0.5,
 	maxWidthOrHeight: imageCompressionMaxDimension,
 	fileType: "image/webp",
 	useWebWorker: true,
