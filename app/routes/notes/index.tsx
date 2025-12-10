@@ -17,7 +17,7 @@ import { useNoteDateKeyboardNavigation } from "~/features/notes/hooks/useNoteDat
 import { useNoteDays } from "~/features/notes/hooks/useNoteDays";
 import type { Note } from "~/features/notes/types/note";
 import { useImageZoom } from "~/hooks/useImageZoom";
-import { useNavigation } from "~/hooks/useNavigation";
+
 import { usePreventBackNavigation } from "~/hooks/usePreventBackNavigation";
 import { cn } from "~/lib/utils";
 import type { UserInfo } from "~/types/user";
@@ -73,7 +73,7 @@ export default function Index() {
 	}>();
 	usePreventBackNavigation();
 	const navigate = useNavigate();
-	const { isLoading } = useNavigation();
+
 
 	const { notes, date, noteDays } = useLoaderData<typeof loader>() as {
 		notes: Note[];
@@ -168,7 +168,6 @@ export default function Index() {
 			<div className="w-full sticky top-0 z-2  px-4 md:px-2 py-2 backdrop-blur-xs">
 				<WeekCalendar
 					selectedDate={selectedDate}
-					isLoading={isLoading}
 					onDateSelect={handleDateSelect}
 					onWeekChange={handleWeekChange}
 					noteDays={hookNoteDays.length > 0 ? hookNoteDays : noteDays}
