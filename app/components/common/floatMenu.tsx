@@ -32,7 +32,7 @@ export default function FloatMenu({ userInfo }: Props) {
 	return (
 		<DropdownMenu open={open} onOpenChange={handleOpenChange}>
 			<DropdownMenuTrigger asChild className="outline-none">
-				<Button className="border-solid border-secondary border-1" disabled={isLoading}>
+				<Button className="border-solid border-secondary border-1">
 					{isLoading ? (
 						<LoadingState variant="spinner" size="sm" color="secondary" />
 					) : (
