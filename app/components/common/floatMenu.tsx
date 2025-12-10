@@ -34,7 +34,7 @@ export default function FloatMenu({ userInfo }: Props) {
 			<DropdownMenuTrigger asChild className="outline-none">
 				<Button className="border-solid border-secondary border-1" disabled={isLoading}>
 					{isLoading ? (
-						<LoadingState variant="spinner" size="sm" />
+						<LoadingState variant="spinner" size="sm" color="secondary" />
 					) : (
 						<AnimatePresence mode="wait" initial={false}>
 							<motion.span
