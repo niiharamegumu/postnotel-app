@@ -1,5 +1,5 @@
 import { useLoaderData } from "react-router";
-import { LoadingState } from "~/components/common/LoadingState";
+
 import { PaginationControls } from "~/components/common/PaginationControls";
 import { ActiveFilters } from "~/features/search/components/ActiveFilters";
 import { SearchForm } from "~/features/search/components/SearchForm";
@@ -7,7 +7,7 @@ import { SearchHeader } from "~/features/search/components/SearchHeader";
 import { SearchResults } from "~/features/search/components/SearchResults";
 import { type SearchLoaderData, useSearchLoader } from "~/features/search/hooks/useSearchLoader";
 import { useSearchMeta } from "~/features/search/hooks/useSearchMeta";
-import { useNavigation } from "~/hooks/useNavigation";
+
 import type { Route } from "./+types/search";
 
 export async function loader({ request, context }: Route.LoaderArgs): Promise<SearchLoaderData> {
@@ -19,7 +19,7 @@ export function meta({ data }: Route.MetaArgs) {
 }
 
 export default function SearchPage() {
-	const { isLoading } = useNavigation();
+
 	const { notes, availableTags, paginationInfo } = useLoaderData<typeof loader>();
 
 	return (
@@ -34,19 +34,13 @@ export default function SearchPage() {
 						<ActiveFilters availableTags={availableTags} />
 					</div>
 				)}
-				{isLoading ? (
-					<LoadingState variant="spinner" size="sm" className="text-center" />
-				) : (
-					<>
-						<h3 className="text-sm font-medium text-muted-foreground mb-2">{paginationInfo?.totalItems || 0}件</h3>
-						{paginationInfo && paginationInfo.totalPages > 1 && (
-							<PaginationControls pagination={paginationInfo} baseUrl="/notes/search"/>
-						)}
-					</>
+				<h3 className="text-sm font-medium text-muted-foreground mb-2">{paginationInfo?.totalItems || 0}件</h3>
+				{paginationInfo && paginationInfo.totalPages > 1 && (
+					<PaginationControls pagination={paginationInfo} baseUrl="/notes/search"/>
 				)}
 			</div>
 
-			{!isLoading && paginationInfo && (
+			{paginationInfo && (
 				<div className="px-4">
 					<SearchResults
 						notes={notes}

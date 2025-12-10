@@ -24,12 +24,12 @@ import { buttonVariants } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
 import { ViewMode } from "~/constants/viewMode";
 import { cn } from "~/lib/utils";
-import { LoadingState } from "./LoadingState";
+
 
 interface WeekCalendarProps {
 	selectedDate: Date;
 	noteDays: string[];
-	isLoading?: boolean;
+
 	onDateSelect: (date: Date) => void;
 	onWeekChange: (date: Date) => void;
 	onDateRangeChange?: (startDate: Date, endDate: Date) => void;
@@ -42,7 +42,7 @@ interface WeekCalendarProps {
 export function WeekCalendar({
 	selectedDate,
 	noteDays,
-	isLoading,
+
 	onDateSelect,
 	onWeekChange,
 	onDateRangeChange,
@@ -190,11 +190,7 @@ export function WeekCalendar({
 				<span className="text-sm font-bold">
 					{format(selectedDate, "yyyy年M月d日（E）", { locale: ja })}
 				</span>
-				{isLoading && (
-					<div className="py-4">
-						<LoadingState variant="spinner" size="sm" />
-					</div>
-				)}
+
 				<div className="ml-auto flex items-center gap-4">
 					<span onClick={handleTodayClick}>
 						<CalendarCheck size={20} />
