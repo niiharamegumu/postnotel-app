@@ -17,7 +17,7 @@ export default function NoteContent({ note, searchQuery }: Props) {
 	useEffect(() => {
 		const processMarkdown = async () => {
 			try {
-				const blocks = await editor.tryParseMarkdownToBlocks(note.content);
+				const blocks = editor.tryParseMarkdownToBlocks(note.content);
 				const HTMLFromBlocks = await editor.blocksToFullHTML(blocks);
 				setHtml(HTMLFromBlocks);
 			} catch (error) {
