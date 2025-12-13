@@ -9,13 +9,15 @@ import {
 } from "react-router";
 
 import "@blocknote/core/fonts/inter.css";
+import "@mantine/core/styles.css";
 import "@blocknote/mantine/style.css";
-import type { Route } from "./+types/root";
-import "./app.css";
+import { MantineProvider } from "@mantine/core";
 import { Toaster } from "./components/ui/sonner";
 import { endpoints } from "./constants/endpoints";
 import { useAuthRevalidator } from "./hooks/useAuthRevalidator";
 import { fetcher } from "./lib/fetcher";
+import type { Route } from "./+types/root";
+import "./app.css";
 import type { UserInfo } from "./types/user";
 
 export const links: Route.LinksFunction = () => [
@@ -88,8 +90,10 @@ export default function App() {
 	useAuthRevalidator();
 	return (
 		<NuqsAdapter>
-			<Toaster position="top-right" />
-			<Outlet context={userInfo} />
+			<MantineProvider>
+				<Toaster position="top-right" />
+				<Outlet context={userInfo} />
+			</MantineProvider>
 		</NuqsAdapter>
 	);
 }
