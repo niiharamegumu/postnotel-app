@@ -11,4 +11,12 @@ export default defineConfig({
     reactRouter(),
     tsconfigPaths(),
   ],
+  optimizeDeps: {
+    include: ["react", "react-dom", "debug"],
+  },
+  ssr: {
+    resolve: {
+      conditions: ["workerd", "worker", "browser"],
+    },
+  },
 });

@@ -15,6 +15,7 @@ import {
 	DrawerContent,
 	DrawerFooter,
 	DrawerTrigger,
+	DrawerTitle,
 } from "~/components/ui/drawer";
 import { AccessLevel } from "~/constants/accessLevel";
 import { ActionType } from "~/features/notes/constants/actionType";
@@ -163,12 +164,11 @@ export default function BlockNoteDrawer({
 	const onDraftRestore = useCallback(
 		(draft: NoteDraft) => {
 			if (editor && draft.content) {
-				editor.tryParseMarkdownToBlocks(draft.content).then((blocks) => {
-					editor.replaceBlocks(editor.document, blocks);
-					if (!isMobileDevice) {
-						setTimeout(() => setCursorPosition("start"), 100);
-					}
-				});
+				const blocks = editor.tryParseMarkdownToBlocks(draft.content);
+				editor.replaceBlocks(editor.document, blocks);
+				if (!isMobileDevice) {
+					setTimeout(() => setCursorPosition("start"), 100);
+				}
 			}
 		},
 		[editor, setCursorPosition, isMobileDevice],
@@ -197,7 +197,7 @@ export default function BlockNoteDrawer({
 		const initializeEditor = async () => {
 			if (note?.content && noteDrawerType === ActionType.Edit && editor) {
 				try {
-					const blocks = await editor.tryParseMarkdownToBlocks(note.content);
+					const blocks = editor.tryParseMarkdownToBlocks(note.content);
 					editor.replaceBlocks(editor.document, blocks);
 					setIsPrivate(note.accessLevel === AccessLevel.Private);
 
@@ -430,7 +430,8 @@ export default function BlockNoteDrawer({
 					</AnimatePresence>
 				</Button>
 			</DrawerTrigger>
-			<DrawerContent className="px-4 !mt-0 !max-h-none !rounded-none h-[100dvh]">
+			<DrawerContent className="px-4 !mt-0 !max-h-none !rounded-none h-[100dvh] bg-white text-black">
+				<DrawerTitle className="sr-only">Note Editor</DrawerTitle>
 				{isUploading && (
 					<div className="flex items-center gap-2 text-sm text-muted-foreground px-2 py-2">
 						画像をアップロード中…
@@ -472,6 +473,7 @@ export default function BlockNoteDrawer({
 				>
 					<BlockNoteView
 						editor={editor}
+						theme="light"
 						className="mb-auto"
 						sideMenu={false}
 						onChange={noteDrawerType === ActionType.Create ? handleEditorChange : undefined}
@@ -565,7 +567,7 @@ export default function BlockNoteDrawer({
 						<Button variant="default" onClick={handleSubmit} disabled={loading || isUploading}>
 							{isUploading ? "Uploading..." : loading ? `${noteDrawerType}...` : noteDrawerType}
 						</Button>
-						<DrawerClose>
+						<DrawerClose asChild>
 							<Button variant="outline">Cancel</Button>
 						</DrawerClose>
 					</div>

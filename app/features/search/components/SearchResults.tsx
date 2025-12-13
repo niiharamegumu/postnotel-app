@@ -3,6 +3,7 @@ import { ja } from "date-fns/locale";
 import { Eye, EyeOff, SquareArrowOutUpRight } from "lucide-react";
 import { Suspense, lazy, useMemo } from "react";
 import { Link, useOutletContext, useSearchParams } from "react-router";
+import ClientOnly from "~/components/common/ClientOnly";
 import { ImageZoomModal } from "~/components/common/ImageZoomModal";
 import { LoadingState } from "~/components/common/LoadingState";
 import { TagLink } from "~/components/common/TagLink";
@@ -126,7 +127,9 @@ export function SearchResults({ notes, availableTags, paginationInfo }: SearchRe
 											</div>
 										)}
 										<div className="wrap-anywhere overflow-y-auto rounded mb-1 w-full">
-											<NoteContent note={note} searchQuery={searchQuery} />
+											<ClientOnly fallback={<LoadingState className="h-20 w-full" />}>
+												<NoteContent note={note} searchQuery={searchQuery} />
+											</ClientOnly>
 										</div>
 										<div className="text-xs text-muted-foreground overflow-scroll max-w-full flex items-stretch gap-2">
 											<div className="flex items-center gap-2 p-2 bg-secondary rounded">
