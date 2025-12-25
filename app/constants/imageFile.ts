@@ -19,6 +19,5 @@ export const imageCompressionOptions = {
 	maxSizeMB: 0.5,
 	maxWidthOrHeight: imageCompressionMaxDimension,
 	fileType: "image/webp",
-	initialQuality: 0.7,
 	useWebWorker: true,
 };
