@@ -133,14 +133,7 @@ export const useImageUpload = () => {
 					continue;
 				}
 				const compressedFile = await imageCompression(file, imageCompressionOptions);
-				const baseName = file.name.replace(/\.[^/.]+$/, "");
-				const webpFileName = `${baseName}.webp`;
-				// Ensure the upload metadata reflects the WebP conversion.
-				const convertedFile = new File([compressedFile], webpFileName, {
-					type: "image/webp",
-					lastModified: file.lastModified,
-				});
-				validFiles.push(convertedFile);
+				validFiles.push(compressedFile);
 			}
 
 			if (validFiles.length > 0) {
