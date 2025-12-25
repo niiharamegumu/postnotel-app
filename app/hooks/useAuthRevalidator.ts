@@ -13,6 +13,8 @@ export function useAuthRevalidator() {
 	const THROTTLE_INTERVAL_MS = 1000;
 
 	const run = useCallback(() => {
+		if (typeof navigator !== "undefined" && !navigator.onLine) return;
+
 		const now = Date.now();
 		if (now - lastRunRef.current < THROTTLE_INTERVAL_MS) return;
 		lastRunRef.current = now;
