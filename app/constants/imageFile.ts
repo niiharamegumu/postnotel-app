@@ -18,6 +18,5 @@ export const imageCompressionMaxDimension = 3000;
 export const imageCompressionOptions = {
 	maxSizeMB: 0.2,
 	maxWidthOrHeight: imageCompressionMaxDimension,
-	fileType: "image/webp",
 	useWebWorker: true,
 };
